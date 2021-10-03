@@ -29,6 +29,30 @@ Entity createSalmon(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
+Entity createWall(RenderSystem* renderer, vec2 pos, float angle, vec2 scale)
+{
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::RECTANGLE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = angle;
+	motion.scale = scale;
+
+	// Create and (empty) Salmon component to be able to refer to all turtles
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
+			EFFECT_ASSET_ID::PEBBLE,
+			GEOMETRY_BUFFER_ID::RECTANGLE });
+
+	return entity;
+}
+
 Entity createFish(RenderSystem* renderer, vec2 position)
 {
 	// Reserve en entity
@@ -95,7 +119,7 @@ Entity createLine(vec2 position, vec2 scale)
 		entity,
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
 		 EFFECT_ASSET_ID::PEBBLE,
-		 GEOMETRY_BUFFER_ID::DEBUG_LINE });
+		 GEOMETRY_BUFFER_ID::RECTANGLE });
 
 	// Create motion
 	Motion& motion = registry.motions.emplace(entity);

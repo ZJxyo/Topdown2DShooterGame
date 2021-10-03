@@ -229,19 +229,8 @@ void WorldSystem::restart_game() {
 	player_salmon = createSalmon(renderer, { 100, 200 });
 	registry.colors.insert(player_salmon, { 1, 0.8f, 0.8f });
 
-	// !! TODO A3: Enable static pebbles on the ground
-	// Create pebbles on the floor for reference
-	/*
-	for (uint i = 0; i < 20; i++) {
-		int w, h;
-		glfwGetWindowSize(window, &w, &h);
-		float radius = 30 * (uniform_dist(rng) + 0.3f); // range 0.3 .. 1.3
-		Entity pebble = createPebble({ uniform_dist(rng) * w, h - uniform_dist(rng) * 20 },
-					 { radius, radius });
-		float brightness = uniform_dist(rng) * 0.5 + 0.5;
-		registry.colors.insert(pebble, { brightness, brightness, brightness});
-	}
-	*/
+	
+	//createWall(renderer, { 100, 200 }, 0.f, { 200, 20 });
 }
 
 // Compute collisions between entities
