@@ -15,7 +15,10 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	transform.translate(motion.position);
 	Entity e = registry.players.entities[0];
 	vec2 pos = registry.motions.get(e).position;
-	pos = { -pos.x+500,-pos.y+500};
+	int screen_width, screen_height;
+	glfwGetFramebufferSize(window, &screen_width, &screen_height);
+	
+	pos = { -pos.x + (screen_width / 2),-pos.y + (screen_height / 2)};
 	//printf("%g,%g\n", pos.x, pos.y);
 	transform.translate(pos);
 	transform.scale(motion.scale);
