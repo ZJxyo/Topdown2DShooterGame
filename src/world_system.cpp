@@ -228,7 +228,7 @@ void WorldSystem::restart_game() {
 	// Create a new salmon
 	player_salmon = createSalmon(renderer, { 100, 200 });
 	registry.colors.insert(player_salmon, { 1, 0.8f, 0.8f });
-	
+
 	// !! TODO A3: Enable static pebbles on the ground
 	// Create pebbles on the floor for reference
 	/*

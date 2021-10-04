@@ -24,7 +24,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	transform.scale(motion.scale);
 	// !!! TODO A1: add rotation to the chain of transformations, mind the order
 	// of transformations
-	pos;
+
 	assert(registry.renderRequests.has(entity));
 	const RenderRequest &render_request = registry.renderRequests.get(entity);
 
