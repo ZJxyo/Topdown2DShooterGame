@@ -229,8 +229,8 @@ void WorldSystem::restart_game() {
 	player_salmon = createSalmon(renderer, { 100, 200 });
 	registry.colors.insert(player_salmon, { 1, 0.8f, 0.8f });
 
-	
-	//createWall(renderer, { 100, 200 }, 0.f, { 200, 20 });
+	// CLEAN
+	//createWall(renderer, { 300, 300 }, 2.f, { 200, 200 });
 }
 
 // Compute collisions between entities
@@ -255,10 +255,10 @@ void WorldSystem::handle_collisions() {
 				//	Mix_PlayChannel(-1, salmon_dead_sound, 0);
 				//	registry.motions.get(entity).angle = 3.1415f;
 				//	registry.motions.get(entity).velocity = { 0, 80 };
-				assert(registry.healths.has(entity));
+				/*assert(registry.healths.has(entity));
 				Health& player_health = registry.healths.get(entity);
 				player_health.health -= 1;
-				printf("Health: %d", player_health.health);
+				printf("Health: %d", player_health.health);*/
 			}
 			// Checking Player - SoftShell collisions
 			else if (registry.softShells.has(entity_other)) {
