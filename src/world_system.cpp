@@ -297,13 +297,13 @@ bool WorldSystem::is_over() const {
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A1: HANDLE SALMON MOVEMENT HERE
 	// key is of 'type' GLFW_KEY_
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	// Resetting game
-	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
+	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
+	{
 		int w, h;
 		glfwGetWindowSize(window, &w, &h);
 
@@ -311,53 +311,68 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	}
 
 	// Debugging
-	if (key == GLFW_KEY_C) {
+	if (key == GLFW_KEY_C)
+	{
 		if (action == GLFW_RELEASE)
 			debugging.in_debug_mode = false;
 		else
 			debugging.in_debug_mode = true;
 	}
 
+	// Player movment WASD
 
-	if (key == GLFW_KEY_W && registry.motions.has(player_salmon)) {
-		Motion& player_motion = registry.motions.get(player_salmon);
+	if (!registry.deathTimers.has(player_salmon))
+	{
+		auto &player = registry.players.get(player_salmon);
+		if (action == GLFW_PRESS)
+		{
+			int speed = player.speed;
+			if (key == GLFW_KEY_A)
+			{
+				player.velocity_left = -speed;
+			}
+			else if (key == GLFW_KEY_D)
+			{
+				player.velocity_right = speed;
+			}
+			else if (key == GLFW_KEY_W)
+			{
+				player.velocity_up = -speed;
+			}
+			else if (key == GLFW_KEY_S)
+			{
+				player.velocity_down = speed;
+			}
+		}
 		if (action == GLFW_RELEASE)
-			player_motion.velocity.y = 0;
-		else
-			player_motion.velocity.y = -100;
+		{
+			if (key == GLFW_KEY_W)
+			{
+				player.velocity_up = 0;
+			}
+			else if (key == GLFW_KEY_S)
+			{
+				player.velocity_down = 0;
+			}
+			else if (key == GLFW_KEY_D)
+			{
+				player.velocity_right = 0;
+			}
+			else if (key == GLFW_KEY_A)
+			{
+				player.velocity_left = 0;
+			}
+		}
 	}
-
-	if (key == GLFW_KEY_S && registry.motions.has(player_salmon)) {
-		Motion& player_motion = registry.motions.get(player_salmon);
-		if (action == GLFW_RELEASE)
-			player_motion.velocity.y = 0;
-		else
-			player_motion.velocity.y = 100;
-	}
-
-	if (key == GLFW_KEY_A && registry.motions.has(player_salmon)) {
-		Motion& player_motion = registry.motions.get(player_salmon);
-		if (action == GLFW_RELEASE)
-			player_motion.velocity.x = 0;
-		else
-			player_motion.velocity.x = -100;
-	}
-
-	if (key == GLFW_KEY_D && registry.motions.has(player_salmon)) {
-		Motion& player_motion = registry.motions.get(player_salmon);
-		if (action == GLFW_RELEASE)
-			player_motion.velocity.x = 0;
-		else
-			player_motion.velocity.x = 100;
-	}
-
 
 	// Control the current speed with `<` `>`
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA) {
+	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA)
+	{
 		current_speed -= 0.1f;
 		printf("Current speed = %f\n", current_speed);
 	}
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD) {
+	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD)
+	{
 		current_speed += 0.1f;
 		printf("Current speed = %f\n", current_speed);
 	}
