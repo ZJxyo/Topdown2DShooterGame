@@ -7,7 +7,11 @@
 // Player component
 struct Player
 {
-
+	float speed = 100;
+	float velocity_left;
+	float velocity_right;
+	float velocity_up;
+	float velocity_down;
 };
 
 // Turtles and pebbles have a hard shell
