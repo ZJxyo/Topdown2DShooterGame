@@ -13,14 +13,14 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	// thus ORDER IS IMPORTANT
 	Transform transform;
 	transform.translate(motion.position);
+
 	Entity e = registry.players.entities[0];
 	vec2 pos = registry.motions.get(e).position;
 	int screen_width, screen_height;
 	glfwGetFramebufferSize(window, &screen_width, &screen_height);
-	
 	pos = { -pos.x + (screen_width / 2),-pos.y + (screen_height / 2)};
-	//printf("%g,%g\n", pos.x, pos.y);
-	transform.translate(pos);
+	transform.translate(pos); // translate camera to player
+
 	transform.scale(motion.scale);
 	// !!! TODO A1: add rotation to the chain of transformations, mind the order
 	// of transformations
