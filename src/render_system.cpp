@@ -13,6 +13,15 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	// thus ORDER IS IMPORTANT
 	Transform transform;
 	transform.translate(motion.position);
+
+	Entity e = registry.players.entities[0];
+	vec2 pos = registry.motions.get(e).position;
+	int screen_width, screen_height;
+	screen_width = 1200;
+	screen_height = 800;
+	pos = { -pos.x + (screen_width / 2),-pos.y + (screen_height / 2)};
+	transform.translate(pos); // translate camera to player
+
 	transform.rotate(motion.angle);
 	transform.scale(motion.scale);
 	// !!! TODO A1: add rotation to the chain of transformations, mind the order
