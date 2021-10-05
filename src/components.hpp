@@ -94,10 +94,10 @@ struct Health {
 // Collider shapes for collision detection, default box collider
 struct Collider {
 	std::vector<vec3> vertices = {
-	{ 0.5f, 0.5f, 1.f },
-	{ -0.5f, 0.5f, 1.f },
+	{ -0.5f, -0.5f, 1.f },
 	{ 0.5f, -0.5f, 1.f },
-	{ -0.5f, -0.5f, 1.f }
+	{ 0.5f, 0.5f, 1.f },
+	{ -0.5f, 0.5f, 1.f }
 	};
 };
 
