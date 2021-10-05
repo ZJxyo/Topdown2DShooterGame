@@ -21,6 +21,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	pos = { -pos.x + (screen_width / 2),-pos.y + (screen_height / 2)};
 	transform.translate(pos); // translate camera to player
 
+	transform.rotate(motion.angle);
 	transform.scale(motion.scale);
 	// !!! TODO A1: add rotation to the chain of transformations, mind the order
 	// of transformations
