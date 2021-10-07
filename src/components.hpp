@@ -7,7 +7,7 @@
 // Player component
 struct Player
 {
-	float speed = 100;
+	float speed = 200;
 	float velocity_left;
 	float velocity_right;
 	float velocity_up;
