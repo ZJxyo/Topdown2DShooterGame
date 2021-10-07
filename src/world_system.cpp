@@ -378,9 +378,8 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	
 	Motion &motion = registry.motions.get(player_salmon);
-	float angle = -atan2(mouse_position.y - motion.position.y, mouse_position.x - motion.position.x);
+	float angle = atan2(mouse_position.y - 400, mouse_position.x - 600);
 	motion.angle = angle;
-
 	(vec2)mouse_position; // dummy to avoid compiler warning
 }
 
