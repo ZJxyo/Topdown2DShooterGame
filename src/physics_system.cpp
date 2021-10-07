@@ -46,9 +46,23 @@ std::vector<vec2> get_world_coordinates(const Entity& entity) {
 }
 
 bool diagonal_collides(const Entity& entity_1, const Entity& entity_2) {
+	bool resolve_collision = false;
+	const Entity* e1 = &entity_1;
+	const Entity* e2 = &entity_2;
+
+	// e2 should be wall
+	if (registry.walls.has(entity_1)) {
+		resolve_collision = true;
+		e1 = &entity_2;
+		e2 = &entity_1;
+	}
+	else if (registry.walls.has(entity_2)) {
+		resolve_collision = true;
+	}
+
 	// get vertex coordinates in world frame
-	std::vector<vec2> vertices_1 = get_world_coordinates(entity_1);
-	std::vector<vec2> vertices_2 = get_world_coordinates(entity_2);
+	std::vector<vec2> vertices_1 = get_world_coordinates(*e1);
+	std::vector<vec2> vertices_2 = get_world_coordinates(*e2);
 
 	/*printf("size1: %d   size2: %d\n", vertices_1.size(), vertices_2.size());
 	assert(false);*/
@@ -56,24 +70,13 @@ bool diagonal_collides(const Entity& entity_1, const Entity& entity_2) {
 	std::vector<vec2> v1 = vertices_1;
 	std::vector<vec2> v2 = vertices_2;
 
-	bool wall_collision = false;
-	int entity_to_move = 0;
+	assert(!(registry.walls.has(*e1) && registry.walls.has(*e2)));
 
-	if (registry.walls.has(entity_1)) {
-		wall_collision = true;
-		entity_to_move = 2;
-	} else if (registry.walls.has(entity_2)) {
-		wall_collision = true;
-		entity_to_move = 1;
-	}
-
-	assert(!(registry.walls.has(entity_1) && registry.walls.has(entity_2)));
-
-	vec2 line_1_vertex_1 = registry.motions.get(entity_1).position;
+	Motion& e1_motion = registry.motions.get(*e1);
+	vec2 line_1_vertex_1 = e1_motion.position;
 
 	for (int i = 0; i < 2; i++)
 	{
-		float scale = 0.f;
 		for (vec2 line_1_vertex_2 : v1)
 		{
 			vec2 dir_1 = line_1_vertex_2 - line_1_vertex_1;
@@ -91,42 +94,28 @@ bool diagonal_collides(const Entity& entity_1, const Entity& entity_2) {
 				float t1 = (dir_2.x * k.y - dir_2.y * k.x) / det;
 				float t2 = (dir_1.x * k.y - dir_1.y * k.x) / det;
 
-				//assert(false);
-				//printf("%f   %f\n", t1, t2);
 				// if intersects
 				if (t1 > 0.f && t1 < 1.f && t2 > 0.f && t2 < 1.f) {
-					printf("%f   %f\n", t1, t2);
-					/*if (wall_collision) {
-						if (entity_to_move == 1) {
-							float d1 = dot((1.f - t1) * dir_1, vec2{ -dir_2.y, dir_1.x });
-							vec2 velocity = registry.motions.get(entity_1).velocity;
-							float d2 = dot(velocity, vec2{ -dir_2.y, dir_1.x });
-							scale = max(abs(d1 / d2), scale);
+					//printf("%f   %f\n", t1, t2);
+					if (resolve_collision) {
+						vec2 normalized_normal = normalize(vec2{ -dir_2.y, dir_2.x });
+						vec2 displacement = dot((1.f - t1) * dir_1, normalized_normal) * normalized_normal;
+						if (i == 1) {
+							displacement = -displacement;
 						}
-						else {
-							float d1 = dot((1.f - t1) * dir_1, vec2{ -dir_2.y, dir_1.x });
-							vec2 velocity = registry.motions.get(entity_2).velocity;
-							float d2 = dot(velocity, vec2{ -dir_2.y, dir_1.x });
-							scale = max(abs(d1 / d2), scale);
+						e1_motion.position -= displacement;
+						for (vec2& v : v1) {
+							v -= displacement;
 						}
-					}*/
+						continue;
+					}
 					return true;
 				}
 			}
 		}
-		/*if (wall_collision) {
-			if (entity_to_move == 1) {
-				Motion& motion = registry.motions.get(entity_1);
-				motion.position -= scale * motion.velocity;
-			}
-			else {
-				Motion& motion = registry.motions.get(entity_2);
-				motion.position -= scale * motion.velocity;
-			}
-		}*/
 		v1 = vertices_2;
 		v2 = vertices_1;
-		line_1_vertex_1 = registry.motions.get(entity_2).position;
+		line_1_vertex_1 = registry.motions.get(*e2).position;
 	}
 
 	return false;
@@ -186,7 +175,7 @@ void PhysicsSystem::step(float elapsed_ms, float window_width_px, float window_h
 
 			Entity& entity_j = collider_container.entities[j];
 
-			// walls shoulding be colliding
+			// walls shouldn't be colliding
 			if (registry.walls.has(entity_i) && registry.walls.has(entity_j)) {
 				continue;
 			}
