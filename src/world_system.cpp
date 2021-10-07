@@ -225,13 +225,20 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
+	// create ground
+	createGround(renderer);
+
 	// Create a new salmon
 	player_salmon = createSalmon(renderer, { 100, 200 });
 	registry.colors.insert(player_salmon, { 1, 0.8f, 0.8f });
-
+	
+	
+	
 	// CLEAN
 	//createWall(renderer, { 300, 300 }, 2.f, { 200, 200 });
 }
+
+
 
 // Compute collisions between entities
 void WorldSystem::handle_collisions() {
@@ -369,11 +376,12 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
-	// calculate rotation
-	/*Motion& player_motion = registry.motions.get(player_salmon);
-	vec2 direction = mouse_position - player_motion.position;
-	float angle = atan2(direction.y, direction.x);*/
-	//printf("angle: %f\n", angle);
+	
+	Motion &motion = registry.motions.get(player_salmon);
+	float angle = -atan2(mouse_position.y - motion.position.y, mouse_position.x - motion.position.x);
+	motion.angle = angle;
+
+	(vec2)mouse_position; // dummy to avoid compiler warning
 }
 
 void WorldSystem::on_mouse_click(int button, int action, int mods) {

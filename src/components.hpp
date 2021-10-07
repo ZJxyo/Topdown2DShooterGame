@@ -135,8 +135,10 @@ struct Wall {
 
 enum class TEXTURE_ASSET_ID {
 	FISH = 0,
-	TURTLE = FISH + 1,
-	TEXTURE_COUNT = TURTLE + 1
+	TURTLE = 1,
+	PLAYER = 2,
+	GROUND_WOOD = 3,
+	TEXTURE_COUNT =  GROUND_WOOD + 1 // 
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
