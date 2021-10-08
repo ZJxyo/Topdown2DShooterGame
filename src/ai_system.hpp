@@ -40,10 +40,25 @@ public:
     }
 
     virtual BTState process(Entity e) override {
-        if (registry.motions.has(e))
-            return move->process(e);
-        else
+        if (registry.motions.has(e)) {
+
+
+            if (move->process(e) == BTState::Success) {
+                return BTState::Success;
+            }
+            else if(shoot->process(e) == BTState::Success){
+                return BTState::Success;
+            }
+            else if (build->process(e) == BTState::Success) {
+                return BTState::Success;
+            }
+
             return BTState::Success;
+        }
+        else {
+            return BTState::Success;
+        }
+
     }
 private:
     BTNode* move;
@@ -86,6 +101,12 @@ private:
         //        vel += 20;
 
         // if distance not within 5m, return success, else return failure
+        int distance = sqrt(pow(playerX - AIX, 2) + pow(playerY - AIY, 2));
+
+        if (distance<225) {
+            return BTState::Failure;
+        }
+
         return BTState::Success;
     }
 };
@@ -107,25 +128,15 @@ private:
         int AIX = registry.motions.get(e).position.x;
         int AIY = registry.motions.get(e).position.y;
 
-
-        if (AIX > playerX) {
-
-            vel.x = -100;
-        }
-        if (AIX < playerX) {
-            vel.x = 100;
-        }
-
-        if (AIY > playerY) {
-            vel.y = -100;
-        }
-        if (AIY < playerY) {
-            vel.y = +100;
-        }
+        
+        
         //        vel += 20;
-
-        // if distance not within 5m, return success, else return failure
-        return BTState::Success;
+        
+        for (int i = 0;i < 5;i++) {
+            printf("shoot");
+            registry.motions.get(e).angle = atan2(playerX - registry.motions.get(e).position.x, playerY - registry.motions.get(e).position.y);
+        }
+        return BTState::Failure; // return failure if shoot five time, success otherwirse. // naive one
     }
 };
 
@@ -139,31 +150,9 @@ private:
     void init(Entity e) override {}
 
     BTState process(Entity e) override {
-        auto& vel = registry.motions.get(e).velocity;
-        //WorldSystem::getEntity()
-        int playerX = registry.motions.get(player).position.x;
-        int playerY = registry.motions.get(player).position.y;
-        int AIX = registry.motions.get(e).position.x;
-        int AIY = registry.motions.get(e).position.y;
+       
+        printf("build");
 
-
-        if (AIX > playerX) {
-
-            vel.x = -100;
-        }
-        if (AIX < playerX) {
-            vel.x = 100;
-        }
-
-        if (AIY > playerY) {
-            vel.y = -100;
-        }
-        if (AIY < playerY) {
-            vel.y = +100;
-        }
-        //        vel += 20;
-
-        // if distance not within 5m, return success, else return failure
         return BTState::Success;
     }
 };
