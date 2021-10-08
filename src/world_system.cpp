@@ -8,6 +8,9 @@
 
 #include "physics_system.hpp"
 
+// AI111
+#include "ai_system.hpp"
+
 // Game configuration
 const size_t MAX_TURTLES = 0;
 const size_t MAX_FISH = 5;
@@ -171,7 +174,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		motion.velocity = vec2(10.f, 10.f);
 	}
 
-
 	// AIvy
 	Chase chase(player_salmon);
 	Shoot shoot(player_salmon);
@@ -244,12 +246,10 @@ void WorldSystem::restart_game() {
 	// Create a new salmon
 	player_salmon = createSalmon(renderer, { 100, 200 });
 	registry.colors.insert(player_salmon, { 1, 0.8f, 0.8f });
-	
 
-	
-	
+
 	// CLEAN
-	createWall(renderer, { 300, 300 }, 2.f, { 200, 200 });
+//	createWall(renderer, { 300, 300 }, 2.f, { 200, 200 });
 }
 
 
