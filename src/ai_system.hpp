@@ -131,9 +131,9 @@ private:
         
         
         //        vel += 20;
-        
+        printf("Turn to the player and shoot 5 bullets\n");
         for (int i = 0;i < 5;i++) {
-            printf("shoot");
+            printf("Bullet #%d\n", i);
             registry.motions.get(e).angle = atan2(playerX - registry.motions.get(e).position.x, playerY - registry.motions.get(e).position.y);
         }
         return BTState::Failure; // return failure if shoot five time, success otherwirse. // naive one
@@ -151,7 +151,7 @@ private:
 
     BTState process(Entity e) override {
        
-        printf("build");
+        printf("After shooting, start to build a wall\n");
 
         return BTState::Success;
     }
