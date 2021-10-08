@@ -26,6 +26,7 @@
 **/__MACOSX/
 **/$RECYCLE.BIN/
 **/Desktop.ini
+cmake-build-debug/
 
 !ext/
 !template/ext/

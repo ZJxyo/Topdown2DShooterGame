@@ -1,15 +1,18 @@
 // Header
 #include "world_system.hpp"
 #include "world_init.hpp"
-
+#include "ai_system.hpp"
 // stlib
 #include <cassert>
 #include <sstream>
 
 #include "physics_system.hpp"
 
+// AI111
+#include "ai_system.hpp"
+
 // Game configuration
-const size_t MAX_TURTLES = 15;
+const size_t MAX_TURTLES = 0;
 const size_t MAX_FISH = 5;
 const size_t TURTLE_DELAY_MS = 2000 * 3;
 const size_t FISH_DELAY_MS = 5000 * 3;
@@ -125,6 +128,8 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	restart_game();
 }
 
+// AIvy
+Entity entity;
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// Get the screen dimensions
@@ -154,20 +159,30 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	}
 
 	// Spawning new turtles
+
 	next_turtle_spawn -= elapsed_ms_since_last_update * current_speed;
 	if (registry.hardShells.components.size() <= MAX_TURTLES && next_turtle_spawn < 0.f) {
 		// Reset timer
 		next_turtle_spawn = (TURTLE_DELAY_MS / 2) + uniform_dist(rng) * (TURTLE_DELAY_MS / 2);
 		// Create turtle
-		Entity entity = createTurtle(renderer, { 0,0 });
+		entity = createTurtle(renderer, { 0,0 });
 		// Setting random initial position and constant velocity
 		Motion& motion = registry.motions.get(entity);
 		motion.position =
 			vec2(screen_width - 200.f,
 				50.f + uniform_dist(rng) * (screen_height - 100.f));
-		motion.velocity = vec2(-100.f, 0.f);
+		motion.velocity = vec2(10.f, 10.f);
 	}
 
+	// AIvy
+	Chase chase(player_salmon);
+	Shoot shoot(player_salmon);
+	Build build(player_salmon);
+	BTIfCondition btIfCondition(&chase, &shoot, &build);
+	btIfCondition.init(entity);
+	btIfCondition.process(entity);
+
+	
 	// Spawning new fish
 	next_fish_spawn -= elapsed_ms_since_last_update * current_speed;
 	if (registry.softShells.components.size() <= MAX_FISH && next_fish_spawn < 0.f) {
@@ -231,11 +246,10 @@ void WorldSystem::restart_game() {
 	// Create a new salmon
 	player_salmon = createSalmon(renderer, { 100, 200 });
 	registry.colors.insert(player_salmon, { 1, 0.8f, 0.8f });
-	
-	
-	
+
+
 	// CLEAN
-	//createWall(renderer, { 300, 300 }, 2.f, { 200, 200 });
+//	createWall(renderer, { 300, 300 }, 2.f, { 200, 200 });
 }
 
 
