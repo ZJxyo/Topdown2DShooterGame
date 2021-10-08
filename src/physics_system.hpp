@@ -14,4 +14,6 @@ public:
 	PhysicsSystem()
 	{
 	}
+
+	std::vector<std::function<void(Entity& entity_1, Entity& entity_2)>> callbacks;
 };

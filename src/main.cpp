@@ -38,6 +38,8 @@ int main()
 	renderer.init(window_width_px, window_height_px, window);
 	world.init(&renderer);
 
+	physics.callbacks.push_back(WorldSystem::handle_collision);
+
 	// variable timestep loop
 	auto t = Clock::now();
 	while (!world.is_over()) {
@@ -54,7 +56,7 @@ int main()
 		world.step(elapsed_ms);
 		ai.step(elapsed_ms);
 		physics.step(elapsed_ms, window_width_px, window_height_px);
-		world.handle_collisions();
+		//world.handle_collisions();
 
 		renderer.draw();
 
