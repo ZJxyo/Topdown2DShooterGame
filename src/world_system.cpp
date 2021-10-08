@@ -173,10 +173,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 
 	// AIvy
-	Move move(player_salmon);
+	Chase chase(player_salmon);
 	Shoot shoot(player_salmon);
 	Build build(player_salmon);
-	BTIfCondition btIfCondition(&move, &shoot, &build);
+	BTIfCondition btIfCondition(&chase, &shoot, &build);
 	btIfCondition.init(entity);
 	btIfCondition.process(entity);
 
@@ -249,7 +249,7 @@ void WorldSystem::restart_game() {
 	
 	
 	// CLEAN
-	//createWall(renderer, { 300, 300 }, 2.f, { 200, 200 });
+	createWall(renderer, { 300, 300 }, 2.f, { 200, 200 });
 }
 
 

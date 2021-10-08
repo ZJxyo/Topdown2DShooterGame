@@ -31,19 +31,19 @@ public:
 
 class BTIfCondition : public BTNode {
 public:
-    BTIfCondition(BTNode* move, BTNode* shoot, BTNode* build) : move(move) , shoot(shoot), build(build){
+    BTIfCondition(BTNode* chase, BTNode* shoot, BTNode* build) : chase(chase) , shoot(shoot), build(build){
 
     }
 
     virtual void init(Entity e) override {
-        move->init(e);
+        chase->init(e);
     }
 
     virtual BTState process(Entity e) override {
         if (registry.motions.has(e)) {
 
 
-            if (move->process(e) == BTState::Success) {
+            if (chase->process(e) == BTState::Success) {
                 return BTState::Success;
             }
             else if(shoot->process(e) == BTState::Success){
@@ -61,14 +61,14 @@ public:
 
     }
 private:
-    BTNode* move;
+    BTNode* chase;
     BTNode* shoot;
     BTNode* build;
 };
 
-class Move : public BTNode {
+class Chase : public BTNode {
 public:
-    Move(Entity other) {
+    Chase(Entity other) {
         player = other;
     }
 private:
