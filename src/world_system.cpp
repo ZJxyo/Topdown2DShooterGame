@@ -386,3 +386,14 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 void WorldSystem::on_mouse_click(int button, int action, int mods) {
 	//printf("working\n");
 }
+
+void WorldSystem::handle_collision(Entity& entity_1, Entity& entity_2) {
+	if (registry.healths.has(entity_1)) {
+		registry.healths.get(entity_1).health -= 10;
+		printf("HP - 10\n");
+	}
+	else if (registry.healths.has(entity_2)) {
+		registry.healths.get(entity_2).health -= 10;
+		printf("HP - 10\n");
+	}
+}
