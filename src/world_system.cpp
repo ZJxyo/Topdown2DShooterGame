@@ -1,15 +1,18 @@
 // Header
 #include "world_system.hpp"
 #include "world_init.hpp"
-
+#include "ai_system.hpp"
 // stlib
 #include <cassert>
 #include <sstream>
 
 #include "physics_system.hpp"
 
+// AI111
+#include "ai_system.hpp"
+
 // Game configuration
-const size_t MAX_TURTLES = 15;
+const size_t MAX_TURTLES = 0;
 const size_t MAX_FISH = 5;
 const size_t TURTLE_DELAY_MS = 2000 * 3;
 const size_t FISH_DELAY_MS = 5000 * 3;
@@ -125,6 +128,8 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	restart_game();
 }
 
+// AIvy
+Entity entity;
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// Get the screen dimensions
@@ -154,20 +159,30 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	}
 
 	// Spawning new turtles
+
 	next_turtle_spawn -= elapsed_ms_since_last_update * current_speed;
 	if (registry.hardShells.components.size() <= MAX_TURTLES && next_turtle_spawn < 0.f) {
 		// Reset timer
 		next_turtle_spawn = (TURTLE_DELAY_MS / 2) + uniform_dist(rng) * (TURTLE_DELAY_MS / 2);
 		// Create turtle
-		Entity entity = createTurtle(renderer, { 0,0 });
+		entity = createTurtle(renderer, { 0,0 });
 		// Setting random initial position and constant velocity
 		Motion& motion = registry.motions.get(entity);
 		motion.position =
 			vec2(screen_width - 200.f,
 				50.f + uniform_dist(rng) * (screen_height - 100.f));
-		motion.velocity = vec2(-100.f, 0.f);
+		motion.velocity = vec2(10.f, 10.f);
 	}
 
+	// AIvy
+	Chase chase(player_salmon);
+	Shoot shoot(player_salmon);
+	Build build(player_salmon);
+	BTIfCondition btIfCondition(&chase, &shoot, &build);
+	btIfCondition.init(entity);
+	btIfCondition.process(entity);
+
+	
 	// Spawning new fish
 	next_fish_spawn -= elapsed_ms_since_last_update * current_speed;
 	if (registry.softShells.components.size() <= MAX_FISH && next_fish_spawn < 0.f) {
@@ -225,24 +240,19 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
+	// create ground
+	createGround(renderer);
+
 	// Create a new salmon
 	player_salmon = createSalmon(renderer, { 100, 200 });
 	registry.colors.insert(player_salmon, { 1, 0.8f, 0.8f });
 
-	// !! TODO A3: Enable static pebbles on the ground
-	// Create pebbles on the floor for reference
-	/*
-	for (uint i = 0; i < 20; i++) {
-		int w, h;
-		glfwGetWindowSize(window, &w, &h);
-		float radius = 30 * (uniform_dist(rng) + 0.3f); // range 0.3 .. 1.3
-		Entity pebble = createPebble({ uniform_dist(rng) * w, h - uniform_dist(rng) * 20 },
-					 { radius, radius });
-		float brightness = uniform_dist(rng) * 0.5 + 0.5;
-		registry.colors.insert(pebble, { brightness, brightness, brightness});
-	}
-	*/
+
+	// CLEAN
+	createWall(renderer, { 300, 300 }, 2.f, { 200, 200 });
 }
+
+
 
 // Compute collisions between entities
 void WorldSystem::handle_collisions() {
@@ -266,10 +276,10 @@ void WorldSystem::handle_collisions() {
 				//	Mix_PlayChannel(-1, salmon_dead_sound, 0);
 				//	registry.motions.get(entity).angle = 3.1415f;
 				//	registry.motions.get(entity).velocity = { 0, 80 };
-				assert(registry.healths.has(entity));
+				/*assert(registry.healths.has(entity));
 				Health& player_health = registry.healths.get(entity);
 				player_health.health -= 1;
-				printf("Health: %d", player_health.health);
+				printf("Health: %d", player_health.health);*/
 			}
 			// Checking Player - SoftShell collisions
 			else if (registry.softShells.has(entity_other)) {
@@ -297,13 +307,13 @@ bool WorldSystem::is_over() const {
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A1: HANDLE SALMON MOVEMENT HERE
 	// key is of 'type' GLFW_KEY_
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	// Resetting game
-	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
+	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
+	{
 		int w, h;
 		glfwGetWindowSize(window, &w, &h);
 
@@ -311,53 +321,68 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	}
 
 	// Debugging
-	if (key == GLFW_KEY_C) {
+	if (key == GLFW_KEY_C)
+	{
 		if (action == GLFW_RELEASE)
 			debugging.in_debug_mode = false;
 		else
 			debugging.in_debug_mode = true;
 	}
 
+	// Player movment WASD
 
-	if (key == GLFW_KEY_W && registry.motions.has(player_salmon)) {
-		Motion& player_motion = registry.motions.get(player_salmon);
+	if (!registry.deathTimers.has(player_salmon))
+	{
+		auto &player = registry.players.get(player_salmon);
+		if (action == GLFW_PRESS)
+		{
+			int speed = player.speed;
+			if (key == GLFW_KEY_A)
+			{
+				player.velocity_left = -speed;
+			}
+			else if (key == GLFW_KEY_D)
+			{
+				player.velocity_right = speed;
+			}
+			else if (key == GLFW_KEY_W)
+			{
+				player.velocity_up = -speed;
+			}
+			else if (key == GLFW_KEY_S)
+			{
+				player.velocity_down = speed;
+			}
+		}
 		if (action == GLFW_RELEASE)
-			player_motion.velocity.y = 0;
-		else
-			player_motion.velocity.y = -100;
+		{
+			if (key == GLFW_KEY_W)
+			{
+				player.velocity_up = 0;
+			}
+			else if (key == GLFW_KEY_S)
+			{
+				player.velocity_down = 0;
+			}
+			else if (key == GLFW_KEY_D)
+			{
+				player.velocity_right = 0;
+			}
+			else if (key == GLFW_KEY_A)
+			{
+				player.velocity_left = 0;
+			}
+		}
 	}
-
-	if (key == GLFW_KEY_S && registry.motions.has(player_salmon)) {
-		Motion& player_motion = registry.motions.get(player_salmon);
-		if (action == GLFW_RELEASE)
-			player_motion.velocity.y = 0;
-		else
-			player_motion.velocity.y = 100;
-	}
-
-	if (key == GLFW_KEY_A && registry.motions.has(player_salmon)) {
-		Motion& player_motion = registry.motions.get(player_salmon);
-		if (action == GLFW_RELEASE)
-			player_motion.velocity.x = 0;
-		else
-			player_motion.velocity.x = -100;
-	}
-
-	if (key == GLFW_KEY_D && registry.motions.has(player_salmon)) {
-		Motion& player_motion = registry.motions.get(player_salmon);
-		if (action == GLFW_RELEASE)
-			player_motion.velocity.x = 0;
-		else
-			player_motion.velocity.x = 100;
-	}
-
 
 	// Control the current speed with `<` `>`
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA) {
+	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA)
+	{
 		current_speed -= 0.1f;
 		printf("Current speed = %f\n", current_speed);
 	}
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD) {
+	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD)
+	{
 		current_speed += 0.1f;
 		printf("Current speed = %f\n", current_speed);
 	}
@@ -365,13 +390,24 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
-	// calculate rotation
-	/*Motion& player_motion = registry.motions.get(player_salmon);
-	vec2 direction = mouse_position - player_motion.position;
-	float angle = atan2(direction.y, direction.x);*/
-	//printf("angle: %f\n", angle);
+	
+	Motion &motion = registry.motions.get(player_salmon);
+	float angle = atan2(mouse_position.y - 400, mouse_position.x - 600);
+	motion.angle = angle;
+	(vec2)mouse_position; // dummy to avoid compiler warning
 }
 
 void WorldSystem::on_mouse_click(int button, int action, int mods) {
 	//printf("working\n");
+}
+
+void WorldSystem::handle_collision(Entity& entity_1, Entity& entity_2) {
+	if (registry.healths.has(entity_1)) {
+		registry.healths.get(entity_1).health -= 10;
+		//printf("HP - 10\n");
+	}
+	else if (registry.healths.has(entity_2)) {
+		registry.healths.get(entity_2).health -= 10;
+		//printf("HP - 10\n");
+	}
 }

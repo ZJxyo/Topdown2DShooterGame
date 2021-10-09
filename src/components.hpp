@@ -7,7 +7,11 @@
 // Player component
 struct Player
 {
-
+	float speed = 200;
+	float velocity_left;
+	float velocity_right;
+	float velocity_up;
+	float velocity_down;
 };
 
 // Turtles and pebbles have a hard shell
@@ -81,7 +85,7 @@ struct TexturedVertex
 struct Mesh
 {
 	static bool loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, vec2& out_size);
-	vec2 original_size = {1,1};
+	vec2 original_size = { 1,1 };
 	std::vector<ColoredVertex> vertices;
 	std::vector<uint16_t> vertex_indices;
 };
@@ -89,6 +93,20 @@ struct Mesh
 struct Health {
 	unsigned int health;
 	Health(unsigned int health) :health(health) {}
+};
+
+// Collider shapes for collision detection, default box collider
+struct Collider {
+	std::vector<vec3> vertices = {
+	{ -0.5f, -0.5f, 1.f },
+	{ 0.5f, -0.5f, 1.f },
+	{ 0.5f, 0.5f, 1.f },
+	{ -0.5f, 0.5f, 1.f }
+	};
+};
+
+// indicate this is a wall type object
+struct Wall {
 };
 
 /**
@@ -117,8 +135,10 @@ struct Health {
 
 enum class TEXTURE_ASSET_ID {
 	FISH = 0,
-	TURTLE = FISH + 1,
-	TEXTURE_COUNT = TURTLE + 1
+	TURTLE = 1,
+	PLAYER = 2,
+	GROUND_WOOD = 3,
+	TEXTURE_COUNT =  GROUND_WOOD + 1 // 
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -136,8 +156,8 @@ enum class GEOMETRY_BUFFER_ID {
 	SALMON = 0,
 	SPRITE = SALMON + 1,
 	PEBBLE = SPRITE + 1,
-	DEBUG_LINE = PEBBLE + 1,
-	SCREEN_TRIANGLE = DEBUG_LINE + 1,
+	RECTANGLE = PEBBLE + 1,
+	SCREEN_TRIANGLE = RECTANGLE + 1,
 	GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;

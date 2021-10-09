@@ -12,6 +12,7 @@ const float TURTLE_BB_HEIGHT = 0.4f * 202.f;
 
 // the player
 Entity createSalmon(RenderSystem* renderer, vec2 pos);
+Entity createWall(RenderSystem* renderer, vec2 pos, float angle, vec2 scale);
 // the prey
 Entity createFish(RenderSystem* renderer, vec2 position);
 // the enemy
@@ -20,5 +21,6 @@ Entity createTurtle(RenderSystem* renderer, vec2 position);
 Entity createLine(vec2 position, vec2 size);
 // a pebble
 Entity createPebble(vec2 pos, vec2 size);
+int createGround(RenderSystem* renderer);
 
 

@@ -6,7 +6,7 @@ Entity createSalmon(RenderSystem* renderer, vec2 pos)
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SALMON);
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	// Setting initial motion values
@@ -14,17 +14,44 @@ Entity createSalmon(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * 150.f;
-	motion.scale.x *= -1; // point front to the right
+	motion.scale = {150,150};
+	
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.players.emplace(entity);
 	registry.healths.emplace(entity, 100);
+	registry.colliders.emplace(entity);
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::PLAYER,
+		 EFFECT_ASSET_ID::TEXTURED,
+		 GEOMETRY_BUFFER_ID::SPRITE });
+	return entity;
+}
+
+Entity createWall(RenderSystem* renderer, vec2 pos, float angle, vec2 scale)
+{
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::RECTANGLE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = angle;
+	motion.scale = scale;
+	
+	registry.colliders.emplace(entity);
+	registry.walls.emplace(entity);
+
+	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
-			EFFECT_ASSET_ID::SALMON,
-			GEOMETRY_BUFFER_ID::SALMON });
+			EFFECT_ASSET_ID::PEBBLE,
+			GEOMETRY_BUFFER_ID::RECTANGLE });
 
 	return entity;
 }
@@ -65,6 +92,7 @@ Entity createTurtle(RenderSystem* renderer, vec2 position)
 	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
+    registry.colliders.emplace(entity);
 
 	// Initialize the motion
 	auto& motion = registry.motions.emplace(entity);
@@ -95,7 +123,7 @@ Entity createLine(vec2 position, vec2 scale)
 		entity,
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
 		 EFFECT_ASSET_ID::PEBBLE,
-		 GEOMETRY_BUFFER_ID::DEBUG_LINE });
+		 GEOMETRY_BUFFER_ID::RECTANGLE });
 
 	// Create motion
 	Motion& motion = registry.motions.emplace(entity);
@@ -129,3 +157,46 @@ Entity createPebble(vec2 pos, vec2 size)
 
 	return entity;
 }
+
+
+int createGround(RenderSystem* renderer)
+{
+
+	for (int i = 0; i <= 10; i++) {
+		for (int j = 0; j <= 10; j++) {
+
+	auto entity = Entity();
+
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::RECTANGLE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = {150,150} ;
+	
+	motion.position = {150*i,150*j};
+
+	// Create and (empty) Salmon component to be able to refer to all turtles
+	
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::GROUND_WOOD,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+	}
+	
+
+		}
+	
+
+
+
+
+
+	return 0;
+}
+
+
+
