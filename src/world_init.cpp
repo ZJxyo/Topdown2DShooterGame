@@ -1,5 +1,13 @@
 #include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
+#include <map>
+#include <list>
+#include <fstream>
+#include <nlohmann/json.hpp>
+#include <iostream>
+
+using namespace std;
+using namespace nlohmann;
 
 Entity createSalmon(RenderSystem *renderer, vec2 pos)
 {
@@ -155,6 +163,49 @@ Entity createPebble(vec2 pos, vec2 size)
 		 GEOMETRY_BUFFER_ID::PEBBLE});
 
 	return entity;
+}
+struct wall
+{
+	vec2 position;
+	float angle;
+	vec2 scale;
+};
+
+int SetupMap(RenderSystem *renderer)
+{
+	TCHAR NPath[MAX_PATH];
+
+	string src = PROJECT_SOURCE_DIR;
+	src += "src/map/map.json";
+	ifstream ifs(src);
+	json j;
+	ifs >> j;
+
+	for (json w : j["walls"])
+	{
+		auto entity = Entity();
+
+		// Store a reference to the potentially re-used mesh object
+		Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::RECTANGLE);
+		registry.meshPtrs.emplace(entity, &mesh);
+
+		// Setting initial motion values
+		Motion &motion = registry.motions.emplace(entity);
+		motion.position = vec2(w["position"]["x"], w["position"]["y"]);
+		motion.angle = w["angle"];
+		motion.scale = vec2(w["scale"]["x"], w["scale"]["y"]);
+
+		registry.colliders.emplace(entity);
+		registry.walls.emplace(entity);
+
+		// Create and (empty) Salmon component to be able to refer to all turtles
+		registry.renderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
+			 EFFECT_ASSET_ID::PEBBLE,
+			 GEOMETRY_BUFFER_ID::RECTANGLE});
+	}
+	return 0;
 }
 
 int createGround(RenderSystem *renderer)

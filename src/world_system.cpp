@@ -19,14 +19,14 @@ const size_t FISH_DELAY_MS = 5000 * 3;
 
 // Create the fish world
 WorldSystem::WorldSystem()
-	: points(0)
-	, next_turtle_spawn(0.f)
-	, next_fish_spawn(0.f) {
+	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f)
+{
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
 
-WorldSystem::~WorldSystem() {
+WorldSystem::~WorldSystem()
+{
 	// Destroy music components
 	if (background_music != nullptr)
 		Mix_FreeMusic(background_music);
@@ -44,19 +44,23 @@ WorldSystem::~WorldSystem() {
 }
 
 // Debugging
-namespace {
-	void glfw_err_cb(int error, const char* desc) {
+namespace
+{
+	void glfw_err_cb(int error, const char *desc)
+	{
 		fprintf(stderr, "%d: %s", error, desc);
 	}
 }
 
 // World initialization
 // Note, this has a lot of OpenGL specific things, could be moved to the renderer
-GLFWwindow* WorldSystem::create_window(int width, int height) {
+GLFWwindow *WorldSystem::create_window(int width, int height)
+{
 	///////////////////////////////////////
 	// Initialize GLFW
 	glfwSetErrorCallback(glfw_err_cb);
-	if (!glfwInit()) {
+	if (!glfwInit())
+	{
 		fprintf(stderr, "Failed to initialize GLFW");
 		return nullptr;
 	}
@@ -76,7 +80,8 @@ GLFWwindow* WorldSystem::create_window(int width, int height) {
 
 	// Create the main window (for rendering, keyboard, and mouse input)
 	window = glfwCreateWindow(width, height, "Salmon Game Assignment", nullptr, nullptr);
-	if (window == nullptr) {
+	if (window == nullptr)
+	{
 		fprintf(stderr, "Failed to glfwCreateWindow");
 		return nullptr;
 	}
@@ -85,20 +90,25 @@ GLFWwindow* WorldSystem::create_window(int width, int height) {
 	// Input is handled using GLFW, for more info see
 	// http://www.glfw.org/docs/latest/input_guide.html
 	glfwSetWindowUserPointer(window, this);
-	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3); };
-	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
-	auto mouse_button_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_click(_0, _1, _2); };
+	auto key_redirect = [](GLFWwindow *wnd, int _0, int _1, int _2, int _3)
+	{ ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3); };
+	auto cursor_pos_redirect = [](GLFWwindow *wnd, double _0, double _1)
+	{ ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_mouse_move({_0, _1}); };
+	auto mouse_button_redirect = [](GLFWwindow *wnd, int _0, int _1, int _2)
+	{ ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_mouse_click(_0, _1, _2); };
 	glfwSetKeyCallback(window, key_redirect);
 	glfwSetCursorPosCallback(window, cursor_pos_redirect);
 	glfwSetMouseButtonCallback(window, mouse_button_redirect);
 
 	//////////////////////////////////////
 	// Loading music and sounds with SDL
-	if (SDL_Init(SDL_INIT_AUDIO) < 0) {
+	if (SDL_Init(SDL_INIT_AUDIO) < 0)
+	{
 		fprintf(stderr, "Failed to initialize SDL Audio");
 		return nullptr;
 	}
-	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == -1) {
+	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == -1)
+	{
 		fprintf(stderr, "Failed to open audio device");
 		return nullptr;
 	}
@@ -107,18 +117,20 @@ GLFWwindow* WorldSystem::create_window(int width, int height) {
 	salmon_dead_sound = Mix_LoadWAV(audio_path("salmon_dead.wav").c_str());
 	salmon_eat_sound = Mix_LoadWAV(audio_path("salmon_eat.wav").c_str());
 
-	if (background_music == nullptr || salmon_dead_sound == nullptr || salmon_eat_sound == nullptr) {
+	if (background_music == nullptr || salmon_dead_sound == nullptr || salmon_eat_sound == nullptr)
+	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
-			audio_path("music.wav").c_str(),
-			audio_path("salmon_dead.wav").c_str(),
-			audio_path("salmon_eat.wav").c_str());
+				audio_path("music.wav").c_str(),
+				audio_path("salmon_dead.wav").c_str(),
+				audio_path("salmon_eat.wav").c_str());
 		return nullptr;
 	}
 
 	return window;
 }
 
-void WorldSystem::init(RenderSystem* renderer_arg) {
+void WorldSystem::init(RenderSystem *renderer_arg)
+{
 	this->renderer = renderer_arg;
 	// Playing background music indefinitely
 	Mix_PlayMusic(background_music, -1);
@@ -131,7 +143,8 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 // AIvy
 Entity entity;
 // Update our game world
-bool WorldSystem::step(float elapsed_ms_since_last_update) {
+bool WorldSystem::step(float elapsed_ms_since_last_update)
+{
 	// Get the screen dimensions
 	int screen_width, screen_height;
 	glfwGetFramebufferSize(window, &screen_width, &screen_height);
@@ -146,14 +159,16 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		registry.remove_all_components_of(registry.debugComponents.entities.back());
 
 	// Removing out of screen entities
-	auto& motions_registry = registry.motions;
+	auto &motions_registry = registry.motions;
 
 	// Remove entities that leave the screen on the left side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
 	// (the containers exchange the last element with the current)
-	for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i) {
-		Motion& motion = motions_registry.components[i];
-		if (motion.position.x + abs(motion.scale.x) < 0.f) {
+	for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i)
+	{
+		Motion &motion = motions_registry.components[i];
+		if (motion.position.x + abs(motion.scale.x) < 0.f)
+		{
 			registry.remove_all_components_of(motions_registry.entities[i]);
 		}
 	}
@@ -161,16 +176,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// Spawning new turtles
 
 	next_turtle_spawn -= elapsed_ms_since_last_update * current_speed;
-	if (registry.hardShells.components.size() <= MAX_TURTLES && next_turtle_spawn < 0.f) {
+	if (registry.hardShells.components.size() <= MAX_TURTLES && next_turtle_spawn < 0.f)
+	{
 		// Reset timer
 		next_turtle_spawn = (TURTLE_DELAY_MS / 2) + uniform_dist(rng) * (TURTLE_DELAY_MS / 2);
 		// Create turtle
-		entity = createTurtle(renderer, { 0,0 });
+		entity = createTurtle(renderer, {0, 0});
 		// Setting random initial position and constant velocity
-		Motion& motion = registry.motions.get(entity);
+		Motion &motion = registry.motions.get(entity);
 		motion.position =
 			vec2(screen_width - 200.f,
-				50.f + uniform_dist(rng) * (screen_height - 100.f));
+				 50.f + uniform_dist(rng) * (screen_height - 100.f));
 		motion.velocity = vec2(10.f, 10.f);
 	}
 
@@ -182,10 +198,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	btIfCondition.init(entity);
 	btIfCondition.process(entity);
 
-	
 	// Spawning new fish
 	next_fish_spawn -= elapsed_ms_since_last_update * current_speed;
-	if (registry.softShells.components.size() <= MAX_FISH && next_fish_spawn < 0.f) {
+	if (registry.softShells.components.size() <= MAX_FISH && next_fish_spawn < 0.f)
+	{
 		// !!!  TODO A1: Create new fish with createFish({0,0}), as for the Turtles above
 	}
 
@@ -196,19 +212,22 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	// Processing the salmon state
 	assert(registry.screenStates.components.size() <= 1);
-	ScreenState& screen = registry.screenStates.components[0];
+	ScreenState &screen = registry.screenStates.components[0];
 
 	float min_counter_ms = 3000.f;
-	for (Entity entity : registry.deathTimers.entities) {
+	for (Entity entity : registry.deathTimers.entities)
+	{
 		// progress timer
-		DeathTimer& counter = registry.deathTimers.get(entity);
+		DeathTimer &counter = registry.deathTimers.get(entity);
 		counter.counter_ms -= elapsed_ms_since_last_update;
-		if (counter.counter_ms < min_counter_ms) {
+		if (counter.counter_ms < min_counter_ms)
+		{
 			min_counter_ms = counter.counter_ms;
 		}
 
 		// restart the game once the death timer expired
-		if (counter.counter_ms < 0) {
+		if (counter.counter_ms < 0)
+		{
 			registry.deathTimers.remove(entity);
 			screen.darken_screen_factor = 0;
 			restart_game();
@@ -224,7 +243,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 }
 
 // Reset the world state to its initial state
-void WorldSystem::restart_game() {
+void WorldSystem::restart_game()
+{
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 	printf("Restarting\n");
@@ -244,31 +264,33 @@ void WorldSystem::restart_game() {
 	createGround(renderer);
 
 	// Create a new salmon
-	player_salmon = createSalmon(renderer, { 100, 200 });
-	registry.colors.insert(player_salmon, { 1, 0.8f, 0.8f });
-
+	player_salmon = createSalmon(renderer, {1000, 1000});
+	registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
 
 	// CLEAN
-	createWall(renderer, { 300, 300 }, 2.f, { 200, 200 });
+	SetupMap(renderer);
+	createWall(renderer, {300, 300}, 2.f, {200, 200});
 }
 
-
-
 // Compute collisions between entities
-void WorldSystem::handle_collisions() {
+void WorldSystem::handle_collisions()
+{
 	// Loop over all collisions detected by the physics system
-	auto& collisionsRegistry = registry.collisions; // TODO: @Tim, is the reference here needed?
-	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
+	auto &collisionsRegistry = registry.collisions; // TODO: @Tim, is the reference here needed?
+	for (uint i = 0; i < collisionsRegistry.components.size(); i++)
+	{
 		// The entity and its collider
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other;
 
 		// For now, we are only interested in collisions that involve the salmon
-		if (registry.players.has(entity)) {
+		if (registry.players.has(entity))
+		{
 			//Player& player = registry.players.get(entity);
 
 			// Checking Player - HardShell collisions
-			if (registry.hardShells.has(entity_other)) {
+			if (registry.hardShells.has(entity_other))
+			{
 				// initiate death unless already dying
 				//if (!registry.deathTimers.has(entity)) {
 				//	// Scream, reset timer, and make the salmon sink
@@ -282,8 +304,10 @@ void WorldSystem::handle_collisions() {
 				printf("Health: %d", player_health.health);*/
 			}
 			// Checking Player - SoftShell collisions
-			else if (registry.softShells.has(entity_other)) {
-				if (!registry.deathTimers.has(entity)) {
+			else if (registry.softShells.has(entity_other))
+			{
+				if (!registry.deathTimers.has(entity))
+				{
 					// chew, count points, and set the LightUp timer
 					registry.remove_all_components_of(entity_other);
 					Mix_PlayChannel(-1, salmon_eat_sound, 0);
@@ -300,12 +324,14 @@ void WorldSystem::handle_collisions() {
 }
 
 // Should the game be over ?
-bool WorldSystem::is_over() const {
+bool WorldSystem::is_over() const
+{
 	return bool(glfwWindowShouldClose(window));
 }
 
 // On key callback
-void WorldSystem::on_key(int key, int, int action, int mod) {
+void WorldSystem::on_key(int key, int, int action, int mod)
+{
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// key is of 'type' GLFW_KEY_
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
@@ -389,24 +415,29 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	current_speed = fmax(0.f, current_speed);
 }
 
-void WorldSystem::on_mouse_move(vec2 mouse_position) {
-	
+void WorldSystem::on_mouse_move(vec2 mouse_position)
+{
+
 	Motion &motion = registry.motions.get(player_salmon);
 	float angle = atan2(mouse_position.y - 400, mouse_position.x - 600);
 	motion.angle = angle;
-	(vec2)mouse_position; // dummy to avoid compiler warning
+	(vec2) mouse_position; // dummy to avoid compiler warning
 }
 
-void WorldSystem::on_mouse_click(int button, int action, int mods) {
+void WorldSystem::on_mouse_click(int button, int action, int mods)
+{
 	//printf("working\n");
 }
 
-void WorldSystem::handle_collision(Entity& entity_1, Entity& entity_2) {
-	if (registry.healths.has(entity_1)) {
+void WorldSystem::handle_collision(Entity &entity_1, Entity &entity_2)
+{
+	if (registry.healths.has(entity_1))
+	{
 		registry.healths.get(entity_1).health -= 10;
 		//printf("HP - 10\n");
 	}
-	else if (registry.healths.has(entity_2)) {
+	else if (registry.healths.has(entity_2))
+	{
 		registry.healths.get(entity_2).health -= 10;
 		//printf("HP - 10\n");
 	}
