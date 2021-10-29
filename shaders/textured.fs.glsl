@@ -16,6 +16,6 @@ void main()
 	color = vec4(fcolor, 1.0) * texture(sampler0, vec2(texcoord.x, texcoord.y));
 	if (team_color == 1)
 	{
-		color.xyz = vec3(color.x * 1.0,color.y * 0.1,color.z * 0.1);
+		color.xyz = vec3(color.x * 1.0,color.y * 1.0,color.z * 1.0);
 	}
 }
