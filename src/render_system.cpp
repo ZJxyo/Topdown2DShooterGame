@@ -80,7 +80,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		gl_has_errors();
 	}
 
-	else if (render_request.used_effect == EFFECT_ASSET_ID::SALMON || render_request.used_effect == EFFECT_ASSET_ID::PEBBLE)
+	else if (render_request.used_texture == TEXTURE_ASSET_ID::PLAYER)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_color_loc = glGetAttribLocation(program, "in_color");
@@ -96,20 +96,17 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 							  sizeof(ColoredVertex), (void *)sizeof(vec3));
 		gl_has_errors();
 
-		if (render_request.used_effect == EFFECT_ASSET_ID::SALMON)
-		{
-			// Light up?
-			GLint light_up_uloc = glGetUniformLocation(program, "light_up");
-			assert(light_up_uloc >= 0);
+		// Light up?
+		GLint light_up_uloc = glGetUniformLocation(program, "light_up");
+		assert(light_up_uloc >= 0);
+		glUniform1i(light_up_uloc, 1);
 
-			// !!! TODO A1: set the light_up shader variable using glUniform1i,
-			// similar to the glUniform1f call below. The 1f or 1i specified the type, here a single int.
-			gl_has_errors();
-		}
+		// !!! TODO A1: set the light_up shader variable using glUniform1i,
+		// similar to the glUniform1f call below. The 1f or 1i specified the type, here a single int.
+		gl_has_errors();
 	}
 	else
 	{
-		assert(false && "Type of render request not supported");
 	}
 
 	// Getting uniform locations for glUniform* calls
@@ -136,15 +133,38 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED && render_request.used_texture == TEXTURE_ASSET_ID::GROUND_WOOD)
 	{
-		GLint ground_uloc = glGetUniformLocation(currProgram, "repeat");
-		glUniform1i(ground_uloc, 10);
+		GLint tex_uloc = glGetUniformLocation(currProgram, "repeatx");
+		glUniform1i(tex_uloc, 10);
+		gl_has_errors();
+
+		GLint tex_uloc2 = glGetUniformLocation(currProgram, "repeaty");
+		glUniform1i(tex_uloc2, 10);
+		gl_has_errors();
+	}
+	else if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED && render_request.used_texture == TEXTURE_ASSET_ID::WALL)
+	{
+		GLint tex_uloc = glGetUniformLocation(currProgram, "repeatx");
+		glUniform1i(tex_uloc, motion.scale.x / 60);
+		gl_has_errors();
+
+		GLint tex_uloc2 = glGetUniformLocation(currProgram, "repeaty");
+		glUniform1i(tex_uloc2, motion.scale.y / 30);
 		gl_has_errors();
 	}
 	else
 	{
-		GLint ground_uloc = glGetUniformLocation(currProgram, "repeat");
-		glUniform1i(ground_uloc, 1);
+		GLint tex_uloc = glGetUniformLocation(currProgram, "repeatx");
+		glUniform1i(tex_uloc, 1);
 		gl_has_errors();
+		GLint tex_uloc2 = glGetUniformLocation(currProgram, "repeaty");
+		glUniform1i(tex_uloc2, 1);
+		gl_has_errors();
+		if (registry.players.has(entity) && render_request.used_texture == TEXTURE_ASSET_ID::PLAYER)
+		{
+			GLint c_uloc = glGetUniformLocation(currProgram, "team_color");
+			glUniform1i(c_uloc, 1);
+			gl_has_errors();
+		}
 	}
 
 	gl_has_errors();

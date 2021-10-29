@@ -181,12 +181,9 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		// Reset timer
 		next_turtle_spawn = (TURTLE_DELAY_MS / 2) + uniform_dist(rng) * (TURTLE_DELAY_MS / 2);
 		// Create turtle
-		entity = createTurtle(renderer, {0, 0});
+		entity = createTurtle(renderer, {1000, 1000});
 		// Setting random initial position and constant velocity
 		Motion &motion = registry.motions.get(entity);
-		motion.position =
-			vec2(screen_width - 200.f,
-				 50.f + uniform_dist(rng) * (screen_height - 100.f));
 		motion.velocity = vec2(10.f, 10.f);
 	}
 

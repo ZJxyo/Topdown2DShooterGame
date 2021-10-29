@@ -104,17 +104,17 @@ Entity createTurtle(RenderSystem *renderer, vec2 position)
 	// Initialize the motion
 	auto &motion = registry.motions.emplace(entity);
 	motion.angle = 0.f;
-	motion.velocity = {-100.f, 0.f};
+	motion.velocity = {100.f, 0.f};
 	motion.position = position;
 
 	// Setting initial values, scale is negative to make it face the opposite way
-	motion.scale = vec2({-TURTLE_BB_WIDTH, TURTLE_BB_HEIGHT});
+	motion.scale = vec2({TURTLE_BB_WIDTH, TURTLE_BB_HEIGHT});
 
 	// Create and (empty) Turtle component to be able to refer to all turtles
 	registry.hardShells.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{TEXTURE_ASSET_ID::TURTLE,
+		{TEXTURE_ASSET_ID::PLAYER,
 		 EFFECT_ASSET_ID::TEXTURED,
 		 GEOMETRY_BUFFER_ID::SPRITE});
 
@@ -173,8 +173,6 @@ struct wall
 
 int SetupMap(RenderSystem *renderer)
 {
-	TCHAR NPath[MAX_PATH];
-
 	string src = PROJECT_SOURCE_DIR;
 	src += "src/map/map.json";
 	ifstream ifs(src);
@@ -191,7 +189,7 @@ int SetupMap(RenderSystem *renderer)
 
 		// Setting initial motion values
 		Motion &motion = registry.motions.emplace(entity);
-		motion.position = vec2(w["position"]["x"], w["position"]["y"]);
+		motion.position = vec2(w["position"]["x"] + 50, w["position"]["y"] + 50);
 		motion.angle = w["angle"];
 		motion.scale = vec2(w["scale"]["x"], w["scale"]["y"]);
 
@@ -201,9 +199,9 @@ int SetupMap(RenderSystem *renderer)
 		// Create and (empty) Salmon component to be able to refer to all turtles
 		registry.renderRequests.insert(
 			entity,
-			{TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
-			 EFFECT_ASSET_ID::PEBBLE,
-			 GEOMETRY_BUFFER_ID::RECTANGLE});
+			{TEXTURE_ASSET_ID::WALL,
+			 EFFECT_ASSET_ID::TEXTURED,
+			 GEOMETRY_BUFFER_ID::SPRITE});
 	}
 	return 0;
 }
@@ -211,9 +209,9 @@ int SetupMap(RenderSystem *renderer)
 int createGround(RenderSystem *renderer)
 {
 
-	for (int i = 0; i <= 10; i++)
+	for (int i = 0; i <= 4; i++)
 	{
-		for (int j = 0; j <= 10; j++)
+		for (int j = 0; j <= 4; j++)
 		{
 
 			auto entity = Entity();
@@ -227,7 +225,7 @@ int createGround(RenderSystem *renderer)
 			motion.velocity = {0.f, 0.f};
 			motion.scale = {1000, 1000};
 
-			motion.position = {1000 * i, 1000 * j};
+			motion.position = {(1000 * i) + 500, (1000 * j) + 500};
 
 			// Create and (empty) Salmon component to be able to refer to all turtles
 
