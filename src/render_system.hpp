@@ -43,6 +43,7 @@ class RenderSystem
 		shader_path("coloured"),
 		shader_path("pebble"),
 		shader_path("salmon"),
+		shader_path("turtle"),
 		shader_path("textured"),
 		shader_path("water")};
 

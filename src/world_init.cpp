@@ -31,7 +31,7 @@ Entity createSalmon(RenderSystem *renderer, vec2 pos)
 	registry.renderRequests.insert(
 		entity,
 		{TEXTURE_ASSET_ID::PLAYER,
-		 EFFECT_ASSET_ID::TEXTURED,
+		 EFFECT_ASSET_ID::SALMON,
 		 GEOMETRY_BUFFER_ID::SPRITE});
 	return entity;
 }
@@ -108,14 +108,14 @@ Entity createTurtle(RenderSystem *renderer, vec2 position)
 	motion.position = position;
 
 	// Setting initial values, scale is negative to make it face the opposite way
-	motion.scale = vec2({TURTLE_BB_WIDTH, TURTLE_BB_HEIGHT});
+	motion.scale = vec2({150, 150});
 
 	// Create and (empty) Turtle component to be able to refer to all turtles
 	registry.hardShells.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
 		{TEXTURE_ASSET_ID::PLAYER,
-		 EFFECT_ASSET_ID::TEXTURED,
+		 EFFECT_ASSET_ID::TURTLE,
 		 GEOMETRY_BUFFER_ID::SPRITE});
 
 	return entity;

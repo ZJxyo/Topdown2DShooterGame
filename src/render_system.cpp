@@ -83,30 +83,37 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	else if (render_request.used_texture == TEXTURE_ASSET_ID::PLAYER)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
-		GLint in_color_loc = glGetAttribLocation(program, "in_color");
+		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
 		gl_has_errors();
+		assert(in_texcoord_loc >= 0);
 
 		glEnableVertexAttribArray(in_position_loc);
 		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
-							  sizeof(ColoredVertex), (void *)0);
+							  sizeof(TexturedVertex), (void *)0);
 		gl_has_errors();
 
-		glEnableVertexAttribArray(in_color_loc);
-		glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
-							  sizeof(ColoredVertex), (void *)sizeof(vec3));
+		glEnableVertexAttribArray(in_texcoord_loc);
+		glVertexAttribPointer(
+			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
+			(void *)sizeof(
+				vec3)); // note the stride to skip the preceeding vertex position
+		// Enabling and binding texture to slot 0
+		glActiveTexture(GL_TEXTURE0);
 		gl_has_errors();
 
-		// Light up?
-		GLint light_up_uloc = glGetUniformLocation(program, "light_up");
+		GLint light_up_uloc = glGetUniformLocation(program, "team_color");
 		assert(light_up_uloc >= 0);
 		glUniform1i(light_up_uloc, 1);
 
-		// !!! TODO A1: set the light_up shader variable using glUniform1i,
-		// similar to the glUniform1f call below. The 1f or 1i specified the type, here a single int.
+		assert(registry.renderRequests.has(entity));
+		GLuint texture_id =
+			texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
+
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		gl_has_errors();
-	}
-	else
-	{
+		glBindTexture(GL_TEXTURE_2D, texture_id);
+		gl_has_errors();
 	}
 
 	// Getting uniform locations for glUniform* calls
