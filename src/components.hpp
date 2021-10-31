@@ -135,13 +135,14 @@ struct Wall {
 
 enum class TEXTURE_ASSET_ID {
 	FISH = 0,
-	TURTLE = 1,
-	PLAYER = 2,
-	GROUND_WOOD = 3,
-    HELP0 = 4,
-    HELP1 = 5,
-    HELP2 = 6,
-	TEXTURE_COUNT =  HELP2 + 1 //
+	TURTLE = FISH + 1,
+	PLAYER = TURTLE + 1,
+	GROUND_WOOD = PLAYER + 1,
+    HELP0 = GROUND_WOOD + 1,
+    HELP1 = HELP0 + 1,
+    HELP2 = HELP1 + 1,
+    HELP3 = HELP2 + 1,
+	TEXTURE_COUNT =  HELP3 + 1 //
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -161,10 +162,7 @@ enum class GEOMETRY_BUFFER_ID {
 	PEBBLE = SPRITE + 1,
 	RECTANGLE = PEBBLE + 1,
 	SCREEN_TRIANGLE = RECTANGLE + 1,
-    HELP0 = SCREEN_TRIANGLE + 1,
-    HELP1 = HELP0 + 1,
-    HELP2 = HELP1 + 1,
-	GEOMETRY_COUNT = HELP2 + 1
+	GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 

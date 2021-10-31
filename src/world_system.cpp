@@ -10,7 +10,7 @@
 
 // AI111
 #include "ai_system.hpp"
-#include "helpMenu.h"
+#include "HelpMenu.h"
 
 // Game configuration
 const size_t MAX_TURTLES = 0;
