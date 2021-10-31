@@ -14,10 +14,6 @@
 
 using Clock = std::chrono::high_resolution_clock;
 
-const int window_width_px = 1200;
-const int window_height_px = 800;
-//bool showMenu = true;
-
 // Entry point
 int main()
 {
@@ -28,14 +24,10 @@ int main()
 	AISystem ai;
     HelpMenu helpMenu;
 
-//	glfwInit();
-//	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-//	int height = mode->height / 6 * 4;
-//	int width = mode->height;
-//	glfwTerminate();
 
 	// Initializing window
-	GLFWwindow* window = world.create_window(window_width_px, window_height_px);
+	GLFWwindow* window = world.create_window();
+
 	if (!window) {
 		// Time to read the error message
 		printf("Press any key to exit");
@@ -83,6 +75,7 @@ int main()
             physics.step(elapsed_ms, window_width_px, window_height_px);
             //world.handle_collisions();
         }
+
 
 
 		// TODO A2: you can implement the debug freeze here but other places are possible too.
