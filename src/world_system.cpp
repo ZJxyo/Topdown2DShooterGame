@@ -249,7 +249,12 @@ void WorldSystem::restart_game() {
 
 
 	// CLEAN
-	createWall(renderer, { 300, 300 }, 2.f, { 200, 200 });
+	createWall(renderer, { 300, 100 }, 0.f, { 200, 200 });
+	createWall(renderer, { 900, 100 }, 0.f, { 200, 200 });
+	createWall(renderer, { 300, 500 }, 0.f, { 200, 200 });
+	createWall(renderer, { 700, 500 }, 0.f, { 200, 200 });
+	createWall(renderer, { 1100, 500 }, 0.f, { 200, 200 });
+	createWall(renderer, { 1100, 700 }, 0.f, { 200, 200 });
 }
 
 

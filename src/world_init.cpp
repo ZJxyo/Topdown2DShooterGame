@@ -114,7 +114,7 @@ Entity createTurtle(RenderSystem* renderer, vec2 position)
 	return entity;
 }
 
-Entity createLine(vec2 position, vec2 scale)
+Entity createLine(vec2 position, float angle, vec2 scale)
 {
 	Entity entity = Entity();
 
@@ -127,7 +127,7 @@ Entity createLine(vec2 position, vec2 scale)
 
 	// Create motion
 	Motion& motion = registry.motions.emplace(entity);
-	motion.angle = 0.f;
+	motion.angle = angle;
 	motion.velocity = { 0, 0 };
 	motion.position = position;
 	motion.scale = scale;
