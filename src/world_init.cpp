@@ -241,3 +241,37 @@ int createGround(RenderSystem *renderer)
 
 	return 0;
 }
+
+Entity createBullet(RenderSystem *renderer, vec2 pos, float angle)
+{
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Setting initial motion values
+	Motion &motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.position.x = motion.position.x + 50*sin(angle) + 35*cos(angle);
+	motion.position.y = motion.position.y + 50*-cos(angle) + 35*sin(angle);
+	motion.angle = angle;
+	motion.scale = {30,30};
+	int speed = 2000;
+	float y_speed = speed * -cos(angle);
+	float x_speed = speed * sin(angle);
+		
+	motion.velocity = {x_speed, y_speed};
+
+	// registry.colliders.emplace(entity);
+	// registry.walls.emplace(entity);
+
+	// Create and (empty) Salmon component to be able to refer to all turtles
+	registry.renderRequests.insert(
+		entity,
+		{TEXTURE_ASSET_ID::BULLET, // TEXTURE_COUNT indicates that no txture is needed
+		 EFFECT_ASSET_ID::TEXTURED,
+		 GEOMETRY_BUFFER_ID::SPRITE});
+
+	return entity;
+}

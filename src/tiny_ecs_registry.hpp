@@ -26,6 +26,7 @@ public:
 	ComponentContainer<Health> healths;
 	ComponentContainer<Collider> colliders;
 	ComponentContainer<Wall> walls;
+	ComponentContainer<Bullet> bullets;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -46,6 +47,7 @@ public:
 		registry_list.push_back(&healths);
 		registry_list.push_back(&colliders);
 		registry_list.push_back(&walls);
+		registry_list.push_back(&bullets);
 	}
 
 	void clear_all_components() {

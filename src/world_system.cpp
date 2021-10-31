@@ -423,7 +423,13 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 
 void WorldSystem::on_mouse_click(int button, int action, int mods)
 {
-	//printf("working\n");
+
+
+	
+	Motion &motion = registry.motions.get(player_salmon);
+
+	createBullet(renderer, motion.position,motion.angle + 1.5708);
+	
 }
 
 void WorldSystem::handle_collision(Entity &entity_1, Entity &entity_2)

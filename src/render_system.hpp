@@ -35,7 +35,8 @@ class RenderSystem
 		textures_path("turtle.png"),
 		textures_path("survivor-idle_rifle_0.png"),
 		textures_path("floor_tile_81.png"),
-		textures_path("wall.png")};
+		textures_path("wall.png"),
+		textures_path("bullet.png")};
 
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.

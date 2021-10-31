@@ -7,11 +7,16 @@
 // Player component
 struct Player
 {
-	float speed = 1000;
+	float speed = 500;
 	float velocity_left;
 	float velocity_right;
 	float velocity_up;
 	float velocity_down;
+};
+
+struct Bullet
+{
+	float speed = 2000;
 };
 
 // Turtles and pebbles have a hard shell
@@ -142,7 +147,8 @@ enum class TEXTURE_ASSET_ID
 	PLAYER = 2,
 	GROUND_WOOD = 3,
 	WALL = 4,
-	TEXTURE_COUNT = WALL + 1 //
+	BULLET = 5,
+	TEXTURE_COUNT = BULLET + 1 //
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
