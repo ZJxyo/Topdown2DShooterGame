@@ -189,7 +189,9 @@ int SetupMap(RenderSystem *renderer)
 
 		// Setting initial motion values
 		Motion &motion = registry.motions.emplace(entity);
-		motion.position = vec2(w["position"]["x"] + 50, w["position"]["y"] + 50);
+		int value1 = int(w["position"]["x"]) + 50;
+		int value2 = int(w["position"]["y"]) + 50;
+		motion.position = vec2(value1, value2);
 		motion.angle = w["angle"];
 		motion.scale = vec2(w["scale"]["x"], w["scale"]["y"]);
 
