@@ -13,9 +13,6 @@
 
 using Clock = std::chrono::high_resolution_clock;
 
-const int window_width_px = 1200;
-const int window_height_px = 800;
-
 // Entry point
 int main()
 {
@@ -26,7 +23,7 @@ int main()
 	AISystem ai;
 
 	// Initializing window
-	GLFWwindow* window = world.create_window(window_width_px, window_height_px);
+	GLFWwindow* window = world.create_window();
 	if (!window) {
 		// Time to read the error message
 		printf("Press any key to exit");
@@ -55,7 +52,7 @@ int main()
 
 		world.step(elapsed_ms);
 		ai.step(elapsed_ms);
-		physics.step(elapsed_ms, window_width_px, window_height_px);
+		physics.step(elapsed_ms);
 		//world.handle_collisions();
 
 		renderer.draw();

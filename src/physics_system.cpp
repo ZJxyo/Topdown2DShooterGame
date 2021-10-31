@@ -135,7 +135,7 @@ bool collides(const Entity& entity_1, const Entity& entity_2)
 	return false;
 }
 
-void PhysicsSystem::step(float elapsed_ms, float window_width_px, float window_height_px)
+void PhysicsSystem::step(float elapsed_ms)
 {
 	// Move fish based on how much time has passed, this is to (partially) avoid
 	// having entities move at different speed based on the machine.
@@ -196,20 +196,6 @@ void PhysicsSystem::step(float elapsed_ms, float window_width_px, float window_h
 			}
 		}
 	}
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A2: HANDLE SALMON - WALL collisions HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	// you may need the following quantities to compute wall positions
-	(float)window_width_px; (float)window_height_px;
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A2: DRAW DEBUG INFO HERE on Salmon mesh collision
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
-	// You will want to use the createLine from world_init.hpp
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	ComponentContainer<Motion>& motion_container = registry.motions;
 	// debugging of bounding boxes
