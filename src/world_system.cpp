@@ -52,7 +52,7 @@ namespace {
 
 // World initialization
 // Note, this has a lot of OpenGL specific things, could be moved to the renderer
-GLFWwindow* WorldSystem::create_window(int width, int height) {
+GLFWwindow* WorldSystem::create_window() {
 	///////////////////////////////////////
 	// Initialize GLFW
 	glfwSetErrorCallback(glfw_err_cb);
@@ -73,6 +73,10 @@ GLFWwindow* WorldSystem::create_window(int width, int height) {
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
+
+	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+	int height = mode->height / 6 * 4;
+	int width = mode->height;
 
 	// Create the main window (for rendering, keyboard, and mouse input)
 	window = glfwCreateWindow(width, height, "Salmon Game Assignment", nullptr, nullptr);
@@ -132,9 +136,6 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 Entity entity;
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
-	// Get the screen dimensions
-	int screen_width, screen_height;
-	glfwGetFramebufferSize(window, &screen_width, &screen_height);
 
 	// Updating window title with points
 	std::stringstream title_ss;
@@ -169,8 +170,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		// Setting random initial position and constant velocity
 		Motion& motion = registry.motions.get(entity);
 		motion.position =
-			vec2(screen_width - 200.f,
-				50.f + uniform_dist(rng) * (screen_height - 100.f));
+			vec2(window_width_px - 200.f,
+				50.f + uniform_dist(rng) * (window_height_px - 100.f));
 		motion.velocity = vec2(10.f, 10.f);
 	}
 
@@ -314,9 +315,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
 	{
-		int w, h;
-		glfwGetWindowSize(window, &w, &h);
-
 		restart_game();
 	}
 
@@ -392,7 +390,8 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	Motion &motion = registry.motions.get(player_salmon);
 	int w, h;
-	glfwGetFramebufferSize(window, &w, &h);
+	glfwGetWindowSize(window, &w, &h);
+
 	float angle = atan2(mouse_position.y - h / 2.f, mouse_position.x - w / 2.f);
 	motion.angle = angle;
 }

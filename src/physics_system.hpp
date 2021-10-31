@@ -9,7 +9,7 @@
 class PhysicsSystem
 {
 public:
-	void step(float elapsed_ms, float window_width_px, float window_height_px);
+	void step(float elapsed_ms);
 
 	PhysicsSystem()
 	{
