@@ -25,6 +25,7 @@ int main()
 	AISystem ai;
     HelpMenu helpMenu;
 
+
 	// Initializing window
 	GLFWwindow* window = world.create_window();
 
