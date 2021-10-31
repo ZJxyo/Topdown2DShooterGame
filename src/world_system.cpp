@@ -10,6 +10,7 @@
 
 // AI111
 #include "ai_system.hpp"
+#include "helpMenu.h"
 
 // Game configuration
 const size_t MAX_TURTLES = 0;
@@ -391,9 +392,10 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	Motion &motion = registry.motions.get(player_salmon);
-	int w, h;
-	glfwGetFramebufferSize(window, &w, &h);
-	float angle = atan2(mouse_position.y - h / 2.f, mouse_position.x - w / 2.f);
+//	int w, h;
+//	glfwGetFramebufferSize(window, &w, &h);
+//	float angle = atan2(mouse_position.y - h / 2.f, mouse_position.x - w / 2.f);
+    float angle = atan2(mouse_position.y - 400, mouse_position.x - 600);
 	motion.angle = angle;
 }
 

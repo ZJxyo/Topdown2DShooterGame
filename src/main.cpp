@@ -10,6 +10,7 @@
 #include "physics_system.hpp"
 #include "render_system.hpp"
 #include "world_system.hpp"
+#include "helpMenu.h"
 
 using Clock = std::chrono::high_resolution_clock;
 
@@ -25,14 +26,14 @@ int main()
 	PhysicsSystem physics;
 	AISystem ai;
 
-	glfwInit();
-	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-	int height = mode->height / 6 * 4;
-	int width = mode->height;
-	glfwTerminate();
+//	glfwInit();
+//	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+//	int height = mode->height / 6 * 4;
+//	int width = mode->height;
+//	glfwTerminate();
 
 	// Initializing window
-	GLFWwindow* window = world.create_window(width, height);
+	GLFWwindow* window = world.create_window(window_width_px, window_height_px);
 	if (!window) {
 		// Time to read the error message
 		printf("Press any key to exit");
