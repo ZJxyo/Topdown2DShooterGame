@@ -16,10 +16,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 	Entity e = registry.players.entities[0];
 	vec2 pos = registry.motions.get(e).position;
-	int screen_width, screen_height;
-	screen_width = 1200;
-	screen_height = 800;
-	pos = { -pos.x + (screen_width / 2),-pos.y + (screen_height / 2)};
+	pos = { -pos.x + (window_width_px / 2),-pos.y + (window_height_px / 2)};
 	transform.translate(pos); // translate camera to player
 
 	transform.rotate(motion.angle);
@@ -268,15 +265,13 @@ mat3 RenderSystem::createProjectionMatrix()
 	float left = 0.f;
 	float top = 0.f;
 
-	int w, h;
-	glfwGetFramebufferSize(window, &w, &h);
 	gl_has_errors();
-	float right = (float)w / screen_scale;
-	float bottom = (float)h / screen_scale;
+	float right = (float)window_width_px;
+	float bottom = (float)window_height_px;
 
 	float sx = 2.f / (right - left);
 	float sy = 2.f / (top - bottom);
 	float tx = -(right + left) / (right - left);
 	float ty = -(top + bottom) / (top - bottom);
-	return {{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
+	return { {sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f} };
 }

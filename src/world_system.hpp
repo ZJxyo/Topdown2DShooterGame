@@ -21,7 +21,7 @@ public:
 	WorldSystem();
 
 	// Creates a window
-	GLFWwindow* create_window(int width, int height);
+	GLFWwindow* create_window();
 
 	// starts the game
 	void init(RenderSystem* renderer);
