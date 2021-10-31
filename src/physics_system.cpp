@@ -214,9 +214,32 @@ void PhysicsSystem::step(float elapsed_ms, float window_width_px, float window_h
 			Entity entity_i = motion_container.entities[i];
 
 			// visualize axises
-			const vec2 bonding_box = get_bounding_box(motion_i);
-			Entity line1 = createLine(motion_i.position, motion_i.angle, vec2{ bonding_box.x, 3});
-			Entity line2 = createLine(motion_i.position, motion_i.angle, vec2{ 3, bonding_box.y });
+			Entity line1 = createLine(motion_i.position, motion_i.angle, vec2{ 30.f, 3.f});
+			Entity line2 = createLine(motion_i.position, motion_i.angle, vec2{ 3.f, 30.f });
+
+			if (registry.colliders.has(entity_i)) {
+				Transform transform;
+				transform.translate(motion_i.position);
+				transform.rotate(motion_i.angle);
+				transform.scale(motion_i.scale);
+
+				std::vector<vec3> verticies = registry.colliders.get(entity_i).vertices;
+				std::vector<vec2> transformed_verticies = {};
+
+				for (int i = 0; i < verticies.size(); i++) {
+					vec2 vector2 = vec2{ transform.mat * vec3{verticies[i].x, verticies[i].y, 1.0f} };
+					transformed_verticies.push_back(vec2{ transform.mat * vec3{verticies[i].x, verticies[i].y, 1.0f} });
+				}
+
+				for (int i = 0; i < transformed_verticies.size(); i++) {
+					vec2 vector1 = transformed_verticies[i];
+					vec2 vector2 = transformed_verticies[(i + 1) % transformed_verticies.size()];
+					vec2 dir = vec2{ vector2 } - vector1;
+					float angle = atan2(dir.y, dir.x);
+					vec2 pos = (vec2{ vector2 } + vector1) / 2.f;
+					createLine(pos, angle, vec2{ glm::length(dir), 3.f });
+				}
+			}
 		}
 	}
 
