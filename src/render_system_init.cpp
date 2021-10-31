@@ -33,10 +33,14 @@ bool RenderSystem::init(int width, int height, GLFWwindow* window_arg)
 
 	// For some high DPI displays (ex. Retina Display on Macbooks)
 	// https://stackoverflow.com/questions/36672935/why-retina-screen-coordinate-value-is-twice-the-value-of-pixel-value
-	int fb_width, fb_height;
-	glfwGetFramebufferSize(window, &fb_width, &fb_height);
-	screen_scale = static_cast<float>(fb_width) / width;
-	(int)height; // dummy to avoid warning
+	int frame_buffer_width_px, frame_buffer_height_px;
+	glfwGetFramebufferSize(window, &frame_buffer_width_px, &frame_buffer_height_px);  // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
+	if (frame_buffer_width_px != window_width_px)
+	{
+		printf("WARNING: retina display! https://stackoverflow.com/questions/36672935/why-retina-screen-coordinate-value-is-twice-the-value-of-pixel-value\n");
+		printf("glfwGetFramebufferSize = %d,%d\n", frame_buffer_width_px, frame_buffer_height_px);
+		printf("window width_height = %d,%d\n", window_width_px, window_height_px);
+	}
 
 	// ASK(Camilo): Setup error callback. This can not be done in mac os, so do not enable
 	// it unless you are on Linux or Windows. You will need to change the window creation

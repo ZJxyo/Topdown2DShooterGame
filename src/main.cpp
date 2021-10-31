@@ -14,9 +14,6 @@
 
 using Clock = std::chrono::high_resolution_clock;
 
-const int window_width_px = 1200;
-const int window_height_px = 800;
-//bool showMenu = true;
 
 // Entry point
 int main()
@@ -28,14 +25,9 @@ int main()
 	AISystem ai;
     HelpMenu helpMenu;
 
-//	glfwInit();
-//	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-//	int height = mode->height / 6 * 4;
-//	int width = mode->height;
-//	glfwTerminate();
-
 	// Initializing window
-	GLFWwindow* window = world.create_window(window_width_px, window_height_px);
+	GLFWwindow* window = world.create_window();
+
 	if (!window) {
 		// Time to read the error message
 		printf("Press any key to exit");
@@ -65,13 +57,13 @@ int main()
         renderer.draw();
         // menu intro loop
         if(helpMenu.showInto) {
-            helpMenu.createInto(&renderer, window, { 450,350 });
+            helpMenu.createInto(&renderer, window, { 350,250 });
             helpMenu.showInto = false;
         }
 
         // show menu page loop
         if(helpMenu.showMenu && !helpMenu.showInto) {
-            helpMenu.createMenu(&renderer, window, { 450,350 });
+            helpMenu.createMenu(&renderer, window, { 350,250 });
             if(!helpMenu.showMenu) {
                 world.init(&renderer);
             }
@@ -80,7 +72,7 @@ int main()
         else {
             world.step(elapsed_ms);
             ai.step(elapsed_ms);
-            physics.step(elapsed_ms, window_width_px, window_height_px);
+            physics.step(elapsed_ms);
             //world.handle_collisions();
         }
 
