@@ -25,8 +25,14 @@ int main()
 	PhysicsSystem physics;
 	AISystem ai;
 
+	glfwInit();
+	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+	int height = mode->height / 6 * 4;
+	int width = mode->height;
+	glfwTerminate();
+
 	// Initializing window
-	GLFWwindow* window = world.create_window(window_width_px, window_height_px);
+	GLFWwindow* window = world.create_window(width, height);
 	if (!window) {
 		// Time to read the error message
 		printf("Press any key to exit");

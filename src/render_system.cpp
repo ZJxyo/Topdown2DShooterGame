@@ -16,10 +16,9 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 	Entity e = registry.players.entities[0];
 	vec2 pos = registry.motions.get(e).position;
-	int screen_width, screen_height;
-	screen_width = 1200;
-	screen_height = 800;
-	pos = { -pos.x + (screen_width / 2),-pos.y + (screen_height / 2)};
+	int w, h;
+	glfwGetFramebufferSize(window, &w, &h);
+	pos = { -pos.x + (w / 2),-pos.y + (h / 2)};
 	transform.translate(pos); // translate camera to player
 
 	transform.rotate(motion.angle);
