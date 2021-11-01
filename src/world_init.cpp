@@ -34,7 +34,7 @@ Entity createSalmon(RenderSystem *renderer, vec2 pos)
 	registry.renderRequests.insert(
 		entity,
 		{TEXTURE_ASSET_ID::PLAYER,
-		 EFFECT_ASSET_ID::LIGHT,
+		 EFFECT_ASSET_ID::TEXTURED,
 		 GEOMETRY_BUFFER_ID::SPRITE});
 	return entity;
 }

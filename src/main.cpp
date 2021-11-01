@@ -59,6 +59,7 @@ int main()
         // menu intro loop
         if(helpMenu.showInto) {
             helpMenu.createInto(&renderer, window, { 1000,1000 });
+//            ai.BFS(0,0, 40,35);
             helpMenu.showInto = false;
         }
 
