@@ -64,7 +64,7 @@ set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory(ext/json/
 ${CMAKE_CURRENT_BINARY_DIR}/nlohmann_json)
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+#add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 target_include_directories(${PROJECT_NAME} PUBLIC src/)
 

@@ -58,13 +58,13 @@ int main()
         renderer.draw();
         // menu intro loop
         if(helpMenu.showInto) {
-            helpMenu.createInto(&renderer, window, { 350,250 });
+            helpMenu.createInto(&renderer, window, { 1000,1000 });
             helpMenu.showInto = false;
         }
 
         // show menu page loop
         if(helpMenu.showMenu && !helpMenu.showInto) {
-            helpMenu.createMenu(&renderer, window, { 350,250 });
+            helpMenu.createMenu(&renderer, window, { 1000,1000 });
             if(!helpMenu.showMenu) {
                 world.init(&renderer);
             }
