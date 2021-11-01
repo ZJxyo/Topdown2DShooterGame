@@ -28,7 +28,7 @@ bool aabb_collides(const Motion& motion1, const Motion& motion2) {
 }
 
 // get the world coordiante of collider vertices
-std::vector<vec2> get_world_coordinates(const Entity& entity) {
+std::vector<vec2> get_world_coordinates(const Entity entity) {
 	Motion& motion = registry.motions.get(entity);
 	Transform transform;
 	transform.translate(motion.position);
@@ -45,7 +45,10 @@ std::vector<vec2> get_world_coordinates(const Entity& entity) {
 	return vertices;
 }
 
-bool diagonal_collides(const Entity& entity_1, const Entity& entity_2) {
+// convex polygons collision detection
+// entity_1 can be a wall entity or a non wall entity
+// entity_2 cannot be a wall entity
+bool diagonal_collides(const Entity entity_1, const Entity entity_2) {
 	bool resolve_collision = false;
 	const Entity* e1 = &entity_1;
 	const Entity* e2 = &entity_2;
@@ -55,17 +58,13 @@ bool diagonal_collides(const Entity& entity_1, const Entity& entity_2) {
 		resolve_collision = true;
 		e1 = &entity_2;
 		e2 = &entity_1;
-	}
-	else if (registry.walls.has(entity_2)) {
+	} else if (registry.walls.has(entity_2)) {
 		resolve_collision = true;
 	}
 
 	// get vertex coordinates in world frame
 	std::vector<vec2> vertices_1 = get_world_coordinates(*e1);
 	std::vector<vec2> vertices_2 = get_world_coordinates(*e2);
-
-	/*printf("size1: %d   size2: %d\n", vertices_1.size(), vertices_2.size());
-	assert(false);*/
 
 	std::vector<vec2> v1 = vertices_1;
 	std::vector<vec2> v2 = vertices_2;
@@ -124,7 +123,7 @@ bool diagonal_collides(const Entity& entity_1, const Entity& entity_2) {
 // This is a SUPER APPROXIMATE check that puts a circle around the bounding boxes and sees
 // if the center point of either object is inside the other's bounding-box-circle. You can
 // surely implement a more accurate detection
-bool collides(const Entity& entity_1, const Entity& entity_2)
+bool collides(const Entity entity_1, const Entity entity_2)
 {
 	if (aabb_collides(registry.motions.get(entity_1), registry.motions.get(entity_2))) {
 		/*if (registry.players.has(entity_1) || registry.players.has(entity_2)) {
@@ -173,7 +172,7 @@ void PhysicsSystem::step(float elapsed_ms)
 		{
 			assert(i != j);
 
-			Entity& entity_j = collider_container.entities[j];
+			Entity entity_j = collider_container.entities[j];
 
 			// walls shouldn't be colliding
 			if (registry.walls.has(entity_i) && registry.walls.has(entity_j)) {
@@ -204,33 +203,17 @@ void PhysicsSystem::step(float elapsed_ms)
 			Entity line2 = createLine(motion_i.position, motion_i.angle, vec2{ 3.f, 30.f });
 
 			if (registry.colliders.has(entity_i)) {
-				Transform transform;
-				transform.translate(motion_i.position);
-				transform.rotate(motion_i.angle);
-				transform.scale(motion_i.scale);
-
-				std::vector<vec3> verticies = registry.colliders.get(entity_i).vertices;
-				std::vector<vec2> transformed_verticies = {};
-
-				for (int i = 0; i < verticies.size(); i++) {
-					vec2 vector2 = vec2{ transform.mat * vec3{verticies[i].x, verticies[i].y, 1.0f} };
-					transformed_verticies.push_back(vec2{ transform.mat * vec3{verticies[i].x, verticies[i].y, 1.0f} });
-				}
+				std::vector<vec2> transformed_verticies = get_world_coordinates(entity_i);
 
 				for (int i = 0; i < transformed_verticies.size(); i++) {
 					vec2 vector1 = transformed_verticies[i];
 					vec2 vector2 = transformed_verticies[(i + 1) % transformed_verticies.size()];
-					vec2 dir = vec2{ vector2 } - vector1;
+					vec2 dir = vector2 - vector1;
 					float angle = atan2(dir.y, dir.x);
-					vec2 pos = (vec2{ vector2 } + vector1) / 2.f;
+					vec2 pos = (vector2 + vector1) / 2.f;
 					createLine(pos, angle, vec2{ glm::length(dir), 3.f });
 				}
 			}
 		}
 	}
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A3: HANDLE PEBBLE collisions HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 3
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
