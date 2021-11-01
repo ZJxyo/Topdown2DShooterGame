@@ -145,10 +145,17 @@ enum class TEXTURE_ASSET_ID
 	FISH = 0,
 	TURTLE = 1,
 	PLAYER = 2,
-	GROUND_WOOD = 3,
-	WALL = 4,
-	BULLET = 5,
+	PLAYER2 = 3,
+	PLAYER3 = 4,
+	PLAYER4 = 5,
+	PLAYER5 = 6,
+	PLAYER6 = 7,
+	PLAYER7 = 8,
+	GROUND_WOOD = 9,
+	WALL = 10,
+  BULLET = 11,
 	TEXTURE_COUNT = BULLET + 1 //
+
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
