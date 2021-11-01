@@ -119,6 +119,12 @@ struct Wall
 struct Animate
 {
 	float counter_ms = 100;
+
+};
+
+struct FireRate
+{
+	float fire_rate = 0;
 };
 
 /**

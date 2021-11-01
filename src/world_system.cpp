@@ -18,6 +18,7 @@ const size_t MAX_FISH = 5;
 const size_t TURTLE_DELAY_MS = 2000 * 3;
 const size_t FISH_DELAY_MS = 5000 * 3;
 const size_t ANIMATION_DELAY_MS = 100;
+const size_t BULLET_TIMER_MS = 100;
 
 // Create the fish world
 WorldSystem::WorldSystem()
@@ -246,22 +247,32 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	}
 
 	// process shooting bullets for player
-	if (mouse_down) {
+
+	FireRate &fireRate = registry.fireRates.get(player_salmon);
+	fireRate.fire_rate -= elapsed_ms_since_last_update * current_speed;
+
+	
+	if (fireRate.fire_rate < 0) {
+		fireRate.fire_rate = BULLET_TIMER_MS;
+		if (mouse_down) {
 		Player &player = registry.players.get(player_salmon);
 		Motion &motion = registry.motions.get(player_salmon);
+		
 		
 		if (player.velocity_left !=  0 || player.velocity_right !=  0 ||player.velocity_up !=  0 ||player.velocity_down !=  0 ) {
 			float LO = -0.5;
 			float HI = 0.5;
 			float r3 = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
+			
 			createBullet(renderer, motion.position,motion.angle + 1.5708 + r3);
 		} 
 		
 		else {
 			createBullet(renderer, motion.position,motion.angle + 1.5708);
 		}
-		
 	}
+	}
+	
 	
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// TODO A3: HANDLE PEBBLE SPAWN HERE

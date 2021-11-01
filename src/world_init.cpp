@@ -25,12 +25,15 @@ Entity createSalmon(RenderSystem *renderer, vec2 pos)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = {150,100};
 
+	
+
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.players.emplace(entity);
 	registry.healths.emplace(entity, 100);
 	registry.colliders.emplace(entity);
 	registry.animates.emplace(entity);
+	registry.fireRates.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
 		{TEXTURE_ASSET_ID::PLAYER,
