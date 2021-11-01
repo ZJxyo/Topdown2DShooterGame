@@ -22,7 +22,7 @@ const size_t BULLET_TIMER_MS = 100;
 
 // Create the fish world
 WorldSystem::WorldSystem()
-	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f)
+	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f), tap(false)
 {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
@@ -254,9 +254,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	
 	if (fireRate.fire_rate < 0) {
 		fireRate.fire_rate = BULLET_TIMER_MS;
-		if (mouse_down) {
+		if (mouse_down || tap) {
 		Player &player = registry.players.get(player_salmon);
 		Motion &motion = registry.motions.get(player_salmon);
+		if (tap)
+			tap = !tap;
 		
 		
 		if (player.velocity_left !=  0 || player.velocity_right !=  0 ||player.velocity_up !=  0 ||player.velocity_down !=  0 ) {
@@ -510,7 +512,8 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 	
 	
 	if (action == GLFW_PRESS) {
-		mouse_down = true;		
+		mouse_down = true;
+		tap = true;		
 	} else if (action == GLFW_RELEASE) {
 		mouse_down = false;
 	}
