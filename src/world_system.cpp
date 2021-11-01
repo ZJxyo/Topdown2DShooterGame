@@ -10,6 +10,7 @@
 
 // AI111
 #include "ai_system.hpp"
+#include "HelpMenu.h"
 
 // Game configuration
 const size_t MAX_TURTLES = 0;
@@ -231,7 +232,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	// AIvy
 	Chase chase(player_salmon);
-	Shoot shoot(player_salmon);
+    ShootNBullets shoot(player_salmon);
 	Build build(player_salmon);
 	BTIfCondition btIfCondition(&chase, &shoot, &build);
 	btIfCondition.init(entity);
@@ -483,10 +484,12 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
 
 	Motion &motion = registry.motions.get(player_salmon);
+
 	int w, h;
 	glfwGetWindowSize(window, &w, &h);
 
 	float angle = atan2(mouse_position.y - h / 2.f, mouse_position.x - w / 2.f);
+
 	motion.angle = angle;
 
 }
