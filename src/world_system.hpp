@@ -61,6 +61,7 @@ private:
 	float next_fish_spawn;
 	float next_animation;
 	Entity player_salmon;
+	bool mouse_down;
 
 	// music references
 	Mix_Music *background_music;

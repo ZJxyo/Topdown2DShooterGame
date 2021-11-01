@@ -23,3 +23,5 @@ Entity createLine(vec2 position, vec2 size);
 Entity createPebble(vec2 pos, vec2 size);
 int createGround(RenderSystem *renderer);
 int SetupMap(RenderSystem *renderer);
+
+Entity createBullet(RenderSystem *renderer, vec2 position, float angle);
