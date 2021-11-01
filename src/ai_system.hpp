@@ -158,46 +158,29 @@ private:
 
 class ShootNBullets : public BTNode {
 public:
-    ShootNBullets(int numberOfBullets)
-    : m_targetNumber(numberOfBullets), m_numberRemaining(0){
+    ShootNBullets(Entity other) {
+        player = other;
     }
-
 private:
-    void init(Entity e) override {
-        m_numberRemaining = m_targetNumber;
-    }
-
+    Entity player;
+    void init(Entity e) override {}
     BTState process(Entity e) override {
-        --m_numberRemaining;
+        auto& vel = registry.motions.get(e).velocity;
+        //WorldSystem::getEntity()
+        int playerX = registry.motions.get(player).position.x;
+        int playerY = registry.motions.get(player).position.y;
+        int AIX = registry.motions.get(e).position.x;
+        int AIY = registry.motions.get(e).position.y;
 
-        auto& motion = registry.motions.get(e);
-        motion.position += motion.velocity;
 
-        if(m_numberRemaining > 0) {
-            return BTState::Running;
-        } else {
-            return BTState::Success;
+        //        vel += 20;
+        printf("Turn to the player and shoot 5 bullets\n");
+        for (int i = 0;i < 5;i++) {
+            printf("Bullet #%d\n", i);
+            registry.motions.get(e).angle = atan2(playerX - registry.motions.get(e).position.x, playerY - registry.motions.get(e).position.y);
         }
-//        auto& vel = registry.motions.get(e).velocity;
-//        //WorldSystem::getEntity()
-//        int playerX = registry.motions.get(player).position.x;
-//        int playerY = registry.motions.get(player).position.y;
-//        int AIX = registry.motions.get(e).position.x;
-//        int AIY = registry.motions.get(e).position.y;
-//
-//
-//
-//        //        vel += 20;
-//        printf("Turn to the player and shoot 5 bullets\n");
-//        for (int i = 0;i < 5;i++) {
-//            printf("Bullet #%d\n", i);
-//            registry.motions.get(e).angle = atan2(playerX - registry.motions.get(e).position.x, playerY - registry.motions.get(e).position.y);
-//        }
-//        return BTState::Failure; // return failure if shoot five time, success otherwirse. // naive one
+        return BTState::Failure; // return failure if shoot five time, success otherwirse. // naive one
     }
-
-    int m_targetNumber;
-    int m_numberRemaining;
 };
 
 class Build : public BTNode {
