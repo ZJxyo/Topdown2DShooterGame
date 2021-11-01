@@ -75,7 +75,6 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
 	}
-
 	else if ((render_request.used_texture >= TEXTURE_ASSET_ID::PLAYER && render_request.used_texture <= TEXTURE_ASSET_ID::PLAYER7) || (render_request.used_texture >= TEXTURE_ASSET_ID::FEET1 && render_request.used_texture <= TEXTURE_ASSET_ID::FEET7))
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
@@ -266,7 +265,6 @@ void RenderSystem::draw()
 			continue;
 		// Note, its not very efficient to access elements indirectly via the entity
 		// albeit iterating through all Sprites in sequence. A good point to optimize
-		assert(registry.renderRequests2.has(entity));
 		RenderRequest &render_request2 = registry.renderRequests2.get(entity);
 
 		drawTexturedMesh(entity, projection_2D, render_request2);
@@ -279,7 +277,6 @@ void RenderSystem::draw()
 		// Note, its not very efficient to access elements indirectly via the entity
 		// albeit iterating through all Sprites in sequence. A good point to optimize
 
-		assert(registry.renderRequests.has(entity));
 		RenderRequest &render_request = registry.renderRequests.get(entity);
 		drawTexturedMesh(entity, projection_2D, render_request);
 	}
