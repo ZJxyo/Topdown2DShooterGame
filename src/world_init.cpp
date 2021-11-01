@@ -28,6 +28,7 @@ Entity createSalmon(RenderSystem *renderer, vec2 pos)
 	registry.players.emplace(entity);
 	registry.healths.emplace(entity, 100);
 	registry.colliders.emplace(entity);
+	registry.animates.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
 		{TEXTURE_ASSET_ID::PLAYER,
@@ -112,6 +113,7 @@ Entity createTurtle(RenderSystem *renderer, vec2 position)
 
 	// Create and (empty) Turtle component to be able to refer to all turtles
 	registry.hardShells.emplace(entity);
+	registry.animates.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
 		{TEXTURE_ASSET_ID::PLAYER,
