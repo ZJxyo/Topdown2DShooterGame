@@ -80,7 +80,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		gl_has_errors();
 	}
 
-	else if (render_request.used_texture == TEXTURE_ASSET_ID::PLAYER)
+	else if (render_request.used_texture >= TEXTURE_ASSET_ID::PLAYER && render_request.used_texture <= TEXTURE_ASSET_ID::PLAYER7)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");

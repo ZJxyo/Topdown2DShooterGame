@@ -34,6 +34,12 @@ class RenderSystem
 		textures_path("fish.png"),
 		textures_path("turtle.png"),
 		textures_path("survivor-idle_rifle_0.png"),
+		textures_path("survivor-move_rifle_3.png"),
+		textures_path("survivor-move_rifle_6.png"),
+		textures_path("survivor-move_rifle_9.png"),
+		textures_path("survivor-move_rifle_12.png"),
+		textures_path("survivor-move_rifle_15.png"),
+		textures_path("survivor-move_rifle_18.png"),
 		textures_path("floor_tile_81.png"),
 		textures_path("wall.png")};
 
