@@ -29,6 +29,51 @@ public:
     virtual BTState process(Entity e) = 0;
 };
 
+// A composite node that loops through all children and exits when one fails
+class BTRunPair : public BTNode {
+private:
+    int m_index;
+    BTNode* m_children[2];
+
+public:
+    BTRunPair(BTNode* c0, BTNode* c1)
+            : m_index(0) {
+        m_children[0] = c0;
+        m_children[1] = c1;
+    }
+
+    void init(Entity e) override
+    {
+        m_index = 0;
+        // initialize the first child
+        const auto& child = m_children[m_index];
+        child->init(e);
+    }
+
+    BTState process(Entity e) override {
+        if (m_index >= 2)
+            return BTState::Success;
+
+        // process current child
+        BTState state = m_children[m_index]->process(e);
+
+        // select a new active child and initialize its internal state
+        if (state == BTState::Success) {
+            ++m_index;
+            if (m_index >= 2) {
+                return BTState::Success;
+            }
+            else {
+                m_children[m_index]->init(e);
+                return BTState::Running;
+            }
+        }
+        else {
+            return state;
+        }
+    }
+};
+
 class BTIfCondition : public BTNode {
 public:
     BTIfCondition(BTNode* chase, BTNode* shoot, BTNode* build) : chase(chase) , shoot(shoot), build(build){
@@ -111,15 +156,14 @@ private:
     }
 };
 
-class Shoot : public BTNode {
+class ShootNBullets : public BTNode {
 public:
-    Shoot(Entity other) {
+    ShootNBullets(Entity other) {
         player = other;
     }
 private:
     Entity player;
     void init(Entity e) override {}
-
     BTState process(Entity e) override {
         auto& vel = registry.motions.get(e).velocity;
         //WorldSystem::getEntity()
@@ -128,8 +172,7 @@ private:
         int AIX = registry.motions.get(e).position.x;
         int AIY = registry.motions.get(e).position.y;
 
-        
-        
+
         //        vel += 20;
         printf("Turn to the player and shoot 5 bullets\n");
         for (int i = 0;i < 5;i++) {
