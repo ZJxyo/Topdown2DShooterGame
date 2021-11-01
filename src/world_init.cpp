@@ -21,8 +21,10 @@ Entity createSalmon(RenderSystem *renderer, vec2 pos)
 	Motion &motion = registry.motions.emplace(entity);
 	motion.position = pos;
 	motion.angle = 0.f;
-	motion.velocity = {0.f, 0.f};
-	motion.scale = {150, 150};
+
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = {150,100};
+
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.players.emplace(entity);
@@ -123,7 +125,7 @@ Entity createTurtle(RenderSystem *renderer, vec2 position)
 	return entity;
 }
 
-Entity createLine(vec2 position, vec2 scale)
+Entity createLine(vec2 position, float angle, vec2 scale)
 {
 	Entity entity = Entity();
 
@@ -135,9 +137,11 @@ Entity createLine(vec2 position, vec2 scale)
 		 GEOMETRY_BUFFER_ID::RECTANGLE});
 
 	// Create motion
-	Motion &motion = registry.motions.emplace(entity);
-	motion.angle = 0.f;
-	motion.velocity = {0, 0};
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.angle = angle;
+	motion.velocity = { 0, 0 };
+
 	motion.position = position;
 	motion.scale = scale;
 

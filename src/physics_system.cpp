@@ -149,7 +149,7 @@ bool collides(const Entity &entity_1, const Entity &entity_2)
 	return false;
 }
 
-void PhysicsSystem::step(float elapsed_ms, float window_width_px, float window_height_px)
+void PhysicsSystem::step(float elapsed_ms)
 {
 	// Move fish based on how much time has passed, this is to (partially) avoid
 	// having entities move at different speed based on the machine.
@@ -197,38 +197,18 @@ void PhysicsSystem::step(float elapsed_ms, float window_width_px, float window_h
 
 			if (collides(entity_i, entity_j))
 			{
-				//CLEAN
-				/*if (registry.players.has(entity_i)) {
-					printf("Collides: %f\n", registry.motions.get(entity_i).position.x);
-				}*/
-				// Create a collisions event
-				// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
-				/*registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-				registry.collisions.emplace_with_duplicates(entity_j, entity_i);*/
-				for (auto callback : callbacks)
-				{
+
+				for (auto callback : callbacks) {
+
 					callback(entity_i, entity_j);
 				}
 			}
 		}
 	}
 
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A2: HANDLE SALMON - WALL collisions HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	// you may need the following quantities to compute wall positions
-	(float)window_width_px;
-	(float)window_height_px;
+	ComponentContainer<Motion>& motion_container = registry.motions;
 
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A2: DRAW DEBUG INFO HERE on Salmon mesh collision
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
-	// You will want to use the createLine from world_init.hpp
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	ComponentContainer<Motion> &motion_container = registry.motions;
 	// debugging of bounding boxes
 	if (debugging.in_debug_mode)
 	{
@@ -238,15 +218,35 @@ void PhysicsSystem::step(float elapsed_ms, float window_width_px, float window_h
 			Motion &motion_i = motion_container.components[i];
 			Entity entity_i = motion_container.entities[i];
 
-			// visualize the radius with two axis-aligned lines
-			const vec2 bonding_box = get_bounding_box(motion_i);
-			float radius = sqrt(dot(bonding_box / 2.f, bonding_box / 2.f));
-			vec2 line_scale1 = {motion_i.scale.x / 10, 2 * radius};
-			Entity line1 = createLine(motion_i.position, line_scale1);
-			vec2 line_scale2 = {2 * radius, motion_i.scale.x / 10};
-			Entity line2 = createLine(motion_i.position, line_scale2);
 
-			// !!! TODO A2: implement debugging of bounding boxes and mesh
+			// visualize axises
+			Entity line1 = createLine(motion_i.position, motion_i.angle, vec2{ 30.f, 3.f});
+			Entity line2 = createLine(motion_i.position, motion_i.angle, vec2{ 3.f, 30.f });
+
+
+			if (registry.colliders.has(entity_i)) {
+				Transform transform;
+				transform.translate(motion_i.position);
+				transform.rotate(motion_i.angle);
+				transform.scale(motion_i.scale);
+
+				std::vector<vec3> verticies = registry.colliders.get(entity_i).vertices;
+				std::vector<vec2> transformed_verticies = {};
+
+				for (int i = 0; i < verticies.size(); i++) {
+					vec2 vector2 = vec2{ transform.mat * vec3{verticies[i].x, verticies[i].y, 1.0f} };
+					transformed_verticies.push_back(vec2{ transform.mat * vec3{verticies[i].x, verticies[i].y, 1.0f} });
+				}
+
+				for (int i = 0; i < transformed_verticies.size(); i++) {
+					vec2 vector1 = transformed_verticies[i];
+					vec2 vector2 = transformed_verticies[(i + 1) % transformed_verticies.size()];
+					vec2 dir = vec2{ vector2 } - vector1;
+					float angle = atan2(dir.y, dir.x);
+					vec2 pos = (vec2{ vector2 } + vector1) / 2.f;
+					createLine(pos, angle, vec2{ glm::length(dir), 3.f });
+				}
+			}
 		}
 	}
 
