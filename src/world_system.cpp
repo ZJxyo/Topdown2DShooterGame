@@ -20,7 +20,7 @@ const size_t ANIMATION_DELAY_MS = 100;
 
 // Create the fish world
 WorldSystem::WorldSystem()
-	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f), next_animation(0.f)
+	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f)
 {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
@@ -160,22 +160,35 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		registry.remove_all_components_of(registry.debugComponents.entities.back());
 
 	//update animation
-	RenderRequest &r = registry.renderRequests.get(player_salmon);
 	Player p = registry.players.get(player_salmon);
-	if (p.velocity_left != 0 || p.velocity_down != 0 || p.velocity_right != 0 || p.velocity_up != 0)
+	auto &a_entities = registry.animates.entities;
+	for (int i = 0; i < registry.animates.components.size(); i++)
 	{
-		next_animation -= elapsed_ms_since_last_update * current_speed;
-	}
-	if (next_animation < 0)
-	{
-		next_animation = ANIMATION_DELAY_MS;
-		if (r.used_texture == TEXTURE_ASSET_ID::PLAYER7)
+		Animate &a = registry.animates.get(a_entities[i]);
+		RenderRequest &r = registry.renderRequests.get(a_entities[i]);
+
+		if (a_entities[i] == player_salmon)
 		{
-			r.used_texture = TEXTURE_ASSET_ID::PLAYER;
+			if (p.velocity_left != 0 || p.velocity_down != 0 || p.velocity_right != 0 || p.velocity_up != 0)
+			{
+				a.counter_ms -= elapsed_ms_since_last_update * current_speed;
+			}
 		}
 		else
 		{
-			r.used_texture = TEXTURE_ASSET_ID((int)r.used_texture + 1);
+			a.counter_ms -= elapsed_ms_since_last_update * current_speed;
+		}
+		if (a.counter_ms < 0)
+		{
+			a.counter_ms = ANIMATION_DELAY_MS;
+			if (r.used_texture == TEXTURE_ASSET_ID::PLAYER7)
+			{
+				r.used_texture = TEXTURE_ASSET_ID::PLAYER;
+			}
+			else
+			{
+				r.used_texture = TEXTURE_ASSET_ID((int)r.used_texture + 1);
+			}
 		}
 	}
 
