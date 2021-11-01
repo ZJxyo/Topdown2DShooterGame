@@ -223,6 +223,24 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		// !!!  TODO A1: Create new fish with createFish({0,0}), as for the Turtles above
 	}
 
+	// process shooting bullets for player
+	if (mouse_down) {
+		Player &player = registry.players.get(player_salmon);
+		Motion &motion = registry.motions.get(player_salmon);
+		
+		if (player.velocity_left !=  0 || player.velocity_right !=  0 ||player.velocity_up !=  0 ||player.velocity_down !=  0 ) {
+			float LO = -0.5;
+			float HI = 0.5;
+			float r3 = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
+			createBullet(renderer, motion.position,motion.angle + 1.5708 + r3);
+		} 
+		
+		else {
+			createBullet(renderer, motion.position,motion.angle + 1.5708);
+		}
+		
+	}
+	
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// TODO A3: HANDLE PEBBLE SPAWN HERE
 	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 3
@@ -269,6 +287,7 @@ void WorldSystem::restart_game()
 
 	// Reset the game speed
 	current_speed = 1.f;
+	mouse_down = false;
 
 	// Remove all entities that we created
 	// All that have a motion, we could also iterate over all fish, turtles, ... but that would be more cumbersome
@@ -444,12 +463,20 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 
 void WorldSystem::on_mouse_click(int button, int action, int mods)
 {
+	
+	
+	if (action == GLFW_PRESS) {
+		mouse_down = true;		
+	} else if (action == GLFW_RELEASE) {
+		mouse_down = false;
+	}
 
 
 	
-	Motion &motion = registry.motions.get(player_salmon);
-
-	createBullet(renderer, motion.position,motion.angle + 1.5708);
+		
+	
+	
+	
 	
 }
 

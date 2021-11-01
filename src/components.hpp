@@ -153,7 +153,7 @@ enum class TEXTURE_ASSET_ID
 	PLAYER7 = 8,
 	GROUND_WOOD = 9,
 	WALL = 10,
-  BULLET = 11,
+    BULLET = 11,
 	TEXTURE_COUNT = BULLET + 1 //
 
 };
