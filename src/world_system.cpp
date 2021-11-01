@@ -56,7 +56,8 @@ namespace
 // World initialization
 // Note, this has a lot of OpenGL specific things, could be moved to the renderer
 
-GLFWwindow* WorldSystem::create_window() {
+GLFWwindow *WorldSystem::create_window()
+{
 
 	///////////////////////////////////////
 	// Initialize GLFW
@@ -80,7 +81,7 @@ GLFWwindow* WorldSystem::create_window() {
 #endif
 	glfwWindowHint(GLFW_RESIZABLE, 0);
 
-	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+	const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 	int height = mode->height / 6 * 4;
 	int width = mode->height;
 
@@ -150,8 +151,8 @@ void WorldSystem::init(RenderSystem *renderer_arg)
 Entity entity;
 // Update our game world
 
-bool WorldSystem::step(float elapsed_ms_since_last_update) {
-
+bool WorldSystem::step(float elapsed_ms_since_last_update)
+{
 
 	// Updating window title with points
 	std::stringstream title_ss;
@@ -184,13 +185,27 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		if (a.counter_ms < 0)
 		{
 			a.counter_ms = ANIMATION_DELAY_MS;
-			if (r.used_texture == TEXTURE_ASSET_ID::PLAYER7)
+			if (registry.players.has(a_entities[i]) || registry.hardShells.has(a_entities[i]))
 			{
-				r.used_texture = TEXTURE_ASSET_ID::PLAYER;
+				if (r.used_texture == TEXTURE_ASSET_ID::PLAYER7)
+				{
+					r.used_texture = TEXTURE_ASSET_ID::PLAYER;
+				}
+				else
+				{
+					r.used_texture = TEXTURE_ASSET_ID((int)r.used_texture + 1);
+				}
 			}
 			else
 			{
-				r.used_texture = TEXTURE_ASSET_ID((int)r.used_texture + 1);
+				if (r.used_texture == TEXTURE_ASSET_ID::FEET7)
+				{
+					r.used_texture = TEXTURE_ASSET_ID::FEET1;
+				}
+				else
+				{
+					r.used_texture = TEXTURE_ASSET_ID((int)r.used_texture + 1);
+				}
 			}
 		}
 	}
@@ -221,10 +236,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		entity = createTurtle(renderer, {1000, 1000});
 		// Setting random initial position and constant velocity
 
-		Motion& motion = registry.motions.get(entity);
+		Motion &motion = registry.motions.get(entity);
 		motion.position =
 			vec2(window_width_px - 200.f,
-				50.f + uniform_dist(rng) * (window_height_px - 100.f));
+				 50.f + uniform_dist(rng) * (window_height_px - 100.f));
 
 		motion.velocity = vec2(10.f, 10.f);
 	}
@@ -245,23 +260,25 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	}
 
 	// process shooting bullets for player
-	if (mouse_down) {
+	if (mouse_down)
+	{
 		Player &player = registry.players.get(player_salmon);
 		Motion &motion = registry.motions.get(player_salmon);
-		
-		if (player.velocity_left !=  0 || player.velocity_right !=  0 ||player.velocity_up !=  0 ||player.velocity_down !=  0 ) {
+
+		if (player.velocity_left != 0 || player.velocity_right != 0 || player.velocity_up != 0 || player.velocity_down != 0)
+		{
 			float LO = -0.5;
 			float HI = 0.5;
-			float r3 = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
-			createBullet(renderer, motion.position,motion.angle + 1.5708 + r3);
-		} 
-		
-		else {
-			createBullet(renderer, motion.position,motion.angle + 1.5708);
+			float r3 = LO + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (HI - LO)));
+			createBullet(renderer, motion.position, motion.angle + 1.5708 + r3);
 		}
-		
+
+		else
+		{
+			createBullet(renderer, motion.position, motion.angle + 1.5708);
+		}
 	}
-	
+
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// TODO A3: HANDLE PEBBLE SPAWN HERE
 	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 3
@@ -324,7 +341,7 @@ void WorldSystem::restart_game()
 	// Create a new salmon
 	player_salmon = createSalmon(renderer, {1000, 1000});
 	registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
-	
+
 	SetupMap(renderer);
 	createWall(renderer, {300, 300}, 2.f, {200, 200});
 
@@ -336,7 +353,6 @@ void WorldSystem::restart_game()
 	//createWall(renderer, { 700, 500 }, 0.f, { 200, 200 });
 	//createWall(renderer, { 1100, 500 }, 0.f, { 200, 200 });
 	//createWall(renderer, { 1100, 700 }, 0.f, { 200, 200 });
-
 }
 
 // Compute collisions between entities
@@ -479,8 +495,8 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	current_speed = fmax(0.f, current_speed);
 }
 
-
-void WorldSystem::on_mouse_move(vec2 mouse_position) {
+void WorldSystem::on_mouse_move(vec2 mouse_position)
+{
 
 	Motion &motion = registry.motions.get(player_salmon);
 	int w, h;
@@ -488,26 +504,19 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 
 	float angle = atan2(mouse_position.y - h / 2.f, mouse_position.x - w / 2.f);
 	motion.angle = angle;
-
 }
 
 void WorldSystem::on_mouse_click(int button, int action, int mods)
 {
-	
-	
-	if (action == GLFW_PRESS) {
-		mouse_down = true;		
-	} else if (action == GLFW_RELEASE) {
+
+	if (action == GLFW_PRESS)
+	{
+		mouse_down = true;
+	}
+	else if (action == GLFW_RELEASE)
+	{
 		mouse_down = false;
 	}
-
-
-	
-		
-	
-	
-	
-	
 }
 
 void WorldSystem::handle_collision(Entity &entity_1, Entity &entity_2)

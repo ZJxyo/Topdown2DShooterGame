@@ -5,7 +5,7 @@
 #include "tiny_ecs_registry.hpp"
 
 void RenderSystem::drawTexturedMesh(Entity entity,
-									const mat3 &projection)
+									const mat3 &projection, RenderRequest &render_request)
 {
 	Motion &motion = registry.motions.get(entity);
 	// Transformation code, see Rendering and Transformation in the template
@@ -17,7 +17,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	Entity e = registry.players.entities[0];
 	vec2 pos = registry.motions.get(e).position;
 
-	pos = { -pos.x + (window_width_px / 2),-pos.y + (window_height_px / 2)};
+	pos = {-pos.x + (window_width_px / 2), -pos.y + (window_height_px / 2)};
 
 	transform.translate(pos); // translate camera to player
 
@@ -25,9 +25,6 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	transform.scale(motion.scale);
 	// !!! TODO A1: add rotation to the chain of transformations, mind the order
 	// of transformations
-
-	assert(registry.renderRequests.has(entity));
-	const RenderRequest &render_request = registry.renderRequests.get(entity);
 
 	const GLuint used_effect_enum = (GLuint)render_request.used_effect;
 	assert(used_effect_enum != (GLuint)EFFECT_ASSET_ID::EFFECT_COUNT);
@@ -79,7 +76,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		gl_has_errors();
 	}
 
-	else if (render_request.used_texture >= TEXTURE_ASSET_ID::PLAYER && render_request.used_texture <= TEXTURE_ASSET_ID::PLAYER7)
+	else if ((render_request.used_texture >= TEXTURE_ASSET_ID::PLAYER && render_request.used_texture <= TEXTURE_ASSET_ID::PLAYER7) || (render_request.used_texture >= TEXTURE_ASSET_ID::FEET1 && render_request.used_texture <= TEXTURE_ASSET_ID::FEET7))
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
@@ -106,7 +103,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 		assert(registry.renderRequests.has(entity));
 		GLuint texture_id =
-			texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
+			texture_gl_handles[(GLuint)render_request.used_texture];
 
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -262,13 +259,29 @@ void RenderSystem::draw()
 	gl_has_errors();
 	mat3 projection_2D = createProjectionMatrix();
 	// Draw all textured meshes that have a position and size component
+
+	for (Entity entity : registry.renderRequests2.entities)
+	{
+		if (!registry.motions.has(entity))
+			continue;
+		// Note, its not very efficient to access elements indirectly via the entity
+		// albeit iterating through all Sprites in sequence. A good point to optimize
+		assert(registry.renderRequests2.has(entity));
+		RenderRequest &render_request2 = registry.renderRequests2.get(entity);
+
+		drawTexturedMesh(entity, projection_2D, render_request2);
+	}
+
 	for (Entity entity : registry.renderRequests.entities)
 	{
 		if (!registry.motions.has(entity))
 			continue;
 		// Note, its not very efficient to access elements indirectly via the entity
 		// albeit iterating through all Sprites in sequence. A good point to optimize
-		drawTexturedMesh(entity, projection_2D);
+
+		assert(registry.renderRequests.has(entity));
+		RenderRequest &render_request = registry.renderRequests.get(entity);
+		drawTexturedMesh(entity, projection_2D, render_request);
 	}
 
 	// Truely render to the screen
@@ -293,5 +306,5 @@ mat3 RenderSystem::createProjectionMatrix()
 	float sy = 2.f / (top - bottom);
 	float tx = -(right + left) / (right - left);
 	float ty = -(top + bottom) / (top - bottom);
-	return { {sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f} };
+	return {{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
 }

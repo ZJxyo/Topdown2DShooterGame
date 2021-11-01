@@ -22,9 +22,8 @@ Entity createSalmon(RenderSystem *renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 
-	motion.velocity = { 0.f, 0.f };
-	motion.scale = {150,100};
-
+	motion.velocity = {0.f, 0.f};
+	motion.scale = {150, 100};
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.players.emplace(entity);
@@ -36,6 +35,13 @@ Entity createSalmon(RenderSystem *renderer, vec2 pos)
 		{TEXTURE_ASSET_ID::PLAYER,
 		 EFFECT_ASSET_ID::SALMON,
 		 GEOMETRY_BUFFER_ID::SPRITE});
+
+	registry.renderRequests2.insert(
+		entity,
+		{TEXTURE_ASSET_ID::FEET1,
+		 EFFECT_ASSET_ID::TURTLE,
+		 GEOMETRY_BUFFER_ID::SPRITE});
+
 	return entity;
 }
 
@@ -122,6 +128,12 @@ Entity createTurtle(RenderSystem *renderer, vec2 position)
 		 EFFECT_ASSET_ID::TURTLE,
 		 GEOMETRY_BUFFER_ID::SPRITE});
 
+	registry.renderRequests2.insert(
+		entity,
+		{TEXTURE_ASSET_ID::FEET1,
+		 EFFECT_ASSET_ID::TURTLE,
+		 GEOMETRY_BUFFER_ID::SPRITE});
+
 	return entity;
 }
 
@@ -138,9 +150,9 @@ Entity createLine(vec2 position, float angle, vec2 scale)
 
 	// Create motion
 
-	Motion& motion = registry.motions.emplace(entity);
+	Motion &motion = registry.motions.emplace(entity);
 	motion.angle = angle;
-	motion.velocity = { 0, 0 };
+	motion.velocity = {0, 0};
 
 	motion.position = position;
 	motion.scale = scale;
@@ -259,14 +271,14 @@ Entity createBullet(RenderSystem *renderer, vec2 pos, float angle)
 	// Setting initial motion values
 	Motion &motion = registry.motions.emplace(entity);
 	motion.position = pos;
-	motion.position.x = motion.position.x + 50*sin(angle) + 35*cos(angle);
-	motion.position.y = motion.position.y + 50*-cos(angle) + 35*sin(angle);
+	motion.position.x = motion.position.x + 50 * sin(angle) + 35 * cos(angle);
+	motion.position.y = motion.position.y + 50 * -cos(angle) + 35 * sin(angle);
 	motion.angle = angle;
-	motion.scale = {30,30};
+	motion.scale = {30, 30};
 	int speed = 2000;
 	float y_speed = speed * -cos(angle);
 	float x_speed = speed * sin(angle);
-		
+
 	motion.velocity = {x_speed, y_speed};
 
 	// registry.colliders.emplace(entity);

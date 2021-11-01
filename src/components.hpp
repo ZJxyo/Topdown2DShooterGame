@@ -118,7 +118,7 @@ struct Wall
 
 struct Animate
 {
-	float counter_ms = 100;
+	float counter_ms = 0;
 };
 
 /**
@@ -156,9 +156,16 @@ enum class TEXTURE_ASSET_ID
 	PLAYER5 = 6,
 	PLAYER6 = 7,
 	PLAYER7 = 8,
-	GROUND_WOOD = 9,
-	WALL = 10,
-    BULLET = 11,
+	FEET1 = 9,
+	FEET2 = 10,
+	FEET3 = 11,
+	FEET4 = 12,
+	FEET5 = 13,
+	FEET6 = 14,
+	FEET7 = 15,
+	GROUND_WOOD = 16,
+	WALL = 17,
+	BULLET = 18,
 	TEXTURE_COUNT = BULLET + 1 //
 
 };
