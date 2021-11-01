@@ -58,9 +58,15 @@ if (IS_OS_MAC)
   link_directories(/usr/local/lib)
 endif()
 
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+add_subdirectory(ext/json/
+${CMAKE_CURRENT_BINARY_DIR}/nlohmann_json)
+
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+
 target_include_directories(${PROJECT_NAME} PUBLIC src/)
 
+target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
 # Added this so policy CMP0065 doesn't scream
 set_target_properties(${PROJECT_NAME} PROPERTIES ENABLE_EXPORTS 0)
 
@@ -75,6 +81,7 @@ if (OPENGL_FOUND)
    target_include_directories(${PROJECT_NAME} PUBLIC ${OPENGL_INCLUDE_DIR})
    target_link_libraries(${PROJECT_NAME} PUBLIC ${OPENGL_gl_LIBRARY})
 endif()
+
 
 set(glm_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ext/glm/cmake/glm) # if necessary
 find_package(glm REQUIRED)
