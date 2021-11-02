@@ -4,10 +4,12 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <math.h>
 
 #include "tiny_ecs_registry.hpp"
 #include "common.hpp"
 #include "world_system.hpp"
+#include "world_init.hpp"
 using namespace std;
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -244,9 +246,6 @@ private:
         //WorldSystem::getEntity()
         int playerX = registry.motions.get(player).position.x;
         int playerY = registry.motions.get(player).position.y;
-        int playerVelX = registry.motions.get(player).velocity.x;
-        int playerVelY = registry.motions.get(player).velocity.y;
-
         int AIX = registry.motions.get(e).position.x;
         int AIY = registry.motions.get(e).position.y;
 
@@ -260,6 +259,7 @@ private:
             ai.BFS(playerX/100, playerY/100, AIX/100, AIY/100);
         }
 
+        //        std::this_thread::sleep_for(std::chrono::milliseconds(5));
         for (auto it = begin (ai.path); it != end (ai.path); ++it) {
             if(vel.x == 0 && vel.y == 0) {
                 std::cout <<"AI is not moving" << " \n";
@@ -286,64 +286,47 @@ private:
                 vel.x = -100;
                 vel.y = 100;
             }
-//            if(AIX > it->first * 100) {
-//                vel.x = -100;
-//            } else {
-//                vel.x = 100;
-//            }
-//
-//            if (AIY > it->second*100) {
-//                vel.y = -100;
-//            } else {
-//                vel.y = +100;
-//            }
-//            vel.x = ((it->first * 100) - AIX) % 1000;
-//            vel.y = (it->second * 100 - AIY) % 1000;
         }
-//        vel.x = lastEnd.first * 100 - AIX;
-//        vel.y = lastEnd.second * 100 - AIY;
-//        std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
-
-
-
-
-        //        vel += 20;
-
-        // if distance not within 5m, return success, else return failure
-
-
-        if (distance<200) {
+        if (distance < 300) {
             return BTState::Failure;
         }
-
         return BTState::Success;
     }
 };
 
 class ShootNBullets : public BTNode {
 public:
-    ShootNBullets(Entity other) {
+    ShootNBullets(Entity other, RenderSystem *renderer) {
         player = other;
+        this->renderer = renderer;
     }
 private:
     Entity player;
+    RenderSystem *renderer;
     void init(Entity e) override {}
     BTState process(Entity e) override {
         auto& vel = registry.motions.get(e).velocity;
         //WorldSystem::getEntity()
         int playerX = registry.motions.get(player).position.x;
         int playerY = registry.motions.get(player).position.y;
-        int AIX = registry.motions.get(e).position.x;
-        int AIY = registry.motions.get(e).position.y;
+        Motion &AImotion = registry.motions.get(e);
 
-
-        //        vel += 20;
-        printf("Turn to the player and shoot 5 bullets\n");
-        for (int i = 0;i < 5;i++) {
-            printf("Bullet #%d\n", i);
-            registry.motions.get(e).angle = atan2(playerX - registry.motions.get(e).position.x, playerY - registry.motions.get(e).position.y);
+        if(AImotion.position.x <= playerX) {
+            AImotion.angle = atan2(playerY, playerX);
+        } else {
+            AImotion.angle = 3.14 - atan2(playerY, playerX);
         }
+
+        if (vel.x !=  0 || vel.y !=  0) {
+            float LO = -0.5;
+            float HI = 0.5;
+            float r3 = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
+            createBullet(renderer, AImotion.position,AImotion.angle + 1.5708 + r3);
+        } else {
+            createBullet(renderer, AImotion.position,AImotion.angle + 1.5708);
+        }
+
         return BTState::Failure; // return failure if shoot five time, success otherwirse. // naive one
     }
 };
