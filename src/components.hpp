@@ -16,7 +16,7 @@ struct Player
 
 struct Bullet
 {
-	float speed = 500.f;
+	float speed = 1000.f;
 };
 
 // Turtles and pebbles have a hard shell
