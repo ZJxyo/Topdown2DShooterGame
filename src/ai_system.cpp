@@ -59,12 +59,12 @@ void AISystem::BFS(int startRow, int startCol, int endRow, int endCol) {
         int x = cell.first;
         int y = cell.second;
         if(x == endRow && y == endCol) {
-            std::cout <<"reached the goal" << " \n";
-            std::cout << "total path length " << path.size() << " \n";
+//            std::cout <<"reached the goal" << " \n";
+//            std::cout << "total path length " << path.size() << " \n";
             for(pair<int, int> i: path) {
-                std::cout << "path x : " << i.first << " path y : " << i.second << " \n";
+//                std::cout << "path x : " << i.first << " path y : " << i.second << " \n";
             }
-            break;
+            return;
         }
 
 //        std::cout << "row : " << x << " col : " << y << " \n";
