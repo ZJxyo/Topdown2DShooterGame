@@ -30,6 +30,7 @@ bool aabb_collides(const Motion &motion1, const Motion &motion2)
 }
 
 // get the world coordiante of collider vertices
+
 std::vector<vec2> get_world_coordinates(const Entity entity) {
 	Motion& motion = registry.motions.get(entity);
 
@@ -48,7 +49,6 @@ std::vector<vec2> get_world_coordinates(const Entity entity) {
 	//printf("size world: %d\n", vertices.size());
 	return vertices;
 }
-
 
 // convex polygons collision detection
 // entity_1 can be a wall entity or a non wall entity

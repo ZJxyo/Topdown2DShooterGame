@@ -43,7 +43,7 @@ struct Collision
 {
 	// Note, the first object is stored in the ECS container.entities
 	Entity other; // the second object involved in the collision
-	Collision(Entity &other) { this->other = other; };
+	Collision(Entity other) { this->other = other; };
 };
 
 // Data structure for toggling debug mode
