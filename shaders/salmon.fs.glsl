@@ -1,26 +1,21 @@
 #version 330
 
-// From Vertex Shader
-in vec3 vcolor;
-in vec2 vpos; // Distance from local origin
+// From vertex shader
+in vec2 texcoord;
 
 // Application data
 uniform sampler2D sampler0;
 uniform vec3 fcolor;
-uniform int light_up;
+uniform int team_color;
 
 // Output color
-layout(location = 0) out vec4 color;
+layout(location = 0) out  vec4 color;
 
 void main()
 {
-	color = vec4(fcolor * vcolor, 1.0);
-
-	// Salmon mesh is contained in a 1x1 square
-	float radius = distance(vec2(0.0), vpos);
-	if (light_up == 1 && radius < 0.3)
+	color = vec4(fcolor, 1.0) * texture(sampler0, vec2(texcoord.x, texcoord.y));
+	if (team_color == 1)
 	{
-		// 0.8 is just to make it not too strong
-		color.xyz += (0.3 - radius) * 0.8 * vec3(1.0, 1.0, 0.0);
+		color.xyz = vec3(color.x * 1.0,color.y * 1.0,color.z * 1.0);
 	}
 }

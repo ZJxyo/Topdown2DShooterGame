@@ -16,10 +16,9 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 	Entity e = registry.players.entities[0];
 	vec2 pos = registry.motions.get(e).position;
-	int screen_width, screen_height;
-	screen_width = 1200;
-	screen_height = 800;
-	pos = { -pos.x + (screen_width / 2),-pos.y + (screen_height / 2)};
+
+	pos = { -pos.x + (window_width_px / 2),-pos.y + (window_height_px / 2)};
+
 	transform.translate(pos); // translate camera to player
 
 	transform.rotate(motion.angle);
@@ -48,7 +47,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	gl_has_errors();
 
 	// Input data location as in the vertex buffer
-	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED && render_request.used_texture != TEXTURE_ASSET_ID::GROUND_WOOD )
+	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
@@ -73,10 +72,15 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		GLuint texture_id =
 			texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
 
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		gl_has_errors();
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
 	}
-	else if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED){
+
+	else if (render_request.used_texture >= TEXTURE_ASSET_ID::PLAYER && render_request.used_texture <= TEXTURE_ASSET_ID::PLAYER7)
+	{
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
 		gl_has_errors();
@@ -96,43 +100,19 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glActiveTexture(GL_TEXTURE0);
 		gl_has_errors();
 
+		GLint light_up_uloc = glGetUniformLocation(program, "team_color");
+		assert(light_up_uloc >= 0);
+		glUniform1i(light_up_uloc, 1);
+
 		assert(registry.renderRequests.has(entity));
 		GLuint texture_id =
 			texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
 
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		gl_has_errors();
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
-	}
-	else if (render_request.used_effect == EFFECT_ASSET_ID::SALMON || render_request.used_effect == EFFECT_ASSET_ID::PEBBLE)
-	{
-		GLint in_position_loc = glGetAttribLocation(program, "in_position");
-		GLint in_color_loc = glGetAttribLocation(program, "in_color");
-		gl_has_errors();
-
-		glEnableVertexAttribArray(in_position_loc);
-		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
-							  sizeof(ColoredVertex), (void *)0);
-		gl_has_errors();
-
-		glEnableVertexAttribArray(in_color_loc);
-		glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
-							  sizeof(ColoredVertex), (void *)sizeof(vec3));
-		gl_has_errors();
-
-		if (render_request.used_effect == EFFECT_ASSET_ID::SALMON)
-		{
-			// Light up?
-			GLint light_up_uloc = glGetUniformLocation(program, "light_up");
-			assert(light_up_uloc >= 0);
-
-			// !!! TODO A1: set the light_up shader variable using glUniform1i,
-			// similar to the glUniform1f call below. The 1f or 1i specified the type, here a single int.
-			gl_has_errors();
-		}
-	}
-	else
-	{
-		assert(false && "Type of render request not supported");
 	}
 
 	// Getting uniform locations for glUniform* calls
@@ -156,6 +136,43 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float *)&transform.mat);
 	GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
 	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float *)&projection);
+
+	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED && render_request.used_texture == TEXTURE_ASSET_ID::GROUND_WOOD)
+	{
+		GLint tex_uloc = glGetUniformLocation(currProgram, "repeatx");
+		glUniform1i(tex_uloc, 10);
+		gl_has_errors();
+
+		GLint tex_uloc2 = glGetUniformLocation(currProgram, "repeaty");
+		glUniform1i(tex_uloc2, 10);
+		gl_has_errors();
+	}
+	else if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED && render_request.used_texture == TEXTURE_ASSET_ID::WALL)
+	{
+		GLint tex_uloc = glGetUniformLocation(currProgram, "repeatx");
+		glUniform1i(tex_uloc, motion.scale.x / 60);
+		gl_has_errors();
+
+		GLint tex_uloc2 = glGetUniformLocation(currProgram, "repeaty");
+		glUniform1i(tex_uloc2, motion.scale.y / 30);
+		gl_has_errors();
+	}
+	else
+	{
+		GLint tex_uloc = glGetUniformLocation(currProgram, "repeatx");
+		glUniform1i(tex_uloc, 1);
+		gl_has_errors();
+		GLint tex_uloc2 = glGetUniformLocation(currProgram, "repeaty");
+		glUniform1i(tex_uloc2, 1);
+		gl_has_errors();
+		if (registry.players.has(entity) && render_request.used_texture == TEXTURE_ASSET_ID::PLAYER)
+		{
+			GLint c_uloc = glGetUniformLocation(currProgram, "team_color");
+			glUniform1i(c_uloc, 1);
+			gl_has_errors();
+		}
+	}
+
 	gl_has_errors();
 	// Drawing of num_indices/3 triangles specified in the index buffer
 	glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
@@ -268,15 +285,13 @@ mat3 RenderSystem::createProjectionMatrix()
 	float left = 0.f;
 	float top = 0.f;
 
-	int w, h;
-	glfwGetFramebufferSize(window, &w, &h);
 	gl_has_errors();
-	float right = (float)w / screen_scale;
-	float bottom = (float)h / screen_scale;
+	float right = (float)window_width_px;
+	float bottom = (float)window_height_px;
 
 	float sx = 2.f / (right - left);
 	float sy = 2.f / (top - bottom);
 	float tx = -(right + left) / (right - left);
 	float ty = -(top + bottom) / (top - bottom);
-	return {{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
+	return { {sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f} };
 }

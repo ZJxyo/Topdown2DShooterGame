@@ -9,11 +9,11 @@
 class PhysicsSystem
 {
 public:
-	void step(float elapsed_ms, float window_width_px, float window_height_px);
+	void step(float elapsed_ms);
 
 	PhysicsSystem()
 	{
 	}
 
-	std::vector<std::function<void(Entity& entity_1, Entity& entity_2)>> callbacks;
+	std::vector<std::function<void(Entity entity_1, Entity entity_2)>> callbacks;
 };

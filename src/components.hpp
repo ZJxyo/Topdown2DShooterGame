@@ -7,31 +7,35 @@
 // Player component
 struct Player
 {
-	float speed = 200;
+	float speed = 500;
 	float velocity_left;
 	float velocity_right;
 	float velocity_up;
 	float velocity_down;
 };
 
+struct Bullet
+{
+	float speed = 500.f;
+};
+
 // Turtles and pebbles have a hard shell
 struct HardShell
 {
-
 };
 
 // Fish and Salmon have a soft shell
 struct SoftShell
 {
-
 };
 
 // All data relevant to the shape and motion of entities
-struct Motion {
-	vec2 position = { 0, 0 };
+struct Motion
+{
+	vec2 position = {0, 0};
 	float angle = 0;
-	vec2 velocity = { 0, 0 };
-	vec2 scale = { 10, 10 };
+	vec2 velocity = {0, 0};
+	vec2 scale = {10, 10};
 };
 
 // Stucture to store collision information
@@ -39,11 +43,12 @@ struct Collision
 {
 	// Note, the first object is stored in the ECS container.entities
 	Entity other; // the second object involved in the collision
-	Collision(Entity& other) { this->other = other; };
+	Collision(Entity other) { this->other = other; };
 };
 
 // Data structure for toggling debug mode
-struct Debug {
+struct Debug
+{
 	bool in_debug_mode = 0;
 	bool in_freeze_mode = 0;
 };
@@ -84,29 +89,42 @@ struct TexturedVertex
 // Mesh datastructure for storing vertex and index buffers
 struct Mesh
 {
-	static bool loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, vec2& out_size);
-	vec2 original_size = { 1,1 };
+	static bool loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex> &out_vertices, std::vector<uint16_t> &out_vertex_indices, vec2 &out_size);
+	vec2 original_size = {1, 1};
 	std::vector<ColoredVertex> vertices;
 	std::vector<uint16_t> vertex_indices;
 };
 
-struct Health {
+struct Health
+{
 	unsigned int health;
-	Health(unsigned int health) :health(health) {}
+	Health(unsigned int health) : health(health) {}
 };
 
 // Collider shapes for collision detection, default box collider
-struct Collider {
+struct Collider
+{
 	std::vector<vec3> vertices = {
-	{ -0.5f, -0.5f, 1.f },
-	{ 0.5f, -0.5f, 1.f },
-	{ 0.5f, 0.5f, 1.f },
-	{ -0.5f, 0.5f, 1.f }
-	};
+		{-0.5f, -0.5f, 1.f},
+		{0.5f, -0.5f, 1.f},
+		{0.5f, 0.5f, 1.f},
+		{-0.5f, 0.5f, 1.f}};
 };
 
 // indicate this is a wall type object
-struct Wall {
+struct Wall
+{
+};
+
+struct Animate
+{
+	float counter_ms = 100;
+
+};
+
+struct FireRate
+{
+	float fire_rate = 0;
 };
 
 /**
@@ -133,26 +151,43 @@ struct Wall {
  * enums there are, and as a default value to represent uninitialized fields.
  */
 
-enum class TEXTURE_ASSET_ID {
+enum class TEXTURE_ASSET_ID
+{
 	FISH = 0,
-	TURTLE = 1,
-	PLAYER = 2,
-	GROUND_WOOD = 3,
-	TEXTURE_COUNT =  GROUND_WOOD + 1 // 
+	TURTLE = FISH + 1,
+	PLAYER = TURTLE + 1,
+	PLAYER2 = PLAYER + 1,
+	PLAYER3 = PLAYER2 + 1,
+	PLAYER4 = PLAYER3 + 1,
+	PLAYER5 = PLAYER4 + 1,
+	PLAYER6 = PLAYER5 + 1,
+	PLAYER7 = PLAYER6 + 1,
+	GROUND_WOOD = PLAYER7 + 1,
+	WALL = GROUND_WOOD + 1,
+  BULLET = WALL + 1,
+  HELP0 = BULLET + 1,
+  HELP1 = HELP0 + 1,
+  HELP2 = HELP1 + 1,
+  HELP3 = HELP2 + 1,
+	TEXTURE_COUNT = HELP3 + 1 
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
-enum class EFFECT_ASSET_ID {
+enum class EFFECT_ASSET_ID
+{
 	COLOURED = 0,
 	PEBBLE = COLOURED + 1,
 	SALMON = PEBBLE + 1,
-	TEXTURED = SALMON + 1,
+	TURTLE = SALMON + 1,
+	TEXTURED = TURTLE + 1,
 	WATER = TEXTURED + 1,
-	EFFECT_COUNT = WATER + 1
+    LIGHT = WATER + 1,
+	EFFECT_COUNT = LIGHT + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
-enum class GEOMETRY_BUFFER_ID {
+enum class GEOMETRY_BUFFER_ID
+{
 	SALMON = 0,
 	SPRITE = SALMON + 1,
 	PEBBLE = SPRITE + 1,
@@ -162,9 +197,9 @@ enum class GEOMETRY_BUFFER_ID {
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 
-struct RenderRequest {
+struct RenderRequest
+{
 	TEXTURE_ASSET_ID used_texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
 	EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
 	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 };
-
