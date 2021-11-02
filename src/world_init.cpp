@@ -116,6 +116,7 @@ Entity createTurtle(RenderSystem *renderer, vec2 position)
 	// Create and (empty) Turtle component to be able to refer to all turtles
 	registry.hardShells.emplace(entity);
 	registry.animates.emplace(entity);
+	registry.healths.emplace(entity, 100);
 	registry.renderRequests.insert(
 		entity,
 		{TEXTURE_ASSET_ID::PLAYER,
@@ -263,14 +264,13 @@ Entity createBullet(RenderSystem *renderer, vec2 pos, float angle)
 	motion.position.y = motion.position.y + 50*-cos(angle) + 35*sin(angle);
 	motion.angle = angle;
 	motion.scale = {30,30};
-	int speed = 2000;
+	int speed = registry.bullets.emplace(entity).speed;
 	float y_speed = speed * -cos(angle);
 	float x_speed = speed * sin(angle);
 		
 	motion.velocity = {x_speed, y_speed};
 
-	// registry.colliders.emplace(entity);
-	// registry.walls.emplace(entity);
+	registry.colliders.emplace(entity).vertices = {{0.f, 0.f, 1.f}};
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.renderRequests.insert(
