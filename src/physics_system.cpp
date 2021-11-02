@@ -30,9 +30,10 @@ bool aabb_collides(const Motion &motion1, const Motion &motion2)
 }
 
 // get the world coordiante of collider vertices
-std::vector<vec2> get_world_coordinates(const Entity entity)
-{
-	Motion &motion = registry.motions.get(entity);
+
+std::vector<vec2> get_world_coordinates(const Entity entity) {
+	Motion& motion = registry.motions.get(entity);
+
 	Transform transform;
 	transform.translate(motion.position);
 	transform.rotate(motion.angle);
@@ -49,8 +50,11 @@ std::vector<vec2> get_world_coordinates(const Entity entity)
 	return vertices;
 }
 
-bool diagonal_collides(const Entity entity_1, const Entity entity_2)
-{
+// convex polygons collision detection
+// entity_1 can be a wall entity or a non wall entity
+// entity_2 cannot be a wall entity
+bool convex_polygons_collides(const Entity entity_1, const Entity entity_2) {
+
 	bool resolve_collision = false;
 	const Entity *e1 = &entity_1;
 	const Entity *e2 = &entity_2;
@@ -70,9 +74,6 @@ bool diagonal_collides(const Entity entity_1, const Entity entity_2)
 	// get vertex coordinates in world frame
 	std::vector<vec2> vertices_1 = get_world_coordinates(*e1);
 	std::vector<vec2> vertices_2 = get_world_coordinates(*e2);
-
-	/*printf("size1: %d   size2: %d\n", vertices_1.size(), vertices_2.size());
-	assert(false);*/
 
 	std::vector<vec2> v1 = vertices_1;
 	std::vector<vec2> v2 = vertices_2;
@@ -134,6 +135,49 @@ bool diagonal_collides(const Entity entity_1, const Entity entity_2)
 	return false;
 }
 
+bool point_convex_polygon_collides(const Entity entity_1, const Entity entity_2) {
+
+	const Entity* e1 = &entity_1;
+	const Entity* e2 = &entity_2;
+
+	// e1 should be bullet
+	if (registry.bullets.has(entity_2))
+	{
+		e1 = &entity_2;
+		e2 = &entity_1;
+	}
+
+	std::vector<vec2> v2 = get_world_coordinates(*e2);
+
+	vec2 line_1_vertex_1 = registry.motions.get(*e1).position;
+	vec2 line_1_vertex_2 = registry.motions.get(*e2).position;
+	vec2 dir_1 = line_1_vertex_2 - line_1_vertex_1;
+
+	for (int j = 0; j < v2.size(); j++)
+	{
+		vec2 line_2_vertex_1 = v2[j];
+		vec2 dir_2 = v2[(j + 1) % v2.size()] - line_2_vertex_1;
+
+		vec2 k = line_1_vertex_1 - line_2_vertex_1;
+		float det = dir_1.x * dir_2.y - dir_2.x * dir_1.y;
+
+		if (det == 0.f)
+		{
+			continue;
+		}
+
+		float t1 = (dir_2.x * k.y - dir_2.y * k.x) / det;
+		float t2 = (dir_1.x * k.y - dir_1.y * k.x) / det;
+
+		// if intersects
+		if (t1 > 0.f && t1 < 1.f && t2 > 0.f && t2 < 1.f)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 // This is a SUPER APPROXIMATE check that puts a circle around the bounding boxes and sees
 // if the center point of either object is inside the other's bounding-box-circle. You can
 // surely implement a more accurate detection
@@ -144,7 +188,10 @@ bool collides(const Entity entity_1, const Entity entity_2)
 		/*if (registry.players.has(entity_1) || registry.players.has(entity_2)) {
 			printf("Collides: %f\n", registry.motions.get(entity_1).position.x);
 		}*/
-		return diagonal_collides(entity_1, entity_2);
+		if (registry.bullets.has(entity_1) || registry.bullets.has(entity_2)) {
+			return point_convex_polygon_collides(entity_1, entity_2);
+		}
+		return convex_polygons_collides(entity_1, entity_2);
 	}
 	return false;
 }
@@ -189,9 +236,13 @@ void PhysicsSystem::step(float elapsed_ms)
 
 			Entity entity_j = collider_container.entities[j];
 
+
 			// walls shouldn't be colliding
-			if (registry.walls.has(entity_i) && registry.walls.has(entity_j))
-			{
+			if (registry.walls.has(entity_i) && registry.walls.has(entity_j)) {
+				continue;
+			}
+
+			if (registry.bullets.has(entity_i) && registry.bullets.has(entity_j)) {
 				continue;
 			}
 
@@ -238,9 +289,4 @@ void PhysicsSystem::step(float elapsed_ms)
 			}
 		}
 	}
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A3: HANDLE PEBBLE collisions HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 3
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }

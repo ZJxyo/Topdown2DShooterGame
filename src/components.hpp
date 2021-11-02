@@ -16,7 +16,7 @@ struct Player
 
 struct Bullet
 {
-	float speed = 2000;
+	float speed = 500.f;
 };
 
 // Turtles and pebbles have a hard shell
@@ -175,7 +175,8 @@ enum class EFFECT_ASSET_ID
 	TURTLE = SALMON + 1,
 	TEXTURED = TURTLE + 1,
 	WATER = TEXTURED + 1,
-	EFFECT_COUNT = WATER + 1
+    LIGHT = WATER + 1,
+	EFFECT_COUNT = LIGHT + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
