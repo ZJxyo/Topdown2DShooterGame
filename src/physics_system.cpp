@@ -30,7 +30,7 @@ bool aabb_collides(const Motion &motion1, const Motion &motion2)
 }
 
 // get the world coordiante of collider vertices
-std::vector<vec2> get_world_coordinates(const Entity &entity)
+std::vector<vec2> get_world_coordinates(const Entity entity)
 {
 	Motion &motion = registry.motions.get(entity);
 	Transform transform;
@@ -49,7 +49,7 @@ std::vector<vec2> get_world_coordinates(const Entity &entity)
 	return vertices;
 }
 
-bool diagonal_collides(const Entity &entity_1, const Entity &entity_2)
+bool diagonal_collides(const Entity entity_1, const Entity entity_2)
 {
 	bool resolve_collision = false;
 	const Entity *e1 = &entity_1;
@@ -137,7 +137,7 @@ bool diagonal_collides(const Entity &entity_1, const Entity &entity_2)
 // This is a SUPER APPROXIMATE check that puts a circle around the bounding boxes and sees
 // if the center point of either object is inside the other's bounding-box-circle. You can
 // surely implement a more accurate detection
-bool collides(const Entity &entity_1, const Entity &entity_2)
+bool collides(const Entity entity_1, const Entity entity_2)
 {
 	if (aabb_collides(registry.motions.get(entity_1), registry.motions.get(entity_2)))
 	{
@@ -187,7 +187,7 @@ void PhysicsSystem::step(float elapsed_ms)
 		{
 			assert(i != j);
 
-			Entity &entity_j = collider_container.entities[j];
+			Entity entity_j = collider_container.entities[j];
 
 			// walls shouldn't be colliding
 			if (registry.walls.has(entity_i) && registry.walls.has(entity_j))
@@ -225,25 +225,14 @@ void PhysicsSystem::step(float elapsed_ms)
 
 
 			if (registry.colliders.has(entity_i)) {
-				Transform transform;
-				transform.translate(motion_i.position);
-				transform.rotate(motion_i.angle);
-				transform.scale(motion_i.scale);
-
-				std::vector<vec3> verticies = registry.colliders.get(entity_i).vertices;
-				std::vector<vec2> transformed_verticies = {};
-
-				for (int i = 0; i < verticies.size(); i++) {
-					vec2 vector2 = vec2{ transform.mat * vec3{verticies[i].x, verticies[i].y, 1.0f} };
-					transformed_verticies.push_back(vec2{ transform.mat * vec3{verticies[i].x, verticies[i].y, 1.0f} });
-				}
+				std::vector<vec2> transformed_verticies = get_world_coordinates(entity_i);
 
 				for (int i = 0; i < transformed_verticies.size(); i++) {
 					vec2 vector1 = transformed_verticies[i];
 					vec2 vector2 = transformed_verticies[(i + 1) % transformed_verticies.size()];
-					vec2 dir = vec2{ vector2 } - vector1;
+					vec2 dir = vector2 - vector1;
 					float angle = atan2(dir.y, dir.x);
-					vec2 pos = (vec2{ vector2 } + vector1) / 2.f;
+					vec2 pos = (vector2 + vector1) / 2.f;
 					createLine(pos, angle, vec2{ glm::length(dir), 3.f });
 				}
 			}

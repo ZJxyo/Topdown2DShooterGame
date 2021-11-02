@@ -36,7 +36,7 @@ public:
 
 	// Check for collisions
 	void handle_collisions();
-	static void handle_collision(Entity &entity_1, Entity &entity_2);
+	static void handle_collision(Entity entity_1, Entity entity_2);
 
 	// Should the game be over ?
 	bool is_over() const;

@@ -513,7 +513,7 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 	
 }
 
-void WorldSystem::handle_collision(Entity &entity_1, Entity &entity_2)
+void WorldSystem::handle_collision(Entity entity_1, Entity entity_2)
 {
 	if (registry.healths.has(entity_1))
 	{
