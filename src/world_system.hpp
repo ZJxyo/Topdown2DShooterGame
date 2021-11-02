@@ -64,6 +64,7 @@ private:
 	float next_animation;
 	Entity player_salmon;
 	bool mouse_down;
+	bool tap;
 
 	// music references
 	Mix_Music *background_music;
