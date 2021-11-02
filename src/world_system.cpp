@@ -232,7 +232,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	// AIvy
 	Chase chase(player_salmon);
-    ShootNBullets shoot(player_salmon);
+    ShootNBullets shoot(player_salmon, renderer);
 	Build build(player_salmon);
 	BTIfCondition btIfCondition(&chase, &shoot, &build);
 	btIfCondition.init(entity);
