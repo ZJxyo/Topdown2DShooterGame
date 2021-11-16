@@ -40,7 +40,30 @@ bool AISystem::isValid(int row, int col) {
     return true;
 }
 
+stack<pair<int, int>>
+AISystem::findPath(int startRow, int startCol, int endRow, int endCol) {
+    if(startRow == endRow && startCol == endCol) return path;
+    int x = endRow, y = endCol;
+//    std::cout <<" hello" << endl;
+    int counter = 5;
+    while(route[x][y].first != startRow || route[x][y].second != startCol) {
+        std::cout <<" hello" << endl;
+//        std::cout <<"inside find path, push back: route x " << route[x][y].first << " rount y :"<< route[x][y].second<< " \n";
+        path.push(route[x][y]);
+        int temp = x;
+        x = route[x][y].first;
+        y = route[temp][y].second;
+//        if(--counter == 0) break;
+    }
+    return path;
+}
+
 void AISystem::BFS(int startRow, int startCol, int endRow, int endCol) {
+    path = stack<pair<int, int>>();
+    vis[ROW-1][COL-1] = {false};
+
+    std::cout << "AI x : " << startRow << " AI y : " << startCol << " \n";
+    std::cout << "player x : " << endRow << " player y : " << endCol << " \n";
     // Stores indices of the matrix cells
     queue<pair<int, int> > q;
 
@@ -58,29 +81,30 @@ void AISystem::BFS(int startRow, int startCol, int endRow, int endCol) {
         pair<int, int> cell = q.front();
         int x = cell.first;
         int y = cell.second;
+//        std::cout << "curr row : " << x << " curr col : " << y << " \n";
         if(x == endRow && y == endCol) {
-//            std::cout <<"reached the goal" << " \n";
+            std::cout <<"reached the goal" << " \n";
+            findPath(startRow, startCol, endRow, endCol);
 //            std::cout << "total path length " << path.size() << " \n";
-            for(pair<int, int> i: path) {
-//                std::cout << "path x : " << i.first << " path y : " << i.second << " \n";
-            }
+//            while(!path.empty()) {
+//                std::cout << "path x : " << path.top().first << " path y : " << path.top().second << " \n";
+//                path.pop();
+//            }
             return;
         }
 
-//        std::cout << "row : " << x << " col : " << y << " \n";
-
-        path.push_back(q.front());
+//        path.push_back(q.front());
         q.pop();
 
         // Go to the adjacent cells
         for (int i = 0; i < 4; i++) {
-
             int adjx = x + dRow[i];
             int adjy = y + dCol[i];
-
+//            std::cout <<"inside BFS route x " << route[x][y].first << " rount y :"<< route[x][y].second<< " \n";
             if (isValid(adjx, adjy)) {
                 q.push({ adjx, adjy });
                 vis[adjx][adjy] = true;
+                route[adjx][adjy] = {x,y};
             }
         }
     }
