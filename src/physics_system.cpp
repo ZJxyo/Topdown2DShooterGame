@@ -22,9 +22,8 @@ std::vector<vec2> get_vertices_location(Entity entity) {
 }
 
 // Returns x min y min x max y max in vec4
-std::vector<float> get_bounding_box(Entity entity)
+std::vector<float> get_bounding_box(std::vector<vec2>& vertices)
 {
-	std::vector<vec2> vertices = get_vertices_location(entity);
 	std::vector<float> bb = { vertices[0].x, vertices[0].y, vertices[0].x, vertices[0].y };
 
 	for (int i = 1; i < vertices.size(); i++) {
@@ -44,47 +43,29 @@ bool aabb_collides(std::vector<float> bb1, std::vector<float> bb2)
 	return bb1[0] < bb2[2] && bb1[2] > bb2[0] && bb1[1] < bb2[3] && bb1[3] > bb2[1];
 }
 
-bool point_convex_polygon_collides(const Entity entity_1, const Entity entity_2) {
+// e1 should be the point and e2 should be the convex polygon
+bool point_convex_polygon_collides(vec2 point, std::vector<vec2> vertices) {
+	vec2 dir1 = point - vertices[0];
+	vec2 dir2 = vertices[1] - vertices[0];
 
-	const Entity* e1 = &entity_1;
-	const Entity* e2 = &entity_2;
+	int index = 1;
 
-	// e1 should be bullet
-	if (registry.bullets.has(entity_2))
-	{
-		e1 = &entity_2;
-		e2 = &entity_1;
+	while (index < vertices.size()) {
+		dir2 = vertices[index] - vertices[0];
+		if (dir1.x * dir2.y - dir2.x * dir1.y > 0) {
+			break;
+		}
+		index++;
 	}
 
-	std::vector<vec2> v2 = get_vertices_location(*e2);
-
-	vec2 line_1_vertex_1 = registry.motions.get(*e1).position;
-	vec2 line_1_vertex_2 = registry.motions.get(*e2).position;
-	vec2 dir_1 = line_1_vertex_2 - line_1_vertex_1;
-
-	for (int j = 0; j < v2.size(); j++)
-	{
-		vec2 line_2_vertex_1 = v2[j];
-		vec2 dir_2 = v2[(j + 1) % v2.size()] - line_2_vertex_1;
-
-		vec2 k = line_1_vertex_1 - line_2_vertex_1;
-		float det = dir_1.x * dir_2.y - dir_2.x * dir_1.y;
-
-		if (det == 0.f)
-		{
-			continue;
-		}
-
-		float t1 = (dir_2.x * k.y - dir_2.y * k.x) / det;
-		float t2 = (dir_1.x * k.y - dir_1.y * k.x) / det;
-
-		// if intersects
-		if (t1 > 0.f && t1 < 1.f && t2 > 0.f && t2 < 1.f)
-		{
-			return false;
-		}
+	if (index == 1 || index == vertices.size()) {
+		return false;
 	}
-	return true;
+
+	dir1 = vertices[index - 1] - vertices[index];
+	dir2 = point - vertices[index];
+
+	return dir1.x * dir2.y - dir2.x * dir1.y >= 0;
 }
 
 void PhysicsSystem::step(float elapsed_ms)
@@ -98,62 +79,32 @@ void PhysicsSystem::step(float elapsed_ms)
 		Motion &motion = motion_registry.components[i];
 		Entity entity = motion_registry.entities[i];
 		float step_seconds = 1.0f * (elapsed_ms / 1000.f);
-		if (registry.players.has(entity))
-		{
-			auto &player = registry.players.get(entity);
-			motion.position.x += step_seconds * (player.velocity_left + player.velocity_right);
-			motion.position.y += step_seconds * (player.velocity_up + player.velocity_down);
-		}
-		else
-		{
-			motion.position += step_seconds * motion.velocity;
-		}
+		motion.position += step_seconds * motion.velocity;
 	}
-
-	//ComponentContainer<Collider> &collider_container = registry.colliders;
-	//for (uint i = 0; i < collider_container.size(); i++)
-	//{
-	//	Entity entity_i = collider_container.entities[i];
-	//	for (uint j = i + 1; j < collider_container.size(); j++) // i+1
-	//	{
-	//		assert(i != j);
-
-	//		Entity entity_j = collider_container.entities[j];
-
-
-	//		// walls shouldn't be colliding
-	//		if (registry.walls.has(entity_i) && registry.walls.has(entity_j)) {
-	//			continue;
-	//		}
-
-	//		if (registry.bullets.has(entity_i) && registry.bullets.has(entity_j)) {
-	//			continue;
-	//		}
-
-	//		if (collides(entity_i, entity_j))
-	//		{
-
-	//			for (auto callback : callbacks) {
-	//				callback(entity_i, entity_j);
-	//			}
-	//		}
-	//	}
-	//}
 
 	// all walls' bounding box
 	// x min y min x max y max
 	std::vector<std::vector<float>> wall_bb;
 	for (auto w : registry.walls.entities) {
-		wall_bb.push_back(get_bounding_box(w));
-		/*float* bb = get_bounding_box(w);
-		printf("x_min: %f y_min: %f x_max: %f x_max: %f\n", bb[0], bb[0], bb[2], bb[3]);*/
+		std::vector<vec2> location = get_vertices_location(w);
+		wall_bb.push_back(get_bounding_box(location));
 	}
 
 	// all bullets' bounding box
-	// in reversed order
+	std::vector<vec2> bullet_locations;
 	std::vector<std::vector<float>> bullet_bb;
 	for (Entity e : registry.bullets.entities) {
-		bullet_bb.push_back(get_bounding_box(e));
+		std::vector<vec2> location = get_vertices_location(e);
+		bullet_locations.push_back(location[0]);
+		bullet_bb.push_back(get_bounding_box(location));
+	}
+
+	std::vector<std::vector<vec2>> player_locations;
+	std::vector<std::vector<float>> player_bb;
+	for (Entity p : registry.players.entities) {
+		std::vector<vec2> location = get_vertices_location(p);
+		player_locations.push_back(location);
+		player_bb.push_back(get_bounding_box(location));
 	}
 
 	// bullets vs walls
@@ -164,9 +115,36 @@ void PhysicsSystem::step(float elapsed_ms)
 			//printf("wall   x_min: %f y_min: %f x_max: %f x_max: %f\n", bb[0], bb[1], bb[2], bb[3]);
 			if (aabb_collides(bullet_bb[i], bb)) {
 				registry.remove_all_components_of(registry.bullets.entities[i]);
+				bullet_locations[i] = bullet_locations.back();
+				bullet_locations.pop_back();
 				bullet_bb[i] = bullet_bb.back();
 				bullet_bb.pop_back();
 				break;
+			}
+		}
+	}
+
+	/*for (int i = registry.bullets.entities.size() - 1; i >= 0; i--) {
+		for (int j = registry.players.entities.size() - 1; j >= 0; j--) {
+			if (aabb_collides(bullet_bb[i], player_bb[j])) {
+				if (point_convex_polygon_collides(bullet_locations[i], player_locations[j])) {
+					for (auto callback : callbacks) {
+						callback(registry.bullets.entities[i], registry.players.entities[j]);
+					}
+					registry.remove_all_components_of(registry.bullets.entities[i]);
+					bullet_locations[i] = bullet_locations.back();
+					bullet_locations.pop_back();
+					bullet_bb[i] = bullet_bb.back();
+					bullet_bb.pop_back();
+					break;
+				}
+			}
+		}
+	}*/
+
+	for (int i = registry.players.entities.size() - 1; i >= 0; i--) {
+		for (std::vector<float> bb : wall_bb) {
+			if (aabb_collides(player_bb[i], bb)) {
 			}
 		}
 	}
@@ -181,8 +159,8 @@ void PhysicsSystem::step(float elapsed_ms)
 			Entity entity = registry.motions.entities[i];
 
 			// visualize axises
-			Entity line1 = createLine(motion.position, motion.angle, vec2{ 30.f, 3.f});
-			Entity line2 = createLine(motion.position, motion.angle, vec2{ 3.f, 30.f });
+			Entity line1 = createLine(motion.position, motion.angle, vec2{ 50.f, 3.f});
+			Entity line2 = createLine(motion.position, motion.angle, vec2{ 3.f, 50.f });
 
 
 			if (registry.colliders.has(entity)) {

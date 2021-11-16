@@ -7,11 +7,6 @@
 // Player component
 struct Player
 {
-	float speed = 500;
-	float velocity_left;
-	float velocity_right;
-	float velocity_up;
-	float velocity_down;
 };
 
 struct Bullet

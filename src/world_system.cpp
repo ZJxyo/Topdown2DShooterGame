@@ -174,7 +174,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 		if (a_entities[i] == player_salmon)
 		{
-			if (p.velocity_left != 0 || p.velocity_down != 0 || p.velocity_right != 0 || p.velocity_up != 0)
+			if (length(registry.motions.get(player_salmon).velocity) > 0)
 			{
 				a.counter_ms -= elapsed_ms_since_last_update * current_speed;
 			}
@@ -261,7 +261,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			tap = !tap;
 		
 		
-		if (player.velocity_left !=  0 || player.velocity_right !=  0 ||player.velocity_up !=  0 ||player.velocity_down !=  0 ) {
+		if (length(motion.velocity) > 0) {
 			float LO = -0.5;
 			float HI = 0.5;
 			float r3 = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
@@ -437,44 +437,50 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 	if (!registry.deathTimers.has(player_salmon))
 	{
-		auto &player = registry.players.get(player_salmon);
 		if (action == GLFW_PRESS)
 		{
-			int speed = player.speed;
-			if (key == GLFW_KEY_A)
+			if (key == GLFW_KEY_W)
 			{
-				player.velocity_left = -speed;
-			}
-			else if (key == GLFW_KEY_D)
-			{
-				player.velocity_right = speed;
-			}
-			else if (key == GLFW_KEY_W)
-			{
-				player.velocity_up = -speed;
+				input.up = 1.f;
+				update_player_velocity();
 			}
 			else if (key == GLFW_KEY_S)
 			{
-				player.velocity_down = speed;
+				input.down = 1.f;
+				update_player_velocity();
+			}
+			else if (key == GLFW_KEY_A)
+			{
+				input.left = 1.f;
+				update_player_velocity();
+			}
+			else if (key == GLFW_KEY_D)
+			{
+				input.right = 1.f;
+				update_player_velocity();
 			}
 		}
 		if (action == GLFW_RELEASE)
 		{
 			if (key == GLFW_KEY_W)
 			{
-				player.velocity_up = 0;
+				input.up = 0;
+				update_player_velocity();
 			}
 			else if (key == GLFW_KEY_S)
 			{
-				player.velocity_down = 0;
-			}
-			else if (key == GLFW_KEY_D)
-			{
-				player.velocity_right = 0;
+				input.down = 0;
+				update_player_velocity();
 			}
 			else if (key == GLFW_KEY_A)
 			{
-				player.velocity_left = 0;
+				input.left = 0;
+				update_player_velocity();
+			}
+			else if (key == GLFW_KEY_D)
+			{
+				input.right = 0;
+				update_player_velocity();
 			}
 		}
 	}
@@ -528,4 +534,8 @@ void WorldSystem::handle_collision(Entity entity_1, Entity entity_2) {
 		registry.healths.get(entity_2).health -= 10;
 		printf("HP - 10\n");
 	}
+}
+
+void WorldSystem::update_player_velocity() {
+	registry.motions.get(player_salmon).velocity = player_speed * vec2(input.right - input.left, input.down - input.up);
 }
