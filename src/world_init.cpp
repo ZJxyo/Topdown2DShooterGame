@@ -192,7 +192,7 @@ struct wall
 	vec2 scale;
 };
 
-void createMatrix() {// matrix 2d array 
+MyArray createMatrix() {// matrix 2d array
 	
 	MyArray T;
 	Fill(T);
@@ -225,12 +225,10 @@ void createMatrix() {// matrix 2d array
 		// 	T[value_y + i][value_x] = 1;
 		// 	T[value_y - i][value_x] = 1;
 		// }
-
-
-		
 	}
 
-	Print(T);
+//	Print(T);
+    return T;
 }
 
 int SetupMap(RenderSystem *renderer)

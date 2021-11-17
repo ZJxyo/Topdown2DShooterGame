@@ -3,8 +3,9 @@
 #include "common.hpp"
 #include "tiny_ecs.hpp"
 #include "render_system.hpp"
-
-using MyArray = std::array<std::array<int, 50>, 50>;
+#define ROW 50
+#define COL 50
+using MyArray = std::array<std::array<int, ROW>, COL>;
 
 // These are ahrd coded to the dimensions of the entity texture
 const float FISH_BB_WIDTH = 0.4f * 296.f;
@@ -23,7 +24,7 @@ Entity createTurtle(RenderSystem *renderer, vec2 position);
 Entity createLine(vec2 position, float angle, vec2 size);
 // a pebble
 Entity createPebble(vec2 pos, vec2 size);
-void createMatrix();
+MyArray createMatrix();
 int createGround(RenderSystem *renderer);
 int SetupMap(RenderSystem *renderer);
 
