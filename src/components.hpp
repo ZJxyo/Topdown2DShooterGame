@@ -121,7 +121,6 @@ struct Wall
 struct Animate
 {
 	float counter_ms = 100;
-
 };
 
 struct FireRate
@@ -164,14 +163,21 @@ enum class TEXTURE_ASSET_ID
 	PLAYER5 = PLAYER4 + 1,
 	PLAYER6 = PLAYER5 + 1,
 	PLAYER7 = PLAYER6 + 1,
-	GROUND_WOOD = PLAYER7 + 1,
+	FEET1 = PLAYER7 + 1,
+	FEET2 = FEET1 + 1,
+	FEET3 = FEET2 + 1,
+	FEET4 = FEET3 + 1,
+	FEET5 = FEET4 + 1,
+	FEET6 = FEET5 + 1,
+	FEET7 = FEET6 + 1,
+	GROUND_WOOD = FEET7 + 1,
 	WALL = GROUND_WOOD + 1,
-  BULLET = WALL + 1,
-  HELP0 = BULLET + 1,
-  HELP1 = HELP0 + 1,
-  HELP2 = HELP1 + 1,
-  HELP3 = HELP2 + 1,
-	TEXTURE_COUNT = HELP3 + 1 
+	BULLET = WALL + 1,
+	HELP0 = BULLET + 1,
+	HELP1 = HELP0 + 1,
+	HELP2 = HELP1 + 1,
+	HELP3 = HELP2 + 1,
+	TEXTURE_COUNT = HELP3 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -183,7 +189,7 @@ enum class EFFECT_ASSET_ID
 	TURTLE = SALMON + 1,
 	TEXTURED = TURTLE + 1,
 	WATER = TEXTURED + 1,
-    LIGHT = WATER + 1,
+	LIGHT = WATER + 1,
 	EFFECT_COUNT = LIGHT + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
