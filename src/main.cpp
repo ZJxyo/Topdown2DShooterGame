@@ -10,8 +10,10 @@
 #include "physics_system.hpp"
 #include "render_system.hpp"
 #include "world_system.hpp"
+#include "HelpMenu.h"
 
 using Clock = std::chrono::high_resolution_clock;
+
 
 // Entry point
 int main()
@@ -21,9 +23,12 @@ int main()
 	RenderSystem renderer;
 	PhysicsSystem physics;
 	AISystem ai;
+    HelpMenu helpMenu;
+
 
 	// Initializing window
 	GLFWwindow* window = world.create_window();
+
 	if (!window) {
 		// Time to read the error message
 		printf("Press any key to exit");
@@ -35,7 +40,7 @@ int main()
 	renderer.init(window_width_px, window_height_px, window);
 	world.init(&renderer);
 
-	physics.callbacks.push_back(WorldSystem::handle_collision);
+	physics.callbacks.emplace_back(WorldSystem::handle_collision);
 
 	// variable timestep loop
 	auto t = Clock::now();
@@ -50,12 +55,29 @@ int main()
 			(float)(std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count() / 1000;
 		t = now;
 
-		world.step(elapsed_ms);
-		ai.step(elapsed_ms);
-		physics.step(elapsed_ms);
-		//world.handle_collisions();
+        renderer.draw();
+        // menu intro loop
+        if(helpMenu.showInto) {
+            helpMenu.createInto(&renderer, window, { 1000,1000 });
+//            ai.BFS(0,0, 40,35);
+            helpMenu.showInto = false;
+        }
 
-		renderer.draw();
+        // show menu page loop
+        if(helpMenu.showMenu && !helpMenu.showInto) {
+            helpMenu.createMenu(&renderer, window, { 1000,1000 });
+            if(!helpMenu.showMenu) {
+                world.init(&renderer);
+            }
+        }
+        // game loop
+        else {
+            world.step(elapsed_ms);
+            ai.step(elapsed_ms);
+            physics.step(elapsed_ms);
+            //world.handle_collisions();
+        }
+
 
 		// TODO A2: you can implement the debug freeze here but other places are possible too.
 	}

@@ -16,7 +16,7 @@ struct Player
 
 struct Bullet
 {
-	float speed = 2000;
+	float speed = 500.f;
 };
 
 // Turtles and pebbles have a hard shell
@@ -43,7 +43,7 @@ struct Collision
 {
 	// Note, the first object is stored in the ECS container.entities
 	Entity other; // the second object involved in the collision
-	Collision(Entity &other) { this->other = other; };
+	Collision(Entity other) { this->other = other; };
 };
 
 // Data structure for toggling debug mode
@@ -118,7 +118,12 @@ struct Wall
 
 struct Animate
 {
-	float counter_ms = 0;
+	float counter_ms = 100;
+};
+
+struct FireRate
+{
+	float fire_rate = 0;
 };
 
 /**
@@ -148,26 +153,29 @@ struct Animate
 enum class TEXTURE_ASSET_ID
 {
 	FISH = 0,
-	TURTLE = 1,
-	PLAYER = 2,
-	PLAYER2 = 3,
-	PLAYER3 = 4,
-	PLAYER4 = 5,
-	PLAYER5 = 6,
-	PLAYER6 = 7,
-	PLAYER7 = 8,
-	FEET1 = 9,
-	FEET2 = 10,
-	FEET3 = 11,
-	FEET4 = 12,
-	FEET5 = 13,
-	FEET6 = 14,
-	FEET7 = 15,
-	GROUND_WOOD = 16,
-	WALL = 17,
-	BULLET = 18,
-	TEXTURE_COUNT = BULLET + 1 //
-
+	TURTLE = FISH + 1,
+	PLAYER = TURTLE + 1,
+	PLAYER2 = PLAYER + 1,
+	PLAYER3 = PLAYER2 + 1,
+	PLAYER4 = PLAYER3 + 1,
+	PLAYER5 = PLAYER4 + 1,
+	PLAYER6 = PLAYER5 + 1,
+	PLAYER7 = PLAYER6 + 1,
+	FEET1 = PLAYER7 + 1,
+	FEET2 = FEET1 + 1,
+	FEET3 = FEET2 + 1,
+	FEET4 = FEET3 + 1,
+	FEET5 = FEET4 + 1,
+	FEET6 = FEET5 + 1,
+	FEET7 = FEET6 + 1,
+	GROUND_WOOD = FEET7 + 1,
+	WALL = GROUND_WOOD + 1,
+	BULLET = WALL + 1,
+	HELP0 = BULLET + 1,
+	HELP1 = HELP0 + 1,
+	HELP2 = HELP1 + 1,
+	HELP3 = HELP2 + 1,
+	TEXTURE_COUNT = HELP3 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -179,7 +187,8 @@ enum class EFFECT_ASSET_ID
 	TURTLE = SALMON + 1,
 	TEXTURED = TURTLE + 1,
 	WATER = TEXTURED + 1,
-	EFFECT_COUNT = WATER + 1
+	LIGHT = WATER + 1,
+	EFFECT_COUNT = LIGHT + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 

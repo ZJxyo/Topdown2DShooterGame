@@ -30,6 +30,7 @@ public:
 	ComponentContainer<Wall> walls;
 	ComponentContainer<Bullet> bullets;
 	ComponentContainer<Animate> animates;
+	ComponentContainer<FireRate> fireRates;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -54,6 +55,7 @@ public:
 		registry_list.push_back(&walls);
 		registry_list.push_back(&bullets);
 		registry_list.push_back(&animates);
+		registry_list.push_back(&fireRates);
 	}
 
 	void clear_all_components()

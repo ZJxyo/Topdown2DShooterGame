@@ -10,6 +10,7 @@
 
 // AI111
 #include "ai_system.hpp"
+#include "HelpMenu.h"
 
 // Game configuration
 const size_t MAX_TURTLES = 0;
@@ -17,10 +18,11 @@ const size_t MAX_FISH = 5;
 const size_t TURTLE_DELAY_MS = 2000 * 3;
 const size_t FISH_DELAY_MS = 5000 * 3;
 const size_t ANIMATION_DELAY_MS = 100;
+const size_t BULLET_TIMER_MS = 100;
 
 // Create the fish world
 WorldSystem::WorldSystem()
-	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f)
+	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f), tap(false)
 {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
@@ -252,7 +254,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	// AIvy
 	Chase chase(player_salmon);
-	Shoot shoot(player_salmon);
+	ShootNBullets shoot(player_salmon, renderer);
 	Build build(player_salmon);
 	BTIfCondition btIfCondition(&chase, &shoot, &build);
 	btIfCondition.init(entity);
@@ -266,22 +268,33 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	}
 
 	// process shooting bullets for player
-	if (mouse_down)
+
+	FireRate &fireRate = registry.fireRates.get(player_salmon);
+	fireRate.fire_rate -= elapsed_ms_since_last_update * current_speed;
+
+	if (fireRate.fire_rate < 0)
 	{
-		Player &player = registry.players.get(player_salmon);
-		Motion &motion = registry.motions.get(player_salmon);
-
-		if (player.velocity_left != 0 || player.velocity_right != 0 || player.velocity_up != 0 || player.velocity_down != 0)
+		fireRate.fire_rate = BULLET_TIMER_MS;
+		if (mouse_down || tap)
 		{
-			float LO = -0.5;
-			float HI = 0.5;
-			float r3 = LO + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (HI - LO)));
-			createBullet(renderer, motion.position, motion.angle + 1.5708 + r3);
-		}
+			Player &player = registry.players.get(player_salmon);
+			Motion &motion = registry.motions.get(player_salmon);
+			if (tap)
+				tap = !tap;
 
-		else
-		{
-			createBullet(renderer, motion.position, motion.angle + 1.5708);
+			if (player.velocity_left != 0 || player.velocity_right != 0 || player.velocity_up != 0 || player.velocity_down != 0)
+			{
+				float LO = -0.5;
+				float HI = 0.5;
+				float r3 = LO + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (HI - LO)));
+
+				createBullet(renderer, motion.position, motion.angle + 1.5708 + r3);
+			}
+
+			else
+			{
+				createBullet(renderer, motion.position, motion.angle + 1.5708);
+			}
 		}
 	}
 
@@ -505,19 +518,21 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 {
 
 	Motion &motion = registry.motions.get(player_salmon);
+
 	int w, h;
 	glfwGetWindowSize(window, &w, &h);
 
 	float angle = atan2(mouse_position.y - h / 2.f, mouse_position.x - w / 2.f);
+
 	motion.angle = angle;
 }
 
 void WorldSystem::on_mouse_click(int button, int action, int mods)
 {
-
 	if (action == GLFW_PRESS)
 	{
 		mouse_down = true;
+		tap = true;
 	}
 	else if (action == GLFW_RELEASE)
 	{
@@ -525,16 +540,16 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 	}
 }
 
-void WorldSystem::handle_collision(Entity &entity_1, Entity &entity_2)
+void WorldSystem::handle_collision(Entity entity_1, Entity entity_2)
 {
-	if (registry.healths.has(entity_1))
+	if (registry.healths.has(entity_1) && registry.bullets.has(entity_2))
 	{
 		registry.healths.get(entity_1).health -= 10;
-		//printf("HP - 10\n");
+		printf("HP - 10\n");
 	}
-	else if (registry.healths.has(entity_2))
+	else if (registry.healths.has(entity_2) && registry.bullets.has(entity_1))
 	{
 		registry.healths.get(entity_2).health -= 10;
-		//printf("HP - 10\n");
+		printf("HP - 10\n");
 	}
 }

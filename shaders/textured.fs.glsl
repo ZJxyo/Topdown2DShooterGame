@@ -17,5 +17,6 @@ void main()
 	if (team_color == 1)
 	{
 		color.xyz = vec3(color.x * 1.0,color.y * 1.0,color.z * 1.0);
+//		color.xyz = texture(sampler0, vec2(texcoord.x, texcoord.y)).rgb * 3;
 	}
 }

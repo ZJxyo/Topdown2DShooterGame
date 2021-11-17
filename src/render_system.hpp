@@ -49,7 +49,11 @@ class RenderSystem
 		textures_path("survivor-run_18.png"),
 		textures_path("floor_tile_81.png"),
 		textures_path("wall.png"),
-		textures_path("bullet.png")};
+		textures_path("bullet.png"),
+    textures_path("help0.png"),
+    textures_path("help1.png"),
+    textures_path("help2.png"),
+    textures_path("help3.png")};
 
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -59,7 +63,8 @@ class RenderSystem
 		shader_path("salmon"),
 		shader_path("turtle"),
 		shader_path("textured"),
-		shader_path("water")};
+		shader_path("water"),
+        shader_path("light")};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
 	std::array<GLuint, geometry_count> index_buffers;
