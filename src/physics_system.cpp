@@ -120,9 +120,17 @@ void PhysicsSystem::step(float elapsed_ms)
 	// bullets vs walls
 	// in reversed order
 	for (int i = registry.bullets.entities.size() - 1; i >= 0; i--) {
+		// bullet vs boundry
+		if (bullet_bb[i][0] < 0 || bullet_bb[i][1] < 0 || bullet_bb[i][2] > 5000 || bullet_bb[i][3] > 5000) {
+			registry.remove_all_components_of(registry.bullets.entities[i]);
+			bullet_vertices[i] = bullet_vertices.back();
+			bullet_vertices.pop_back();
+			bullet_bb[i] = bullet_bb.back();
+			bullet_bb.pop_back();
+			break;
+		}
+
 		for (std::vector<float> bb : wall_bb) {
-			//printf("bullet   x_min: %f y_min: %f x_max: %f x_max: %f\n", bullet_bb[i][0], bullet_bb[i][1], bullet_bb[i][2], bullet_bb[i][3]);
-			//printf("wall   x_min: %f y_min: %f x_max: %f x_max: %f\n", bb[0], bb[1], bb[2], bb[3]);
 			if (aabb_collides(bullet_bb[i], bb)) {
 				registry.remove_all_components_of(registry.bullets.entities[i]);
 				bullet_vertices[i] = bullet_vertices.back();
@@ -134,6 +142,7 @@ void PhysicsSystem::step(float elapsed_ms)
 		}
 	}
 
+	// bullet vs player/enemies
 	for (int i = registry.bullets.entities.size() - 1; i >= 0; i--) {
 		for (int j = registry.circleColliders.entities.size() - 1; j >= 0; j--) {
 			Entity p = registry.circleColliders.entities[j];
@@ -151,26 +160,59 @@ void PhysicsSystem::step(float elapsed_ms)
 		}
 	}
 
+	// player/enemies vs walls
 	for (int i = registry.circleColliders.entities.size() - 1; i >= 0; i--) {
 		Entity p = registry.circleColliders.entities[i];
 		Motion& p_motion = registry.motions.get(p);
 		vec2& pos = p_motion.position;
-		vec2& vel = p_motion.velocity;
+		vec2 offset = p_motion.velocity * elapsed_ms / 1000.f;
 		float radius = registry.circleColliders.components[i].radius;
+		bool restore_x = false;
+		bool restore_y = false;
+		std::vector<float> bb = { pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius };
 		for (int j = registry.walls.entities.size() - 1; j >= 0; j--) {
-			std::vector<float> bb = { pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius };
-			if (aabb_collides(bb, wall_bb[j])) {
-				float time = elapsed_ms / 1000.f;
-				if (!aabb_collides({ bb[0] - vel.x * time, bb[1], bb[2] - vel.x * time, bb[3] }, wall_bb[j])) {
-					pos.x -= vel.x * time;
-				}
-				else if (!aabb_collides({ bb[0], bb[1] - vel.y * time, bb[2], bb[3] - vel.y * time }, wall_bb[j])) {
-					pos.y -= vel.y * time;
-				}
-				else {
-					pos -= vel * time;
-				}
+			if (restore_x == true && restore_y == true) {
 			}
+			if (aabb_collides(bb, wall_bb[j])) {
+				if (restore_x == false) {
+					std::vector<float> bb_x = { bb[0] - offset.x, bb[1], bb[2] - offset.x, bb[3] };
+					if (!aabb_collides(bb_x, wall_bb[j])) {
+						pos.x -= offset.x;
+						bb = bb_x;
+						restore_x = true;
+						continue;
+					}
+				}
+
+				if (restore_y == false) {
+					std::vector<float> bb_y = { bb[0], bb[1] - offset.y, bb[2], bb[3] - offset.y };
+					if (!aabb_collides(bb_y, wall_bb[j])) {
+						pos.y -= offset.y;
+						bb = bb_y;
+						restore_y = true;
+						continue;
+					}
+				}
+
+				pos -= offset;
+				break;
+			}
+		}
+		// player/enemies vs boundries
+		if (bb[0] < 0) {
+			pos.x -= bb[0];
+		}
+
+		if (bb[1] < 0) {
+			pos.y -= bb[1];
+		}
+
+		if (bb[2] > 5000) {
+			pos.x -= (bb[2] - 5000);
+		}
+
+		if (bb[3] > 5000) {
+			pos.y -= (bb[3] - 5000);
 		}
 	}
 
@@ -186,7 +228,6 @@ void PhysicsSystem::step(float elapsed_ms)
 			// visualize axises
 			Entity line1 = createLine(motion.position, motion.angle, vec2{ 50.f, 3.f});
 			Entity line2 = createLine(motion.position, motion.angle, vec2{ 3.f, 50.f });
-
 
 			if (registry.polygonColliders.has(entity)) {
 				std::vector<vec2> vertices = get_vertices_world_coordinate(entity);
