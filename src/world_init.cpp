@@ -29,7 +29,7 @@ Entity createSalmon(RenderSystem *renderer, vec2 pos)
 	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.players.emplace(entity);
 	registry.healths.emplace(entity, 100);
-	registry.colliders.emplace(entity);
+	registry.circleColliders.emplace(entity, 50);
 	registry.animates.emplace(entity);
 	registry.fireRates.emplace(entity);
 	registry.renderRequests.insert(
@@ -61,7 +61,7 @@ Entity createWall(RenderSystem *renderer, vec2 pos, float angle, vec2 scale)
 	motion.angle = angle;
 	motion.scale = scale;
 
-	registry.colliders.emplace(entity);
+	registry.polygonColliders.emplace(entity);
 	registry.walls.emplace(entity);
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
@@ -110,7 +110,7 @@ Entity createTurtle(RenderSystem *renderer, vec2 position)
 	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
 	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
-	registry.colliders.emplace(entity);
+	registry.circleColliders.emplace(entity, 50);
 
 	// Initialize the motion
 	auto &motion = registry.motions.emplace(entity);
@@ -122,7 +122,7 @@ Entity createTurtle(RenderSystem *renderer, vec2 position)
 	motion.scale = vec2({120, 120});
 
 	// Create and (empty) Turtle component to be able to refer to all turtles
-	registry.hardShells.emplace(entity);
+	registry.enemies.emplace(entity);
 	registry.animates.emplace(entity);
 	registry.healths.emplace(entity, 100);
 	registry.renderRequests.insert(
@@ -261,7 +261,7 @@ int SetupMap(RenderSystem *renderer)
 		motion.angle = w["angle"];
 		motion.scale = vec2(w["scale"]["x"], w["scale"]["y"]);
 
-		registry.colliders.emplace(entity);
+		registry.polygonColliders.emplace(entity);
 		registry.walls.emplace(entity);
 
 		
@@ -357,7 +357,7 @@ Entity createBullet(RenderSystem *renderer, vec2 pos, float angle)
 
 	motion.velocity = {x_speed, y_speed};
 
-	registry.colliders.emplace(entity).vertices = {{0.f, 0.f, 1.f}};
+	registry.pointColliders.emplace(entity);
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.renderRequests.insert(

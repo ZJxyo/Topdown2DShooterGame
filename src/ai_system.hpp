@@ -5,6 +5,8 @@
 #include <chrono>
 #include <thread>
 #include <math.h>
+#include <stack>
+
 
 #include "tiny_ecs_registry.hpp"
 #include "common.hpp"
