@@ -5,7 +5,7 @@
 #include "tiny_ecs_registry.hpp"
 
 void RenderSystem::drawTexturedMesh(Entity entity,
-									const mat3 &projection, RenderRequest &render_request)
+									const mat3 &projection, RenderRequest &render_request, vec2 scaling = {1, 1})
 {
 	Motion &motion = registry.motions.get(entity);
 	// Transformation code, see Rendering and Transformation in the template
@@ -23,6 +23,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 	transform.rotate(motion.angle);
 	transform.scale(motion.scale);
+	transform.scale(scaling);
 	// !!! TODO A1: add rotation to the chain of transformations, mind the order
 	// of transformations
 
@@ -65,9 +66,8 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glActiveTexture(GL_TEXTURE0);
 		gl_has_errors();
 
-		assert(registry.renderRequests.has(entity));
 		GLuint texture_id =
-			texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
+			texture_gl_handles[(GLuint)render_request.used_texture];
 
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -98,7 +98,15 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 		GLint light_up_uloc = glGetUniformLocation(program, "team_color");
 		assert(light_up_uloc >= 0);
-		glUniform1i(light_up_uloc, 1);
+		// lightup red for enemy
+		if (registry.hardShells.has(entity))
+		{
+			glUniform1i(light_up_uloc, 1);
+		}
+		else
+		{
+			glUniform1i(light_up_uloc, 0);
+		}
 
 		assert(registry.renderRequests.has(entity));
 		GLuint texture_id =
@@ -259,23 +267,28 @@ void RenderSystem::draw()
 	mat3 projection_2D = createProjectionMatrix();
 	// Draw all textured meshes that have a position and size component
 
+	for (Entity entity : registry.floorRenderRequests.entities)
+	{
+		if (!registry.motions.has(entity))
+			continue;
+
+		RenderRequest &render_request = registry.floorRenderRequests.get(entity);
+		drawTexturedMesh(entity, projection_2D, render_request);
+	}
+
 	for (Entity entity : registry.renderRequests2.entities)
 	{
 		if (!registry.motions.has(entity))
 			continue;
-		// Note, its not very efficient to access elements indirectly via the entity
-		// albeit iterating through all Sprites in sequence. A good point to optimize
 		RenderRequest &render_request2 = registry.renderRequests2.get(entity);
 
-		drawTexturedMesh(entity, projection_2D, render_request2);
+		drawTexturedMesh(entity, projection_2D, render_request2, {0.7, 0.7});
 	}
 
 	for (Entity entity : registry.renderRequests.entities)
 	{
 		if (!registry.motions.has(entity))
 			continue;
-		// Note, its not very efficient to access elements indirectly via the entity
-		// albeit iterating through all Sprites in sequence. A good point to optimize
 
 		RenderRequest &render_request = registry.renderRequests.get(entity);
 		drawTexturedMesh(entity, projection_2D, render_request);

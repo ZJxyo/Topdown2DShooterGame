@@ -95,7 +95,7 @@ public:
 
 private:
 	// Internal drawing functions for each entity type
-	void drawTexturedMesh(Entity entity, const mat3 &projection, RenderRequest &render_request);
+	void drawTexturedMesh(Entity entity, const mat3 &projection, RenderRequest &render_request, vec2 scaling);
 	void drawToScreen();
 
 	// Window handle

@@ -249,7 +249,7 @@ int createGround(RenderSystem *renderer)
 
 			// Create and (empty) Salmon component to be able to refer to all turtles
 
-			registry.renderRequests.insert(
+			registry.floorRenderRequests.insert(
 				entity,
 				{TEXTURE_ASSET_ID::GROUND_WOOD,
 				 EFFECT_ASSET_ID::TEXTURED,

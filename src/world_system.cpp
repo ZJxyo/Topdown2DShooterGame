@@ -199,13 +199,18 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			if (registry.renderRequests2.has(a_entities[i]))
 			{
 				RenderRequest &r2 = registry.renderRequests2.get(a_entities[i]);
+				ECSRegistry ecsR = registry;
+				ecsR.renderRequests2.has(entity);
+				ECSRegistry ecsR2 = registry;
+				ECSRegistry ecsR3 = registry;
+				ecsR2;
 				if (r2.used_texture == TEXTURE_ASSET_ID::FEET7)
 				{
 					r2.used_texture = TEXTURE_ASSET_ID::FEET1;
 				}
 				else
 				{
-					r2.used_texture = TEXTURE_ASSET_ID((int)r.used_texture + 1);
+					r2.used_texture = TEXTURE_ASSET_ID((int)r2.used_texture + 1);
 				}
 			}
 		}

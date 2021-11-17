@@ -17,6 +17,7 @@ public:
 	ComponentContainer<Collision> collisions;
 	ComponentContainer<Player> players;
 	ComponentContainer<Mesh *> meshPtrs;
+	ComponentContainer<RenderRequest> floorRenderRequests;
 	ComponentContainer<RenderRequest> renderRequests;
 	ComponentContainer<RenderRequest> renderRequests2;
 	ComponentContainer<ScreenState> screenStates;
@@ -30,7 +31,6 @@ public:
 	ComponentContainer<Bullet> bullets;
 	ComponentContainer<Animate> animates;
 
-
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
@@ -43,6 +43,7 @@ public:
 		registry_list.push_back(&meshPtrs);
 		registry_list.push_back(&renderRequests);
 		registry_list.push_back(&renderRequests2);
+		registry_list.push_back(&floorRenderRequests);
 		registry_list.push_back(&screenStates);
 		registry_list.push_back(&softShells);
 		registry_list.push_back(&hardShells);
@@ -53,7 +54,6 @@ public:
 		registry_list.push_back(&walls);
 		registry_list.push_back(&bullets);
 		registry_list.push_back(&animates);
-
 	}
 
 	void clear_all_components()
