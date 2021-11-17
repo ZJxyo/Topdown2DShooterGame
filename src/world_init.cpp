@@ -289,7 +289,7 @@ Entity createBullet(RenderSystem *renderer, vec2 pos, float angle)
 	registry.bulletsRenderRequests.insert(
 		entity,
 		{TEXTURE_ASSET_ID::BULLET, // TEXTURE_COUNT indicates that no txture is needed
-		 EFFECT_ASSET_ID::TEXTURED,
+		 EFFECT_ASSET_ID::INSTANCES,
 		 GEOMETRY_BUFFER_ID::SPRITE});
 
 	return entity;

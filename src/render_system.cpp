@@ -368,6 +368,7 @@ void RenderSystem::draw()
 		RenderRequest &render_request = registry.renderRequests.get(entity);
 		drawTexturedMesh(entity, projection_2D, render_request);
 	}
+
 	if (registry.bulletsRenderRequests.entities.size() > 0) {
 		drawTexturedInstances(registry.bulletsRenderRequests.entities, projection_2D, registry.bulletsRenderRequests.components[0]);
 	}
