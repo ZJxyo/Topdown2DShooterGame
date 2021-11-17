@@ -99,7 +99,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		GLint light_up_uloc = glGetUniformLocation(program, "team_color");
 		assert(light_up_uloc >= 0);
 		// lightup red for enemy
-		if (registry.hardShells.has(entity))
+		if (registry.enemies.has(entity))
 		{
 			glUniform1i(light_up_uloc, 1);
 		}

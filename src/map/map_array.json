@@ -1,0 +1,15 @@
+{
+  "map": {
+    "grid_size": 100,
+    "map_size_x": 50,
+    "map_size_y": 50,
+    "walls": [
+      {
+        "x": 4,
+        "y": 5,
+        "width": 3,
+        "height": 4
+      }
+    ]
+  }
+}

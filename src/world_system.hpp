@@ -38,6 +38,8 @@ public:
 	void handle_collisions();
 	static void handle_collision(Entity entity_1, Entity entity_2);
 
+	void update_player_velocity();
+
 	// Should the game be over ?
 	bool is_over() const;
 
@@ -59,6 +61,7 @@ private:
 	// Game state
 	RenderSystem *renderer;
 	float current_speed;
+	float player_speed = 500;
 	float next_turtle_spawn;
 	float next_fish_spawn;
 	float next_animation;
@@ -74,4 +77,13 @@ private:
 	// C++ random number generator
 	std::default_random_engine rng;
 	std::uniform_real_distribution<float> uniform_dist; // number between 0..1
+
+	struct Input {
+		float up = 0;
+		float down = 0;
+		float left = 0;
+		float right = 0;
+	};
+
+	Input input;
 };

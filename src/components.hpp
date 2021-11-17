@@ -7,11 +7,6 @@
 // Player component
 struct Player
 {
-	float speed = 500;
-	float velocity_left;
-	float velocity_right;
-	float velocity_up;
-	float velocity_down;
 };
 
 struct Bullet
@@ -20,7 +15,7 @@ struct Bullet
 };
 
 // Turtles and pebbles have a hard shell
-struct HardShell
+struct Enemy
 {
 };
 
@@ -102,7 +97,7 @@ struct Health
 };
 
 // Collider shapes for collision detection, default box collider
-struct Collider
+struct PolygonCollider
 {
 	std::vector<vec3> vertices = {
 		{-0.5f, -0.5f, 1.f},
@@ -110,6 +105,13 @@ struct Collider
 		{0.5f, 0.5f, 1.f},
 		{-0.5f, 0.5f, 1.f}};
 };
+
+struct CircleCollider {
+	float radius;
+	CircleCollider(float radius) : radius(radius) {}
+};
+
+struct PointCollider {};
 
 // indicate this is a wall type object
 struct Wall
