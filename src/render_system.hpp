@@ -40,6 +40,13 @@ class RenderSystem
 		textures_path("survivor-move_rifle_12.png"),
 		textures_path("survivor-move_rifle_15.png"),
 		textures_path("survivor-move_rifle_18.png"),
+		textures_path("survivor-run_0.png"),
+		textures_path("survivor-run_3.png"),
+		textures_path("survivor-run_6.png"),
+		textures_path("survivor-run_9.png"),
+		textures_path("survivor-run_12.png"),
+		textures_path("survivor-run_15.png"),
+		textures_path("survivor-run_18.png"),
 		textures_path("floor_tile_81.png"),
 		textures_path("wall.png"),
 		textures_path("bullet.png"),
@@ -93,7 +100,7 @@ public:
 
 private:
 	// Internal drawing functions for each entity type
-	void drawTexturedMesh(Entity entity, const mat3 &projection);
+	void drawTexturedMesh(Entity entity, const mat3 &projection, RenderRequest &render_request, vec2 scaling);
 	void drawToScreen();
 
 	// Window handle
