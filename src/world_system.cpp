@@ -185,7 +185,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		if (a.counter_ms < 0)
 		{
 			a.counter_ms = ANIMATION_DELAY_MS;
-			if (registry.players.has(a_entities[i]) || registry.hardShells.has(a_entities[i]))
+			if (registry.players.has(a_entities[i]) || registry.enemies.has(a_entities[i]))
 			{
 				if (r.used_texture == TEXTURE_ASSET_ID::PLAYER7)
 				{
@@ -252,22 +252,23 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	{
 		fireRate.fire_rate = BULLET_TIMER_MS;
 		if (mouse_down || tap) {
-		Player &player = registry.players.get(player_salmon);
-		Motion &motion = registry.motions.get(player_salmon);
-		if (tap)
-			tap = !tap;
-		
-		
-		if (length(motion.velocity) > 0) {
-			float LO = -0.5;
-			float HI = 0.5;
-			float r3 = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
-			
-			createBullet(renderer, motion.position,motion.angle + 1.5708 + r3);
-		} 
-		
-		else {
-			createBullet(renderer, motion.position,motion.angle + 1.5708);
+			Player& player = registry.players.get(player_salmon);
+			Motion& motion = registry.motions.get(player_salmon);
+			if (tap)
+				tap = !tap;
+
+
+			if (length(motion.velocity) > 0) {
+				float LO = -0.5;
+				float HI = 0.5;
+				float r3 = LO + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (HI - LO)));
+
+				createBullet(renderer, motion.position, motion.angle + 1.5708 + r3);
+			}
+
+			else {
+				createBullet(renderer, motion.position, motion.angle + 1.5708);
+			}
 		}
 	}
 
