@@ -215,7 +215,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// Spawning new turtles
 
 	next_turtle_spawn -= elapsed_ms_since_last_update * current_speed;
-	if (registry.hardShells.components.size() <= MAX_TURTLES && next_turtle_spawn < 0.f)
+	if (registry.enemies.components.size() <= MAX_TURTLES && next_turtle_spawn < 0.f)
 	{
 		// Reset timer
 		next_turtle_spawn = (TURTLE_DELAY_MS / 2) + uniform_dist(rng) * (TURTLE_DELAY_MS / 2);
@@ -370,7 +370,7 @@ void WorldSystem::handle_collisions()
 			//Player& player = registry.players.get(entity);
 
 			// Checking Player - HardShell collisions
-			if (registry.hardShells.has(entity_other))
+			if (registry.enemies.has(entity_other))
 			{
 				// initiate death unless already dying
 				//if (!registry.deathTimers.has(entity)) {

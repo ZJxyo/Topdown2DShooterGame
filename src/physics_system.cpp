@@ -3,7 +3,7 @@
 #include "world_init.hpp"
 
 // get the world coordiante of collider vertices
-std::vector<vec2> get_vertices_location(Entity entity) {
+std::vector<vec2> get_vertices_world_coordinate(Entity entity) {
 	Motion& motion = registry.motions.get(entity);
 
 	Transform transform;
@@ -11,7 +11,7 @@ std::vector<vec2> get_vertices_location(Entity entity) {
 	transform.rotate(motion.angle);
 	transform.scale(motion.scale);
 
-	std::vector<vec3> collider_vertices = registry.colliders.get(entity).vertices;
+	std::vector<vec3> collider_vertices = registry.polygonColliders.get(entity).vertices;
 	std::vector<vec2> vertices;
 	for (vec3& vertex : collider_vertices)
 	{
@@ -68,6 +68,23 @@ bool point_convex_polygon_collides(vec2 point, std::vector<vec2> vertices) {
 	return dir1.x * dir2.y - dir2.x * dir1.y >= 0;
 }
 
+//bool circle_corner_collides(vec2 pos, float radius, std::vector<vec2> vertices) {
+//	float min_len = length(vertices[0] - pos);
+//	int index = 0;
+//
+//	for (int i = 1; i < vertices.size(); i++) {
+//		float len = length(vertices[i] - pos);
+//		if (len < min_len) {
+//			min_len = len;
+//			index = i;
+//		}
+//	}
+//
+//	vec2 axis = vertices[index] - pos;
+//
+//
+//}
+
 void PhysicsSystem::step(float elapsed_ms)
 {
 	// Move fish based on how much time has passed, this is to (partially) avoid
@@ -78,33 +95,26 @@ void PhysicsSystem::step(float elapsed_ms)
 	{
 		Motion &motion = motion_registry.components[i];
 		Entity entity = motion_registry.entities[i];
-		float step_seconds = 1.0f * (elapsed_ms / 1000.f);
-		motion.position += step_seconds * motion.velocity;
+		motion.position += motion.velocity * elapsed_ms / 1000.f;
 	}
 
 	// all walls' bounding box
-	// x min y min x max y max
+	std::vector<std::vector<vec2>> wall_vertices;
 	std::vector<std::vector<float>> wall_bb;
 	for (auto w : registry.walls.entities) {
-		std::vector<vec2> location = get_vertices_location(w);
-		wall_bb.push_back(get_bounding_box(location));
+		std::vector<vec2> vertices = get_vertices_world_coordinate(w);
+		wall_vertices.push_back(vertices);
+		wall_bb.push_back(get_bounding_box(vertices));
 	}
 
 	// all bullets' bounding box
-	std::vector<vec2> bullet_locations;
+	std::vector<vec2> bullet_vertices;
 	std::vector<std::vector<float>> bullet_bb;
 	for (Entity e : registry.bullets.entities) {
-		std::vector<vec2> location = get_vertices_location(e);
-		bullet_locations.push_back(location[0]);
-		bullet_bb.push_back(get_bounding_box(location));
-	}
-
-	std::vector<std::vector<vec2>> player_locations;
-	std::vector<std::vector<float>> player_bb;
-	for (Entity p : registry.players.entities) {
-		std::vector<vec2> location = get_vertices_location(p);
-		player_locations.push_back(location);
-		player_bb.push_back(get_bounding_box(location));
+		vec2 vertex = registry.motions.get(e).position;
+		bullet_vertices.push_back(vertex);
+		std::vector<float> bb = { vertex.x, vertex.y, vertex.x, vertex.y };
+		bullet_bb.push_back(bb);
 	}
 
 	// bullets vs walls
@@ -115,8 +125,8 @@ void PhysicsSystem::step(float elapsed_ms)
 			//printf("wall   x_min: %f y_min: %f x_max: %f x_max: %f\n", bb[0], bb[1], bb[2], bb[3]);
 			if (aabb_collides(bullet_bb[i], bb)) {
 				registry.remove_all_components_of(registry.bullets.entities[i]);
-				bullet_locations[i] = bullet_locations.back();
-				bullet_locations.pop_back();
+				bullet_vertices[i] = bullet_vertices.back();
+				bullet_vertices.pop_back();
 				bullet_bb[i] = bullet_bb.back();
 				bullet_bb.pop_back();
 				break;
@@ -124,27 +134,42 @@ void PhysicsSystem::step(float elapsed_ms)
 		}
 	}
 
-	/*for (int i = registry.bullets.entities.size() - 1; i >= 0; i--) {
-		for (int j = registry.players.entities.size() - 1; j >= 0; j--) {
-			if (aabb_collides(bullet_bb[i], player_bb[j])) {
-				if (point_convex_polygon_collides(bullet_locations[i], player_locations[j])) {
-					for (auto callback : callbacks) {
-						callback(registry.bullets.entities[i], registry.players.entities[j]);
-					}
-					registry.remove_all_components_of(registry.bullets.entities[i]);
-					bullet_locations[i] = bullet_locations.back();
-					bullet_locations.pop_back();
-					bullet_bb[i] = bullet_bb.back();
-					bullet_bb.pop_back();
-					break;
+	for (int i = registry.bullets.entities.size() - 1; i >= 0; i--) {
+		for (int j = registry.circleColliders.entities.size() - 1; j >= 0; j--) {
+			Entity p = registry.circleColliders.entities[j];
+			if (length(bullet_vertices[i] - registry.motions.get(p).position) < registry.circleColliders.components[j].radius) {
+				for (auto callback : callbacks) {
+					callback(registry.bullets.entities[i], p);
 				}
+				registry.remove_all_components_of(registry.bullets.entities[i]);
+				bullet_vertices[i] = bullet_vertices.back();
+				bullet_vertices.pop_back();
+				bullet_bb[i] = bullet_bb.back();
+				bullet_bb.pop_back();
+				break;
 			}
 		}
-	}*/
+	}
 
-	for (int i = registry.players.entities.size() - 1; i >= 0; i--) {
-		for (std::vector<float> bb : wall_bb) {
-			if (aabb_collides(player_bb[i], bb)) {
+	for (int i = registry.circleColliders.entities.size() - 1; i >= 0; i--) {
+		Entity p = registry.circleColliders.entities[i];
+		Motion& p_motion = registry.motions.get(p);
+		vec2& pos = p_motion.position;
+		vec2& vel = p_motion.velocity;
+		float radius = registry.circleColliders.components[i].radius;
+		for (int j = registry.walls.entities.size() - 1; j >= 0; j--) {
+			std::vector<float> bb = { pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius };
+			if (aabb_collides(bb, wall_bb[j])) {
+				float time = elapsed_ms / 1000.f;
+				if (!aabb_collides({ bb[0] - vel.x * time, bb[1], bb[2] - vel.x * time, bb[3] }, wall_bb[j])) {
+					pos.x -= vel.x * time;
+				}
+				else if (!aabb_collides({ bb[0], bb[1] - vel.y * time, bb[2], bb[3] - vel.y * time }, wall_bb[j])) {
+					pos.y -= vel.y * time;
+				}
+				else {
+					pos -= vel * time;
+				}
 			}
 		}
 	}
@@ -163,8 +188,8 @@ void PhysicsSystem::step(float elapsed_ms)
 			Entity line2 = createLine(motion.position, motion.angle, vec2{ 3.f, 50.f });
 
 
-			if (registry.colliders.has(entity)) {
-				std::vector<vec2> vertices = get_vertices_location(entity);
+			if (registry.polygonColliders.has(entity)) {
+				std::vector<vec2> vertices = get_vertices_world_coordinate(entity);
 
 				for (int i = 0; i < vertices.size(); i++) {
 					vec2 v1 = vertices[i];
