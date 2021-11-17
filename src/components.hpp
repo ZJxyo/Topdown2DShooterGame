@@ -116,9 +116,15 @@ struct Wall
 {
 };
 
+
 struct Animate
 {
 	float counter_ms = 100;
+	int sprite_frame = 0;
+	int feet_frames = 7;
+	int player_frames = 7;
+	int feet_width = 204;
+	int player_width = 254;
 };
 
 struct FireRate
@@ -155,20 +161,8 @@ enum class TEXTURE_ASSET_ID
 	FISH = 0,
 	TURTLE = FISH + 1,
 	PLAYER = TURTLE + 1,
-	PLAYER2 = PLAYER + 1,
-	PLAYER3 = PLAYER2 + 1,
-	PLAYER4 = PLAYER3 + 1,
-	PLAYER5 = PLAYER4 + 1,
-	PLAYER6 = PLAYER5 + 1,
-	PLAYER7 = PLAYER6 + 1,
-	FEET1 = PLAYER7 + 1,
-	FEET2 = FEET1 + 1,
-	FEET3 = FEET2 + 1,
-	FEET4 = FEET3 + 1,
-	FEET5 = FEET4 + 1,
-	FEET6 = FEET5 + 1,
-	FEET7 = FEET6 + 1,
-	GROUND_WOOD = FEET7 + 1,
+	FEET = PLAYER + 1,
+	GROUND_WOOD = FEET + 1,
 	WALL = GROUND_WOOD + 1,
 	BULLET = WALL + 1,
 	HELP0 = BULLET + 1,
@@ -188,7 +182,8 @@ enum class EFFECT_ASSET_ID
 	TEXTURED = TURTLE + 1,
 	WATER = TEXTURED + 1,
 	LIGHT = WATER + 1,
-	EFFECT_COUNT = LIGHT + 1
+	ANIMATE = LIGHT + 1,
+	EFFECT_COUNT = ANIMATE + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
