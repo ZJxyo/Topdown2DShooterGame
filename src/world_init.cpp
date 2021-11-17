@@ -286,7 +286,7 @@ Entity createBullet(RenderSystem *renderer, vec2 pos, float angle)
 	registry.colliders.emplace(entity).vertices = {{0.f, 0.f, 1.f}};
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
-	registry.renderRequests.insert(
+	registry.bulletsRenderRequests.insert(
 		entity,
 		{TEXTURE_ASSET_ID::BULLET, // TEXTURE_COUNT indicates that no txture is needed
 		 EFFECT_ASSET_ID::TEXTURED,

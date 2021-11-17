@@ -20,6 +20,7 @@ public:
 	ComponentContainer<RenderRequest> floorRenderRequests;
 	ComponentContainer<RenderRequest> renderRequests;
 	ComponentContainer<RenderRequest> renderRequests2;
+	ComponentContainer<RenderRequest> bulletsRenderRequests;
 	ComponentContainer<ScreenState> screenStates;
 	ComponentContainer<SoftShell> softShells;
 	ComponentContainer<HardShell> hardShells;
@@ -45,6 +46,7 @@ public:
 		registry_list.push_back(&renderRequests);
 		registry_list.push_back(&renderRequests2);
 		registry_list.push_back(&floorRenderRequests);
+		registry_list.push_back(&bulletsRenderRequests);
 		registry_list.push_back(&screenStates);
 		registry_list.push_back(&softShells);
 		registry_list.push_back(&hardShells);

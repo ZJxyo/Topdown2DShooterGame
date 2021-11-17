@@ -183,6 +183,81 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	gl_has_errors();
 }
 
+void RenderSystem::drawTexturedInstances(std::vector<Entity>& entities,
+	const mat3& projection, RenderRequest& request) {
+
+	const GLuint program = (GLuint)effects[(GLuint)request.used_effect];
+	glUseProgram(program);
+	gl_has_errors();
+
+	const GLuint vbo = vertex_buffers[(GLuint)request.used_geometry];
+	const GLuint ibo = index_buffers[(GLuint)request.used_geometry];
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	gl_has_errors();
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), 0);
+	glEnableVertexAttribArray(0);
+	gl_has_errors();
+
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)sizeof(vec3));
+	glEnableVertexAttribArray(1);
+	gl_has_errors();
+
+	glActiveTexture(GL_TEXTURE0);
+	gl_has_errors();
+
+	GLuint texture_id = texture_gl_handles[(GLuint)request.used_texture];
+
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	gl_has_errors();
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+	gl_has_errors();
+
+	vec2 player_postion = registry.motions.get(registry.players.entities[0]).position;
+	vec2 offset = vec2(window_width_px / 2.f - player_postion.x, window_height_px / 2.f - player_postion.y);
+
+	std::vector<glm::mat3> transforms;
+
+	for (auto e : entities) {
+		Motion& motion = registry.motions.get(e);
+		Transform transform;
+		transform.translate(motion.position + offset);
+		transform.rotate(motion.angle);
+		transform.scale(motion.scale);
+		transforms.push_back(transform.mat);
+	}
+
+	GLuint transformsBufferID;
+	glGenBuffers(1, &transformsBufferID);
+	glBindBuffer(GL_ARRAY_BUFFER, transformsBufferID);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat3) * transforms.size(), transforms.data(), GL_STREAM_DRAW);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 3, 0);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 3, (void*)sizeof(vec3));
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 3, (void*)(sizeof(vec3) * 2));
+	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(3);
+	glEnableVertexAttribArray(4);
+	glVertexAttribDivisor(2, 1);
+	glVertexAttribDivisor(3, 1);
+	glVertexAttribDivisor(4, 1);
+	gl_has_errors();
+
+	GLint projection_loc = glGetUniformLocation(program, "projection");
+	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projection);
+	gl_has_errors();
+
+	GLint size = 0;
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+	gl_has_errors();
+
+	GLsizei num_indices = size / sizeof(uint16_t);
+
+	glDrawElementsInstanced(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr, entities.size());
+	gl_has_errors();
+}
+
 // draw the intermediate texture to the screen, with some distortion to simulate
 // water
 void RenderSystem::drawToScreen()
@@ -292,6 +367,9 @@ void RenderSystem::draw()
 
 		RenderRequest &render_request = registry.renderRequests.get(entity);
 		drawTexturedMesh(entity, projection_2D, render_request);
+	}
+	if (registry.bulletsRenderRequests.entities.size() > 0) {
+		drawTexturedInstances(registry.bulletsRenderRequests.entities, projection_2D, registry.bulletsRenderRequests.components[0]);
 	}
 
 	// Truely render to the screen
