@@ -362,6 +362,7 @@ void WorldSystem::restart_game()
 	registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
 
 	SetupMap(renderer);
+	createMatrix();
 	createWall(renderer, {300, 300}, 2.f, {200, 200});
 
 	// CLEAN
