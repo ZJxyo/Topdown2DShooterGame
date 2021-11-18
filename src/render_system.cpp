@@ -256,6 +256,9 @@ void RenderSystem::drawTexturedInstances(std::vector<Entity>& entities,
 
 	glDrawElementsInstanced(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr, entities.size());
 	gl_has_errors();
+
+	GLuint buffers[1] = { transformsBufferID };
+	glDeleteBuffers(1, buffers);
 }
 
 // draw the intermediate texture to the screen, with some distortion to simulate
