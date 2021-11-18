@@ -128,6 +128,13 @@ struct FireRate
 	float fire_rate = 0;
 };
 
+struct ParticleSource {
+	std::vector<Motion> motions;
+	std::vector<vec4> colors;
+	std::vector<float> radii;
+	std::vector<float> life_spans;
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
@@ -190,7 +197,8 @@ enum class EFFECT_ASSET_ID
 	TEXTURED = TURTLE + 1,
 	WATER = TEXTURED + 1,
 	LIGHT = WATER + 1,
-	EFFECT_COUNT = LIGHT + 1
+	INSTANCES = LIGHT + 1,
+	EFFECT_COUNT = INSTANCES + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
