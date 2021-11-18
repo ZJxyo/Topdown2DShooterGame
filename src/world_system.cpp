@@ -293,6 +293,19 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
 
 	// !!! TODO A1: update LightUp timers and remove if time drops below zero, similar to the death counter
+	float time = elapsed_ms_since_last_update / 1000.f;
+
+	for (int i = registry.particleSources.entities.size() - 1; i >= 0; i--) {
+		ParticleSource& ps = registry.particleSources.components[i];
+		ps.alpha -= ps.decay * time;
+		if (ps.alpha <= 0) {
+			registry.remove_all_components_of(registry.particleSources.entities[i]);
+			continue;
+		}
+		for (int j = 0; j < ps.size; j++) {
+			ps.positions[j] += ps.velocities[j];
+		}
+	}
 
 	return true;
 }
@@ -509,37 +522,33 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 	}
 }
 
-void WorldSystem::handle_collision(Entity entity_1, Entity entity_2) {
-	if (registry.healths.has(entity_1) && registry.bullets.has(entity_2)) {
-		registry.healths.get(entity_1).health -= 1;
+// e1 should be the bullet
+void WorldSystem::handle_bullet_hit(Entity bullet, Entity entity) {
+	if (registry.healths.has(entity)) {
+		registry.healths.get(entity).health -= 1;
+	}
 
-		printf("HP - 10\n");
-	}
-	else if (registry.healths.has(entity_2) && registry.bullets.has(entity_1))
-	{
-		registry.healths.get(entity_2).health -= 1;
-		printf("HP - 10\n");
-	}
+	assert(registry.motions.has(bullet));
+	Motion& bullet_motion = registry.motions.get(bullet);
+	createParticleSource(1, 5, 1.f, vec3(1.f, 0.f, 0.f), bullet_motion.position, -normalize(bullet_motion.velocity), 50.f);
 }
 
 void WorldSystem::update_player_velocity() {
 	registry.motions.get(player_salmon).velocity = player_speed * vec2(input.right - input.left, input.down - input.up);
 }
 
-Entity WorldSystem::createParticleSource(uint8 size, float radius, float decay, vec3 color, vec2 pos, vec2 vel) {
+Entity WorldSystem::createParticleSource(uint8 size, float radius, float decay, vec3 color, vec2 pos, vec2 dir, float speed) {
 	assert(size != 0);
 	std::vector<vec2> positions;
 	std::vector<vec2> velocities;
-	float speed = length(vel);
-	vec2 dir = normalize(vel);
 	for (uint i = 0; i < size; i++) {
 		positions.push_back(pos);
 		// -0.5 to 0.5
-		float random_float = (uniform_dist(rng) - 0.5);
-		float cs = cos(random_float * M_PI);
-		float sn = sin(random_float * M_PI);
+		float random_float = ((rand() / RAND_MAX) - 0.5);
+		float cs = cos(random_float * M_PI / 2);
+		float sn = sin(random_float * M_PI / 2);
 		vec2 random_dir = vec2(dir.x * cs - dir.y * sn, dir.x * sn + dir.y * cs);
-		float random_speed = speed * (1 + 0.5 * (uniform_dist(rng) - 0.5));
+		float random_speed = speed * (1 + 0.5 * ((rand() / RAND_MAX) - 0.5));
 		velocities.push_back(random_dir * random_speed);
 	}
 

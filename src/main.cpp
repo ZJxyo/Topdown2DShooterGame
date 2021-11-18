@@ -40,7 +40,7 @@ int main()
 	renderer.init(window_width_px, window_height_px, window);
 	world.init(&renderer);
 
-	physics.callbacks.emplace_back(WorldSystem::handle_collision);
+	physics.bullet_hit_callbacks.emplace_back(WorldSystem::handle_bullet_hit);
 
 	// variable timestep loop
 	auto t = Clock::now();

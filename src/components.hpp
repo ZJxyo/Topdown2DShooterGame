@@ -137,6 +137,7 @@ struct FireRate
 struct ParticleSource {
 	uint8 size;
 	float radius;
+	float alpha = 1.f;
 	float decay;
 	vec3 color;
 	std::vector<vec2> positions;
