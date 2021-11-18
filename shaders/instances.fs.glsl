@@ -5,8 +5,9 @@ in vec2 texcoord;
 
 // Application data
 uniform sampler2D tex;
+layout(location = 0) out vec4 color;
 
 void main()
 {
-	gl_FragColor = texture(tex, texcoord);
+	color = texture(tex, texcoord);
 }
