@@ -135,6 +135,10 @@ struct ParticleSource {
 	std::vector<float> life_spans;
 };
 
+struct StoryBox {
+    bool isOpened = false;
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
@@ -184,7 +188,8 @@ enum class TEXTURE_ASSET_ID
 	HELP1 = HELP0 + 1,
 	HELP2 = HELP1 + 1,
 	HELP3 = HELP2 + 1,
-	TEXTURE_COUNT = HELP3 + 1
+    STORY_BOX = HELP3 + 1,
+	TEXTURE_COUNT = STORY_BOX + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

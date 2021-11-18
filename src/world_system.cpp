@@ -339,6 +339,9 @@ void WorldSystem::restart_game()
 	createMatrix();
 	createWall(renderer, {300, 300}, 2.f, {200, 200});
 
+    // create story box
+    createStoryBox(renderer, {1000, 900});
+
 	// CLEAN
 
 	//createWall(renderer, { 300, 100 }, 0.f, { 200, 200 });
