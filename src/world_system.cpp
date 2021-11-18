@@ -14,9 +14,7 @@
 
 // Game configuration
 const size_t MAX_TURTLES = 0;
-const size_t MAX_FISH = 5;
 const size_t TURTLE_DELAY_MS = 2000 * 3;
-const size_t FISH_DELAY_MS = 5000 * 3;
 const size_t ANIMATION_DELAY_MS = 100;
 const size_t BULLET_TIMER_MS = 100;
 
@@ -175,7 +173,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 		if (a_entities[i] == player_salmon)
 		{
-			if (p.velocity_left != 0 || p.velocity_down != 0 || p.velocity_right != 0 || p.velocity_up != 0)
+			if (length(registry.motions.get(player_salmon).velocity) > 0)
 			{
 				a.counter_ms -= elapsed_ms_since_last_update * current_speed;
 			}
@@ -187,7 +185,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		if (a.counter_ms < 0)
 		{
 			a.counter_ms = ANIMATION_DELAY_MS;
-			if (registry.players.has(a_entities[i]) || registry.hardShells.has(a_entities[i]))
+			if (registry.players.has(a_entities[i]) || registry.enemies.has(a_entities[i]))
 			{
 				if (a.sprite_frame == a.player_frames -1){
 					a.sprite_frame = 0;
@@ -206,25 +204,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		}
 	}
 
-	// Removing out of screen entities
-	auto &motions_registry = registry.motions;
-
-	// Remove entities that leave the screen on the left side
-	// Iterate backwards to be able to remove without unterfering with the next object to visit
-	// (the containers exchange the last element with the current)
-	for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i)
-	{
-		Motion &motion = motions_registry.components[i];
-		if (motion.position.x + abs(motion.scale.x) < 0.f)
-		{
-			registry.remove_all_components_of(motions_registry.entities[i]);
-		}
-	}
-
 	// Spawning new turtles
 
 	next_turtle_spawn -= elapsed_ms_since_last_update * current_speed;
-	if (registry.hardShells.components.size() <= MAX_TURTLES && next_turtle_spawn < 0.f)
+	if (registry.enemies.components.size() <= MAX_TURTLES && next_turtle_spawn < 0.f)
 	{
 		// Reset timer
 		next_turtle_spawn = (TURTLE_DELAY_MS / 2) + uniform_dist(rng) * (TURTLE_DELAY_MS / 2);
@@ -248,13 +231,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	btIfCondition.init(entity);
 	btIfCondition.process(entity);
 
-	// Spawning new fish
-	next_fish_spawn -= elapsed_ms_since_last_update * current_speed;
-	if (registry.softShells.components.size() <= MAX_FISH && next_fish_spawn < 0.f)
-	{
-		// !!!  TODO A1: Create new fish with createFish({0,0}), as for the Turtles above
-	}
-
 	// process shooting bullets for player
 
 	FireRate &fireRate = registry.fireRates.get(player_salmon);
@@ -263,24 +239,22 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	if (fireRate.fire_rate < 0)
 	{
 		fireRate.fire_rate = BULLET_TIMER_MS;
-		if (mouse_down || tap)
-		{
-			Player &player = registry.players.get(player_salmon);
-			Motion &motion = registry.motions.get(player_salmon);
+		if (mouse_down || tap) {
+			Player& player = registry.players.get(player_salmon);
+			Motion& motion = registry.motions.get(player_salmon);
 			if (tap)
 				tap = !tap;
 
-			if (player.velocity_left != 0 || player.velocity_right != 0 || player.velocity_up != 0 || player.velocity_down != 0)
-			{
+
+			if (length(motion.velocity) > 0) {
 				float LO = -0.5;
 				float HI = 0.5;
-				float r3 = LO + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (HI - LO)));
+				float r3 = LO + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (HI - LO)));
 
 				createBullet(renderer, motion.position, motion.angle + 1.5708 + r3);
 			}
 
-			else
-			{
+			else {
 				createBullet(renderer, motion.position, motion.angle + 1.5708);
 			}
 		}
@@ -350,6 +324,7 @@ void WorldSystem::restart_game()
 	registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
 
 	SetupMap(renderer);
+	createMatrix();
 	createWall(renderer, {300, 300}, 2.f, {200, 200});
 
 	// CLEAN
@@ -363,55 +338,55 @@ void WorldSystem::restart_game()
 }
 
 // Compute collisions between entities
-void WorldSystem::handle_collisions()
-{
-	// Loop over all collisions detected by the physics system
-	auto &collisionsRegistry = registry.collisions; // TODO: @Tim, is the reference here needed?
-	for (uint i = 0; i < collisionsRegistry.components.size(); i++)
-	{
-		// The entity and its collider
-		Entity entity = collisionsRegistry.entities[i];
-		Entity entity_other = collisionsRegistry.components[i].other;
-
-		// For now, we are only interested in collisions that involve the salmon
-		if (registry.players.has(entity))
-		{
-			//Player& player = registry.players.get(entity);
-
-			// Checking Player - HardShell collisions
-			if (registry.hardShells.has(entity_other))
-			{
-				// initiate death unless already dying
-				//if (!registry.deathTimers.has(entity)) {
-				//	// Scream, reset timer, and make the salmon sink
-				//	registry.deathTimers.emplace(entity);
-				//	Mix_PlayChannel(-1, salmon_dead_sound, 0);
-				//	registry.motions.get(entity).angle = 3.1415f;
-				//	registry.motions.get(entity).velocity = { 0, 80 };
-				/*assert(registry.healths.has(entity));
-				Health& player_health = registry.healths.get(entity);
-				player_health.health -= 1;
-				printf("Health: %d", player_health.health);*/
-			}
-			// Checking Player - SoftShell collisions
-			else if (registry.softShells.has(entity_other))
-			{
-				if (!registry.deathTimers.has(entity))
-				{
-					// chew, count points, and set the LightUp timer
-					registry.remove_all_components_of(entity_other);
-					Mix_PlayChannel(-1, salmon_eat_sound, 0);
-					++points;
-
-					// !!! TODO A1: create a new struct called LightUp in components.hpp and add an instance to the salmon entity by modifying the ECS registry
-				}
-			}
-		}
-	}
-
-	// Remove all collisions from this simulation step
-	registry.collisions.clear();
-}
+//void WorldSystem::handle_collisions()
+//{
+//	// Loop over all collisions detected by the physics system
+//	auto &collisionsRegistry = registry.collisions; // TODO: @Tim, is the reference here needed?
+//	for (uint i = 0; i < collisionsRegistry.components.size(); i++)
+//	{
+//		// The entity and its collider
+//		Entity entity = collisionsRegistry.entities[i];
+//		Entity entity_other = collisionsRegistry.components[i].other;
+//
+//		// For now, we are only interested in collisions that involve the salmon
+//		if (registry.players.has(entity))
+//		{
+//			//Player& player = registry.players.get(entity);
+//
+//			// Checking Player - HardShell collisions
+//			if (registry.enemies.has(entity_other))
+//			{
+//				// initiate death unless already dying
+//				//if (!registry.deathTimers.has(entity)) {
+//				//	// Scream, reset timer, and make the salmon sink
+//				//	registry.deathTimers.emplace(entity);
+//				//	Mix_PlayChannel(-1, salmon_dead_sound, 0);
+//				//	registry.motions.get(entity).angle = 3.1415f;
+//				//	registry.motions.get(entity).velocity = { 0, 80 };
+//				/*assert(registry.healths.has(entity));
+//				Health& player_health = registry.healths.get(entity);
+//				player_health.health -= 1;
+//				printf("Health: %d", player_health.health);*/
+//			}
+//			// Checking Player - SoftShell collisions
+//			else if (registry.softShells.has(entity_other))
+//			{
+//				if (!registry.deathTimers.has(entity))
+//				{
+//					// chew, count points, and set the LightUp timer
+//					registry.remove_all_components_of(entity_other);
+//					Mix_PlayChannel(-1, salmon_eat_sound, 0);
+//					++points;
+//
+//					// !!! TODO A1: create a new struct called LightUp in components.hpp and add an instance to the salmon entity by modifying the ECS registry
+//				}
+//			}
+//		}
+//	}
+//
+//	// Remove all collisions from this simulation step
+//	registry.collisions.clear();
+//}
 
 // Should the game be over ?
 bool WorldSystem::is_over() const
@@ -446,44 +421,50 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 	if (!registry.deathTimers.has(player_salmon))
 	{
-		auto &player = registry.players.get(player_salmon);
 		if (action == GLFW_PRESS)
 		{
-			int speed = player.speed;
-			if (key == GLFW_KEY_A)
+			if (key == GLFW_KEY_W)
 			{
-				player.velocity_left = -speed;
-			}
-			else if (key == GLFW_KEY_D)
-			{
-				player.velocity_right = speed;
-			}
-			else if (key == GLFW_KEY_W)
-			{
-				player.velocity_up = -speed;
+				input.up = 1.f;
+				update_player_velocity();
 			}
 			else if (key == GLFW_KEY_S)
 			{
-				player.velocity_down = speed;
+				input.down = 1.f;
+				update_player_velocity();
+			}
+			else if (key == GLFW_KEY_A)
+			{
+				input.left = 1.f;
+				update_player_velocity();
+			}
+			else if (key == GLFW_KEY_D)
+			{
+				input.right = 1.f;
+				update_player_velocity();
 			}
 		}
 		if (action == GLFW_RELEASE)
 		{
 			if (key == GLFW_KEY_W)
 			{
-				player.velocity_up = 0;
+				input.up = 0;
+				update_player_velocity();
 			}
 			else if (key == GLFW_KEY_S)
 			{
-				player.velocity_down = 0;
-			}
-			else if (key == GLFW_KEY_D)
-			{
-				player.velocity_right = 0;
+				input.down = 0;
+				update_player_velocity();
 			}
 			else if (key == GLFW_KEY_A)
 			{
-				player.velocity_left = 0;
+				input.left = 0;
+				update_player_velocity();
+			}
+			else if (key == GLFW_KEY_D)
+			{
+				input.right = 0;
+				update_player_velocity();
 			}
 		}
 	}
@@ -528,16 +509,19 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 	}
 }
 
-void WorldSystem::handle_collision(Entity entity_1, Entity entity_2)
-{
-	if (registry.healths.has(entity_1) && registry.bullets.has(entity_2))
-	{
-		registry.healths.get(entity_1).health -= 10;
+void WorldSystem::handle_collision(Entity entity_1, Entity entity_2) {
+	if (registry.healths.has(entity_1) && registry.bullets.has(entity_2)) {
+		registry.healths.get(entity_1).health -= 1;
+
 		printf("HP - 10\n");
 	}
 	else if (registry.healths.has(entity_2) && registry.bullets.has(entity_1))
 	{
-		registry.healths.get(entity_2).health -= 10;
+		registry.healths.get(entity_2).health -= 1;
 		printf("HP - 10\n");
 	}
+}
+
+void WorldSystem::update_player_velocity() {
+	registry.motions.get(player_salmon).velocity = player_speed * vec2(input.right - input.left, input.down - input.up);
 }

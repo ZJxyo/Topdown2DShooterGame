@@ -7,20 +7,15 @@
 // Player component
 struct Player
 {
-	float speed = 500;
-	float velocity_left;
-	float velocity_right;
-	float velocity_up;
-	float velocity_down;
 };
 
 struct Bullet
 {
-	float speed = 500.f;
+	float speed = 1000.f;
 };
 
 // Turtles and pebbles have a hard shell
-struct HardShell
+struct Enemy
 {
 };
 
@@ -102,7 +97,7 @@ struct Health
 };
 
 // Collider shapes for collision detection, default box collider
-struct Collider
+struct PolygonCollider
 {
 	std::vector<vec3> vertices = {
 		{-0.5f, -0.5f, 1.f},
@@ -110,6 +105,13 @@ struct Collider
 		{0.5f, 0.5f, 1.f},
 		{-0.5f, 0.5f, 1.f}};
 };
+
+struct CircleCollider {
+	float radius;
+	CircleCollider(float radius) : radius(radius) {}
+};
+
+struct PointCollider {};
 
 // indicate this is a wall type object
 struct Wall
@@ -130,6 +132,13 @@ struct Animate
 struct FireRate
 {
 	float fire_rate = 0;
+};
+
+struct ParticleSource {
+	std::vector<Motion> motions;
+	std::vector<vec4> colors;
+	std::vector<float> radii;
+	std::vector<float> life_spans;
 };
 
 /**
@@ -182,8 +191,9 @@ enum class EFFECT_ASSET_ID
 	TEXTURED = TURTLE + 1,
 	WATER = TEXTURED + 1,
 	LIGHT = WATER + 1,
-	ANIMATE = LIGHT + 1,
-	EFFECT_COUNT = ANIMATE + 1
+	INSTANCES = LIGHT + 1,
+	ANIMATE = INSTANCES + 1,
+	EFFECT_COUNT = INSTANCES + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
