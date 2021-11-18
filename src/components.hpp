@@ -189,7 +189,8 @@ enum class TEXTURE_ASSET_ID
 	HELP2 = HELP1 + 1,
 	HELP3 = HELP2 + 1,
     STORY_BOX = HELP3 + 1,
-	TEXTURE_COUNT = STORY_BOX + 1
+    STORY1 = STORY_BOX + 1,
+	TEXTURE_COUNT = STORY1 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

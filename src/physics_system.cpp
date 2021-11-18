@@ -117,25 +117,6 @@ void PhysicsSystem::step(float elapsed_ms)
 		bullet_bb.push_back(bb);
 	}
 
-//    // storyBox vs player
-//    for (int i = registry.storyBox.entities.size() - 1; i >= 0; i--) {
-//        for (int j = registry.players.entities.size() - 1; j >= 0; j--) {
-//            Entity p = registry.storyBox.entities[j];
-//            if(p.)
-//            if (length(bullet_vertices[i] - registry.motions.get(p).position) < registry.circleColliders.components[j].radius) {
-//                for (auto callback : callbacks) {
-//                    callback(registry.bullets.entities[i], p);
-//                }
-//                registry.remove_all_components_of(registry.bullets.entities[i]);
-//                bullet_vertices[i] = bullet_vertices.back();
-//                bullet_vertices.pop_back();
-//                bullet_bb[i] = bullet_bb.back();
-//                bullet_bb.pop_back();
-//                break;
-//            }
-//        }
-//    }
-
 	// bullets vs walls
 	// in reversed order
 	for (int i = registry.bullets.entities.size() - 1; i >= 0; i--) {

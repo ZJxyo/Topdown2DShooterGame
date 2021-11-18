@@ -15,8 +15,10 @@ class HelpMenu {
 public:
     Entity createInto(RenderSystem* renderer, GLFWwindow* window, vec2 position);
     Entity createMenu(RenderSystem* renderer, GLFWwindow* window, vec2 position);
+    Entity createStroy1(RenderSystem* renderer, GLFWwindow* window, vec2 position);
     bool showMenu = true;
     bool showInto = true;
+    bool showStory1 = true;
 private:
     static RenderSystem* renderer;
     // OpenGL window handle

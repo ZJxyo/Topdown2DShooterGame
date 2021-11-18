@@ -17,6 +17,8 @@ const size_t MAX_TURTLES = 0;
 const size_t TURTLE_DELAY_MS = 2000 * 3;
 const size_t ANIMATION_DELAY_MS = 100;
 const size_t BULLET_TIMER_MS = 100;
+bool toggle = true;
+Entity story1;
 
 // Create the fish world
 WorldSystem::WorldSystem()
@@ -243,6 +245,23 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	btIfCondition.init(entity);
 	btIfCondition.process(entity);
 
+    // show story
+    if(abs(registry.motions.get(player_salmon).position.x -  1000)  < 50
+    && abs(registry.motions.get(player_salmon).position.y - 900) < 50) {
+
+        if(toggle) {
+            story1 = helpMenu.createStroy1(renderer, window, { 1000,900 });
+            toggle = false;
+        }
+
+        if (!helpMenu.showStory1) {
+            printf("deleting story1\n");
+//            registry.storyBox.(story1);
+            registry.remove_all_components_of(story1);
+        }
+    }
+
+
 	// process shooting bullets for player
 
 	FireRate &fireRate = registry.fireRates.get(player_salmon);
@@ -416,6 +435,11 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	// key is of 'type' GLFW_KEY_
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    if (action == GLFW_PRESS && key == GLFW_KEY_4)
+    {
+            helpMenu.showStory1 = false;
+    }
 
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
