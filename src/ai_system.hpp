@@ -213,15 +213,15 @@ private:
         ////            vel.y = playerY % 100;
         //            ai.BFS(AIX/100, AIY/100, playerX/100, playerY/100);
         //        }
-        stack<pair<int, int>> tempPath = ai.path;
-        while (!tempPath.empty()) {
-            std::cout << "path x : " << tempPath.top().second << " path y : " << tempPath.top().first << " \n";
-            tempPath.pop();
-        }
+        //stack<pair<int, int>> tempPath = ai.path;
+        //while (!tempPath.empty()) {
+        //    std::cout << "path x : " << tempPath.top().second << " path y : " << tempPath.top().first << " \n";
+        //    tempPath.pop();
+        //}
 
         if (!ai.path.empty()) {
             pair<int, int> curr = ai.path.top();
-            std::cout << "curr row : " << curr.second * 100 << " curr col : " << curr.first * 100 << " \n";
+            //std::cout << "curr row : " << curr.second * 100 << " curr col : " << curr.first * 100 << " \n";
             //std::cout << "AIX : " << AIX << " AIY : " << AIY << " \n";
             if (AIX > curr.second * 100 + 50) {
 

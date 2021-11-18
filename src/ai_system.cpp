@@ -62,8 +62,8 @@ void AISystem::BFS(int startRow, int startCol, int endRow, int endCol) {
     path = stack<pair<int, int>>();
     vis[ROW - 1][COL - 1] = { false };
 
-    std::cout << "AI x : " << startRow << " AI y : " << startCol << " \n";
-    std::cout << "player x : " << endRow << " player y : " << endCol << " \n";
+    //std::cout << "AI x : " << startRow << " AI y : " << startCol << " \n";
+    //std::cout << "player x : " << endRow << " player y : " << endCol << " \n";
     // Stores indices of the matrix cells
     queue<pair<int, int> > q;
 
