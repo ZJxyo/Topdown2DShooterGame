@@ -223,9 +223,9 @@ void RenderSystem::drawTexturedInstances(std::vector<Entity>& entities,
 
 	GLuint texture_id = texture_gl_handles[(GLuint)request.used_texture];
 
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	gl_has_errors();
+	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//gl_has_errors();
 	glBindTexture(GL_TEXTURE_2D, texture_id);
 	gl_has_errors();
 
@@ -243,9 +243,7 @@ void RenderSystem::drawTexturedInstances(std::vector<Entity>& entities,
 		transforms.push_back(transform.mat);
 	}
 
-	GLuint transformsBufferID;
-	glGenBuffers(1, &transformsBufferID);
-	glBindBuffer(GL_ARRAY_BUFFER, transformsBufferID);
+	glBindBuffer(GL_ARRAY_BUFFER, transform_buffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat3) * transforms.size(), transforms.data(), GL_STREAM_DRAW);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 3, 0);
 	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 3, (void*)sizeof(vec3));

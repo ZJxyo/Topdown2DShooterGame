@@ -104,6 +104,8 @@ private:
 	GLuint off_screen_render_buffer_color;
 	GLuint off_screen_render_buffer_depth;
 
+	GLuint transform_buffer;
+
 	Entity screen_state_entity;
 };
 
