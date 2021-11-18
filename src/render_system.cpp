@@ -270,6 +270,66 @@ void RenderSystem::drawTexturedInstances(std::vector<Entity>& entities,
 	gl_has_errors();
 }
 
+void RenderSystem::drawParticles(ParticleSource ps, mat3 projection) {
+	const GLuint program = (GLuint)effects[(GLuint)EFFECT_ASSET_ID::PARTICLE];
+	glUseProgram(program);
+	gl_has_errors();
+
+	const GLuint vbo = vertex_buffers[(GLuint)GEOMETRY_BUFFER_ID::SPRITE];
+	const GLuint ibo = index_buffers[(GLuint)GEOMETRY_BUFFER_ID::SPRITE];
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	gl_has_errors();
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), 0);
+	glEnableVertexAttribArray(0);
+	gl_has_errors();
+
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)sizeof(vec3));
+	glEnableVertexAttribArray(1);
+	gl_has_errors();
+
+	vec2 player_postion = registry.motions.get(registry.players.entities[0]).position;
+	vec2 offset = vec2(window_width_px / 2.f - player_postion.x, window_height_px / 2.f - player_postion.y);
+
+	std::vector<vec2> positions;
+	for (int i = 0; i < ps.size; i++) {
+		positions.push_back(ps.positions[i] + offset);
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, transform_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vec2) * positions.size(), positions.data(), GL_STREAM_DRAW);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vec2), 0);
+	glEnableVertexAttribArray(2);
+	glVertexAttribDivisor(2, 1);
+	gl_has_errors();
+
+	GLint radius_loc = glGetUniformLocation(program, "radius");
+	glUniform1f(radius_loc, ps.radius);
+	gl_has_errors();
+
+	GLint alpha_loc = glGetUniformLocation(program, "alpha");
+	glUniform1f(alpha_loc, ps.alpha);
+	gl_has_errors();
+
+	GLint color_loc = glGetUniformLocation(program, "color");
+	glUniform3f(color_loc, ps.color.x, ps.color.y, ps.color.z);
+	gl_has_errors();
+
+	GLint projection_loc = glGetUniformLocation(program, "projection");
+	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projection);
+	gl_has_errors();
+
+	GLint size = 0;
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+	gl_has_errors();
+
+	GLsizei num_indices = size / sizeof(uint16_t);
+
+	glDrawElementsInstanced(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr, ps.size);
+	gl_has_errors();
+}
+
 // draw the intermediate texture to the screen, with some distortion to simulate
 // water
 void RenderSystem::drawToScreen()
@@ -383,6 +443,10 @@ void RenderSystem::draw()
 
 	if (registry.bulletsRenderRequests.entities.size() > 0) {
 		drawTexturedInstances(registry.bulletsRenderRequests.entities, projection_2D, registry.bulletsRenderRequests.components[0]);
+	}
+
+	for (ParticleSource ps : registry.particleSources.components) {
+		drawParticles(ps, projection_2D);
 	}
 
 	// Truely render to the screen

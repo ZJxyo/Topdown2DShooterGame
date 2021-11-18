@@ -298,12 +298,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	for (int i = registry.particleSources.entities.size() - 1; i >= 0; i--) {
 		ParticleSource& ps = registry.particleSources.components[i];
 		ps.alpha -= ps.decay * time;
-		if (ps.alpha <= 0) {
+		if (ps.alpha <= 0.5) {
 			registry.remove_all_components_of(registry.particleSources.entities[i]);
 			continue;
 		}
 		for (int j = 0; j < ps.size; j++) {
-			ps.positions[j] += ps.velocities[j];
+			ps.positions[j] += ps.velocities[j] * time;
 		}
 	}
 
@@ -530,7 +530,7 @@ void WorldSystem::handle_bullet_hit(Entity bullet, Entity entity) {
 
 	assert(registry.motions.has(bullet));
 	Motion& bullet_motion = registry.motions.get(bullet);
-	createParticleSource(1, 5, 1.f, vec3(1.f, 0.f, 0.f), bullet_motion.position, -normalize(bullet_motion.velocity), 50.f);
+	createParticleSource(20, 3.f, 1.5f, vec3(1.f, 0.f, 0.f), bullet_motion.position, -normalize(bullet_motion.velocity), 300.f);
 }
 
 void WorldSystem::update_player_velocity() {
@@ -543,12 +543,12 @@ Entity WorldSystem::createParticleSource(uint8 size, float radius, float decay, 
 	std::vector<vec2> velocities;
 	for (uint i = 0; i < size; i++) {
 		positions.push_back(pos);
-		// -0.5 to 0.5
-		float random_float = ((rand() / RAND_MAX) - 0.5);
-		float cs = cos(random_float * M_PI / 2);
-		float sn = sin(random_float * M_PI / 2);
+		 //-0.5 to 0.5
+		float random_float = ((float)rand() / (float)RAND_MAX) - 0.5f;
+		float cs = cos(random_float * M_PI / 2.f);
+		float sn = sin(random_float * M_PI / 2.f);
 		vec2 random_dir = vec2(dir.x * cs - dir.y * sn, dir.x * sn + dir.y * cs);
-		float random_speed = speed * (1 + 0.5 * ((rand() / RAND_MAX) - 0.5));
+		float random_speed = speed * (1.f + (((float)rand() / (float)RAND_MAX) - 0.5f));
 		velocities.push_back(random_dir * random_speed);
 	}
 
