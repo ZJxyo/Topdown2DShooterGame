@@ -35,13 +35,13 @@ Entity createSalmon(RenderSystem *renderer, vec2 pos)
 	registry.renderRequests.insert(
 		entity,
 		{TEXTURE_ASSET_ID::PLAYER,
-		 EFFECT_ASSET_ID::TEXTURED,
+		 EFFECT_ASSET_ID::ANIMATE,
 		 GEOMETRY_BUFFER_ID::SPRITE});
 
 	registry.renderRequests2.insert(
 		entity,
-		{TEXTURE_ASSET_ID::FEET1,
-		 EFFECT_ASSET_ID::TURTLE,
+		{TEXTURE_ASSET_ID::FEET,
+		 EFFECT_ASSET_ID::ANIMATE,
 		 GEOMETRY_BUFFER_ID::SPRITE});
 
 	return entity;
@@ -133,7 +133,7 @@ Entity createTurtle(RenderSystem *renderer, vec2 position)
 
 	registry.renderRequests2.insert(
 		entity,
-		{TEXTURE_ASSET_ID::FEET1,
+		{TEXTURE_ASSET_ID::FEET,
 		 EFFECT_ASSET_ID::TURTLE,
 		 GEOMETRY_BUFFER_ID::SPRITE});
 

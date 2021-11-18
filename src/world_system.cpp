@@ -187,30 +187,18 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			a.counter_ms = ANIMATION_DELAY_MS;
 			if (registry.players.has(a_entities[i]) || registry.enemies.has(a_entities[i]))
 			{
-				if (r.used_texture == TEXTURE_ASSET_ID::PLAYER7)
-				{
-					r.used_texture = TEXTURE_ASSET_ID::PLAYER;
-				}
-				else
-				{
-					r.used_texture = TEXTURE_ASSET_ID((int)r.used_texture + 1);
+				if (a.sprite_frame == a.player_frames -1){
+					a.sprite_frame = 0;
+				} else {
+					a.sprite_frame += 1;
 				}
 			}
 			if (registry.renderRequests2.has(a_entities[i]))
 			{
-				RenderRequest &r2 = registry.renderRequests2.get(a_entities[i]);
-				ECSRegistry ecsR = registry;
-				ecsR.renderRequests2.has(entity);
-				ECSRegistry ecsR2 = registry;
-				ECSRegistry ecsR3 = registry;
-				ecsR2;
-				if (r2.used_texture == TEXTURE_ASSET_ID::FEET7)
-				{
-					r2.used_texture = TEXTURE_ASSET_ID::FEET1;
-				}
-				else
-				{
-					r2.used_texture = TEXTURE_ASSET_ID((int)r2.used_texture + 1);
+				if (a.sprite_frame == a.feet_frames -1){
+					a.sprite_frame = 0;
+				} else {
+					a.sprite_frame += 1;
 				}
 			}
 		}
