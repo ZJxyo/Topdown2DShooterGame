@@ -119,7 +119,7 @@ Entity createTurtle(RenderSystem *renderer, vec2 position)
 	motion.position = position;
 
 	// Setting initial values, scale is negative to make it face the opposite way
-	motion.scale = vec2({60, 60});
+	motion.scale = vec2({120, 120});
 
 	// Create and (empty) Turtle component to be able to refer to all turtles
 	registry.enemies.emplace(entity);
