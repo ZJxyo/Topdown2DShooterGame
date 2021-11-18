@@ -33,20 +33,8 @@ class RenderSystem
 	const std::array<std::string, texture_count> texture_paths = {
 		textures_path("fish.png"),
 		textures_path("turtle.png"),
-		textures_path("survivor-idle_rifle_0.png"),
-		textures_path("survivor-move_rifle_3.png"),
-		textures_path("survivor-move_rifle_6.png"),
-		textures_path("survivor-move_rifle_9.png"),
-		textures_path("survivor-move_rifle_12.png"),
-		textures_path("survivor-move_rifle_15.png"),
-		textures_path("survivor-move_rifle_18.png"),
-		textures_path("survivor-run_0.png"),
-		textures_path("survivor-run_3.png"),
-		textures_path("survivor-run_6.png"),
-		textures_path("survivor-run_9.png"),
-		textures_path("survivor-run_12.png"),
-		textures_path("survivor-run_15.png"),
-		textures_path("survivor-run_18.png"),
+		textures_path("survivorSpriteSheet.png"),
+		textures_path("runSpriteSheet.png"),
 		textures_path("floor_tile_81.png"),
 		textures_path("wall.png"),
 		textures_path("bullet.png"),
@@ -66,8 +54,9 @@ class RenderSystem
 		shader_path("turtle"),
 		shader_path("textured"),
 		shader_path("water"),
-        shader_path("light"), 
-		shader_path("instances") };
+        shader_path("light"),
+		shader_path("instances"),
+        shader_path("animate")};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
 	std::array<GLuint, geometry_count> index_buffers;
@@ -116,6 +105,8 @@ private:
 	GLuint frame_buffer;
 	GLuint off_screen_render_buffer_color;
 	GLuint off_screen_render_buffer_depth;
+
+	GLuint transform_buffer;
 
 	Entity screen_state_entity;
 };

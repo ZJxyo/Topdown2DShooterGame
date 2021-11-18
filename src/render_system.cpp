@@ -75,7 +75,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
 	}
-	else if ((render_request.used_texture >= TEXTURE_ASSET_ID::PLAYER && render_request.used_texture <= TEXTURE_ASSET_ID::PLAYER7) || (render_request.used_texture >= TEXTURE_ASSET_ID::FEET1 && render_request.used_texture <= TEXTURE_ASSET_ID::FEET7))
+	else if (render_request.used_texture == TEXTURE_ASSET_ID::PLAYER || render_request.used_texture == TEXTURE_ASSET_ID::FEET)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
@@ -96,6 +96,22 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glActiveTexture(GL_TEXTURE0);
 		gl_has_errors();
 
+
+		GLint sprite_width_loc = glGetUniformLocation(program, "spriteWidth");
+		GLint cur_frame_loc = glGetUniformLocation(program, "curframe");
+		GLint frames_loc = glGetUniformLocation(program, "frames");
+		Animate &a = registry.animates.get(entity);
+		if (render_request.used_texture == TEXTURE_ASSET_ID::FEET){
+			glUniform1i(sprite_width_loc, a.feet_width);
+			glUniform1i(cur_frame_loc, a.sprite_frame);
+			glUniform1i(frames_loc, a.feet_frames);
+		} else {
+			glUniform1i(sprite_width_loc, a.player_width);
+			glUniform1i(cur_frame_loc, a.sprite_frame);
+			glUniform1i(frames_loc, a.player_frames);
+		}
+		gl_has_errors();
+
 		GLint light_up_uloc = glGetUniformLocation(program, "team_color");
 		assert(light_up_uloc >= 0);
 		// lightup red for enemy
@@ -111,9 +127,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		assert(registry.renderRequests.has(entity));
 		GLuint texture_id =
 			texture_gl_handles[(GLuint)render_request.used_texture];
-
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		
 		gl_has_errors();
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
@@ -209,9 +223,9 @@ void RenderSystem::drawTexturedInstances(std::vector<Entity>& entities,
 
 	GLuint texture_id = texture_gl_handles[(GLuint)request.used_texture];
 
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	gl_has_errors();
+	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//gl_has_errors();
 	glBindTexture(GL_TEXTURE_2D, texture_id);
 	gl_has_errors();
 
@@ -229,9 +243,7 @@ void RenderSystem::drawTexturedInstances(std::vector<Entity>& entities,
 		transforms.push_back(transform.mat);
 	}
 
-	GLuint transformsBufferID;
-	glGenBuffers(1, &transformsBufferID);
-	glBindBuffer(GL_ARRAY_BUFFER, transformsBufferID);
+	glBindBuffer(GL_ARRAY_BUFFER, transform_buffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat3) * transforms.size(), transforms.data(), GL_STREAM_DRAW);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 3, 0);
 	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 3, (void*)sizeof(vec3));
