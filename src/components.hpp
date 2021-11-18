@@ -135,20 +135,14 @@ struct FireRate
 };
 
 struct ParticleSource {
-	unsigned int size;
-	vec3 color;
+	uint8 size;
 	float radius;
+	float decay;
+	vec3 color;
 	std::vector<vec2> positions;
 	std::vector<vec2> velocities;
-	std::vector<float> alphas;
-	std::vector<float> life_spans;
-	ParticleSource(unsigned int size, vec3 color, float radius,
-		std::vector<vec2> positions, 
-		std::vector<vec2> velocities,
-		std::vector<float> alphas,
-		std::vector<float> life_spans) : 
-		size(size), color(color), radius(radius), 
-		positions(positions), velocities(velocities), alphas(alphas), life_spans(life_spans) {}
+	ParticleSource(uint8 size, float radius, float decay, vec3 color, std::vector<vec2> positions, std::vector<vec2> velocities) :
+		size(size), radius(radius), decay(decay), color(color), positions(positions), velocities(velocities) {}
 };
 
 /**

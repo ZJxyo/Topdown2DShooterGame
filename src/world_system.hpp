@@ -40,6 +40,8 @@ public:
 
 	void update_player_velocity();
 
+	Entity createParticleSource(uint8 size, float radius, float decay, vec3 color, vec2 pos, vec2 vel);
+
 	// Should the game be over ?
 	bool is_over() const;
 
