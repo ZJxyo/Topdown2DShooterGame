@@ -334,10 +334,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	}
 
-	plant_timer -= elapsed_ms_since_last_update * current_speed;
+	if (is_planting && !bomb_planted){
+		plant_timer -= elapsed_ms_since_last_update * current_speed;
+	}
 
-	if (plant_timer < 0 ) {
+	if (plant_timer < 0 && !bomb_planted) {
+		is_planting = false;
 		bomb_planted = true;
+		cout << "planted";
 	} 
 
 
@@ -510,16 +514,20 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 	if (!registry.deathTimers.has(player_salmon)) {
 		if (key == GLFW_KEY_E) {
-			if (action == GLFW_PRESS) {
-				if (can_plant && !bomb_planted) {
-					is_planting = true;
+			if (!bomb_planted){
+				if (action == GLFW_PRESS) {
+					if (can_plant ) {
+						is_planting = true;
+						cout << "planting";
+						
 					
-				
-				} 
+					} 
 
-			}
-			else if (action == GLFW_RELEASE) {
-				plant_timer = 5000.0f;
+				}
+				else if (action == GLFW_RELEASE) {
+					plant_timer = 5000.0f;
+					cout << "plant release";
+				}
 			}
 		}
 		
