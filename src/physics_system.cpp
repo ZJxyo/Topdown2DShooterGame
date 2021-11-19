@@ -169,50 +169,58 @@ void PhysicsSystem::step(float elapsed_ms)
 		float radius = registry.circleColliders.components[i].radius;
 		bool restore_x = false;
 		bool restore_y = false;
+		bool restore_xOry = false;
+		bool restore_xAndy = false;
 		std::vector<float> bb = { pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius };
+		std::vector<float> bb_x = { bb[0] - offset.x, bb[1], bb[2] - offset.x, bb[3] };
+		std::vector<float> bb_y = { bb[0], bb[1] - offset.y, bb[2], bb[3] - offset.y };
 		for (int j = registry.walls.entities.size() - 1; j >= 0; j--) {
-			if (restore_x == true && restore_y == true) {
-			}
 			if (aabb_collides(bb, wall_bb[j])) {
-				if (restore_x == false) {
-					std::vector<float> bb_x = { bb[0] - offset.x, bb[1], bb[2] - offset.x, bb[3] };
-					if (!aabb_collides(bb_x, wall_bb[j])) {
-						pos.x -= offset.x;
-						bb = bb_x;
-						restore_x = true;
-						continue;
-					}
+				// is colliding after restoring x
+				bool rx = aabb_collides(bb_x, wall_bb[j]);
+				// is colliding after restoring y
+				bool ry = aabb_collides(bb_y, wall_bb[j]);
+				
+				if (rx && ry) {
+					restore_xAndy = true;
+					break;
 				}
-
-				if (restore_y == false) {
-					std::vector<float> bb_y = { bb[0], bb[1] - offset.y, bb[2], bb[3] - offset.y };
-					if (!aabb_collides(bb_y, wall_bb[j])) {
-						pos.y -= offset.y;
-						bb = bb_y;
-						restore_y = true;
-						continue;
-					}
+				else if (rx) {
+					restore_y = true;
 				}
-
-				pos -= offset;
-				break;
+				else if (ry) {
+					restore_x = true;
+				}
+				else {
+					restore_xOry = true;
+				}
 			}
 		}
-		// player/enemies vs boundries
-		if (bb[0] < 0) {
-			pos.x -= bb[0];
+
+		bool x_out = bb[0] < 0 || bb[2] > 5000;
+		bool y_out = bb[1] < 0 || bb[3] > 5000;
+
+		if (x_out && y_out) {
+			restore_xAndy = true;
+		}
+		else if (x_out) {
+			restore_x = true;
+		}
+		else if (y_out) {
+			restore_y = true;
 		}
 
-		if (bb[1] < 0) {
-			pos.y -= bb[1];
+		if (restore_xAndy || (restore_x && restore_y)) {
+			pos -= offset;
 		}
-
-		if (bb[2] > 5000) {
-			pos.x -= (bb[2] - 5000);
+		else if (restore_x) {
+			pos.x -= offset.x;
 		}
-
-		if (bb[3] > 5000) {
-			pos.y -= (bb[3] - 5000);
+		else if (restore_y) {
+			pos.y -= offset.y;
+		}
+		else if (restore_xOry) {
+			pos.x -= offset.x;
 		}
 	}
 
