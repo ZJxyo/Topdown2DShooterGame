@@ -335,17 +335,18 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	}
 
 	if (plant_timer < 0 && !bomb_planted) {
+		cout << "planted";
 		is_planting = false;
 		bomb_planted = true;
 		
 	} 
 
 	if (bomb_planted) {
-		
 		explode_timer -= elapsed_ms_since_last_update * current_speed;
 	}
 
 	if (explode_timer < 0 ) {
+		cout << "explode";
 		bomb_exploded =true;
 		
 	}
