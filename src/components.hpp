@@ -135,10 +135,15 @@ struct FireRate
 };
 
 struct ParticleSource {
-	std::vector<Motion> motions;
-	std::vector<vec4> colors;
-	std::vector<float> radii;
-	std::vector<float> life_spans;
+	uint8 size;
+	float radius;
+	float alpha = 1.f;
+	float decay;
+	vec3 color;
+	std::vector<vec2> positions;
+	std::vector<vec2> velocities;
+	ParticleSource(uint8 size, float radius, float decay, vec3 color, std::vector<vec2> positions, std::vector<vec2> velocities) :
+		size(size), radius(radius), decay(decay), color(color), positions(positions), velocities(velocities) {}
 };
 
 /**
@@ -193,7 +198,8 @@ enum class EFFECT_ASSET_ID
 	LIGHT = WATER + 1,
 	INSTANCES = LIGHT + 1,
 	ANIMATE = INSTANCES + 1,
-	EFFECT_COUNT = ANIMATE + 1
+	PARTICLE = ANIMATE + 1,
+	EFFECT_COUNT = PARTICLE + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 

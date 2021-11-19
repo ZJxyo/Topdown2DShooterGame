@@ -36,9 +36,11 @@ public:
 
 	// Check for collisions
 	void handle_collisions();
-	static void handle_collision(Entity entity_1, Entity entity_2);
+	static void handle_bullet_hit(Entity entity_1, Entity entity_2);
 
 	void update_player_velocity();
+
+	static Entity createParticleSource(uint8 size, float radius, float decay, vec3 color, vec2 pos, vec2 dir, float speed);
 
 	// Should the game be over ?
 	bool is_over() const;

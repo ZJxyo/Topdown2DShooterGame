@@ -54,7 +54,9 @@ class RenderSystem
 		shader_path("water"),
         shader_path("light"),
 		shader_path("instances"),
-        shader_path("animate")};
+        shader_path("animate"),
+		shader_path("particle")
+	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
 	std::array<GLuint, geometry_count> index_buffers;
@@ -92,6 +94,7 @@ private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3 &projection, RenderRequest &render_request, vec2 scaling);
 	void drawTexturedInstances(std::vector<Entity>& entities, const mat3& projection, RenderRequest& request);
+	void drawParticles(ParticleSource ps, mat3 projection_2d);
 	void drawToScreen();
 
 	// Window handle

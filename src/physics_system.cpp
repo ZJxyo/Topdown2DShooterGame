@@ -147,7 +147,7 @@ void PhysicsSystem::step(float elapsed_ms)
 		for (int j = registry.circleColliders.entities.size() - 1; j >= 0; j--) {
 			Entity p = registry.circleColliders.entities[j];
 			if (length(bullet_vertices[i] - registry.motions.get(p).position) < registry.circleColliders.components[j].radius) {
-				for (auto callback : callbacks) {
+				for (auto callback : bullet_hit_callbacks) {
 					callback(registry.bullets.entities[i], p);
 				}
 				registry.remove_all_components_of(registry.bullets.entities[i]);
