@@ -19,6 +19,7 @@ const size_t ANIMATION_DELAY_MS = 100;
 const size_t BULLET_TIMER_MS = 100;
 bool toggle = true;
 Entity story1;
+vec2 oldPosition;
 
 // Create the fish world
 WorldSystem::WorldSystem()
@@ -149,7 +150,7 @@ void WorldSystem::init(RenderSystem *renderer_arg)
 	restart_game();
 }
 
-// AIvy
+// AIvy for turtle
 Entity entity;
 // Update our game world
 
@@ -237,8 +238,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
     if(abs(registry.motions.get(player_salmon).position.x -  1000)  < 50
     && abs(registry.motions.get(player_salmon).position.y - 900) < 50) {
 
+
         if(toggle) {
+            oldPosition = registry.motions.get(entity).position;
             story1 = helpMenu.createStroy1(renderer, window, { 1000,900 });
+            registry.motions.get(entity).position = {2000, 300};
+            registry.motions.get(entity).velocity = {0,0};
             toggle = false;
         }
 
@@ -246,6 +251,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
             printf("deleting story1\n");
 //            registry.storyBox.(story1);
             registry.remove_all_components_of(story1);
+            registry.motions.get(entity).position = oldPosition;
         }
     }
 
