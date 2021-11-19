@@ -17,7 +17,9 @@ const size_t MAX_TURTLES = 0;
 const size_t TURTLE_DELAY_MS = 2000 * 3;
 const size_t ANIMATION_DELAY_MS = 100;
 const size_t BULLET_TIMER_MS = 100;
-bool toggle[4] = {true, true, true, true};
+int toggle[4] = {-1, -1, -1, -1};
+Entity stories[4];
+Entity boxes[4];
 Entity story1;
 Entity story2;
 Entity story3;
@@ -242,74 +244,86 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	btIfCondition.process(entity);
 
     // show storybox 1
-    if(abs(registry.motions.get(player_salmon).position.x -  1000)  < 50
-    && abs(registry.motions.get(player_salmon).position.y - 900) < 50) {
+    if(abs(registry.motions.get(player_salmon).position.x -  BOX1_LOCATION.x)  < 50
+    && abs(registry.motions.get(player_salmon).position.y - BOX1_LOCATION.y) < 50) {
 
-        if(toggle[0]) {
+        if(toggle[0] == -1) {
             oldPosition = registry.motions.get(entity).position;
-            story1 = helpMenu.createStroy1(renderer, window, { 1000,900 });
+            stories[0] = helpMenu.createStroy1(renderer, window, { BOX1_LOCATION.x,BOX1_LOCATION.y });
             registry.motions.get(entity).position = {2000, 2000};
             registry.motions.get(entity).velocity = {0,0};
-            toggle[0] = false;
+            toggle[0] = 0;
         }
 
-        if (!helpMenu.showStory1) {
-            registry.remove_all_components_of(story1);
-            registry.motions.get(entity).position = oldPosition;
+        if (!helpMenu.showStory1 && toggle[0] == 0) {
+            registry.remove_all_components_of(stories[0]);
+            toggle[0] = 1;
+            if(toggle[0] == 1) {
+                registry.motions.get(entity).position = oldPosition;
+            }
         }
     }
 
     // show storybox 2
-    if(abs(registry.motions.get(player_salmon).position.x -  300)  < 50
-       && abs(registry.motions.get(player_salmon).position.y - 900) < 50) {
+    if(abs(registry.motions.get(player_salmon).position.x -  BOX2_LOCATION.x)  < 50
+       && abs(registry.motions.get(player_salmon).position.y - BOX2_LOCATION.y) < 50) {
 
-        if(toggle[1]) {
+        if(toggle[1] == -1) {
             oldPosition = registry.motions.get(entity).position;
-            story2 = helpMenu.createStroy2(renderer, window, { 300,900 });
+            stories[1] = helpMenu.createStroy2(renderer, window, { BOX2_LOCATION.x,BOX2_LOCATION.y });
             registry.motions.get(entity).position = {2000, 2000};
             registry.motions.get(entity).velocity = {0,0};
-            toggle[1] = false;
+            toggle[1] = 0;
         }
 
-        if (!helpMenu.showStory2) {
-            registry.remove_all_components_of(story2);
-            registry.motions.get(entity).position = oldPosition;
+        if (!helpMenu.showStory2&& toggle[1] == 0) {
+            registry.remove_all_components_of(stories[1]);
+            toggle[1] = 1;
+            if(toggle[1] == 1) {
+                registry.motions.get(entity).position = oldPosition;
+            }
         }
     }
 
     // show storybox 3
-    if(abs(registry.motions.get(player_salmon).position.x -  300)  < 50
-       && abs(registry.motions.get(player_salmon).position.y - 1200) < 50) {
+    if(abs(registry.motions.get(player_salmon).position.x -  BOX3_LOCATION.x)  < 50
+       && abs(registry.motions.get(player_salmon).position.y - BOX3_LOCATION.y) < 50) {
 
-        if(toggle[2]) {
+        if(toggle[2] == -1) {
             oldPosition = registry.motions.get(entity).position;
-            story3 = helpMenu.createStroy3(renderer, window, { 300,1200 });
+            stories[2] = helpMenu.createStroy3(renderer, window, { BOX3_LOCATION.x,BOX3_LOCATION.y });
             registry.motions.get(entity).position = {2000, 2000};
             registry.motions.get(entity).velocity = {0,0};
-            toggle[2] = false;
+            toggle[2] = 0;
         }
 
-        if (!helpMenu.showStory3) {
-            registry.remove_all_components_of(story3);
-            registry.motions.get(entity).position = oldPosition;
+        if (!helpMenu.showStory3 && toggle[2] == 0) {
+            registry.remove_all_components_of(stories[2]);
+            toggle[2] = 1;
+            if(toggle[2] == 1) {
+                registry.motions.get(entity).position = oldPosition;
+            }
         }
     }
 
     // show storybox 4
-    if(abs(registry.motions.get(player_salmon).position.x -  300)  < 50
-       && abs(registry.motions.get(player_salmon).position.y - 1500) < 50) {
+    if(abs(registry.motions.get(player_salmon).position.x -  BOX4_LOCATION.x)  < 50
+       && abs(registry.motions.get(player_salmon).position.y - BOX4_LOCATION.y) < 50) {
 
-        if(toggle[3]) {
+        if(toggle[3] == -1) {
             oldPosition = registry.motions.get(entity).position;
-            story4 = helpMenu.createStroy4(renderer, window, { 300,1500 });
+            stories[3] = helpMenu.createStroy4(renderer, window, { BOX4_LOCATION.x,BOX4_LOCATION.y });
             registry.motions.get(entity).position = {2000, 2000};
             registry.motions.get(entity).velocity = {0,0};
-            toggle[3] = false;
+            toggle[3] = 0;
         }
 
-        if (!helpMenu.showStory4) {
-            registry.remove_all_components_of(story4);
-            registry.motions.get(entity).position = oldPosition;
+        if (!helpMenu.showStory4 && toggle[3] == 0) {
+            registry.remove_all_components_of(stories[3]);
+            toggle[3] = 1;
+            if(toggle[3] == 1) {
+                registry.motions.get(entity).position = oldPosition;
+            }
         }
     }
 
@@ -412,10 +426,10 @@ void WorldSystem::restart_game()
 	createWall(renderer, {300, 300}, 2.f, {200, 200});
 
     // create story box
-    box1 = createStoryBox(renderer, {1000, 900});
-    box2 = createStoryBox(renderer, {300, 900});
-    box3 = createStoryBox(renderer, {300, 1200});
-    box4 = createStoryBox(renderer, {300, 1500});
+    boxes[0] = createStoryBox(renderer, BOX1_LOCATION);
+    boxes[1] = createStoryBox(renderer, BOX2_LOCATION);
+    boxes[2] = createStoryBox(renderer, BOX3_LOCATION);
+    boxes[3] = createStoryBox(renderer, BOX4_LOCATION);
 
 	// CLEAN
 
@@ -495,22 +509,22 @@ void WorldSystem::on_key(int key, int, int action, int mod)
     if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory1)
     {
         helpMenu.showStory1 = false;
-        registry.remove_all_components_of(box1);
+        registry.remove_all_components_of(boxes[0]);
 
     } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory2)
     {
         helpMenu.showStory2 = false;
-        registry.remove_all_components_of(box2);
+        registry.remove_all_components_of(boxes[1]);
 
     } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory3)
     {
         helpMenu.showStory3 = false;
-        registry.remove_all_components_of(box3);
+        registry.remove_all_components_of(boxes[2]);
 
     } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory4)
     {
         helpMenu.showStory4 = false;
-        registry.remove_all_components_of(box4);
+        registry.remove_all_components_of(boxes[3]);
     }
 
 	// Resetting game
