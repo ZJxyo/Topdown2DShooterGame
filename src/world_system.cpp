@@ -17,8 +17,15 @@ const size_t MAX_TURTLES = 0;
 const size_t TURTLE_DELAY_MS = 2000 * 3;
 const size_t ANIMATION_DELAY_MS = 100;
 const size_t BULLET_TIMER_MS = 100;
-bool toggle = true;
+bool toggle[4] = {true, true, true, true};
 Entity story1;
+Entity story2;
+Entity story3;
+Entity story4;
+Entity box1;
+Entity box2;
+Entity box3;
+Entity box4;
 vec2 oldPosition;
 
 // Create the fish world
@@ -234,26 +241,78 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	btIfCondition.init(entity);
 	btIfCondition.process(entity);
 
-    // show story
+    // show storybox 1
     if(abs(registry.motions.get(player_salmon).position.x -  1000)  < 50
     && abs(registry.motions.get(player_salmon).position.y - 900) < 50) {
 
-
-        if(toggle) {
+        if(toggle[0]) {
             oldPosition = registry.motions.get(entity).position;
             story1 = helpMenu.createStroy1(renderer, window, { 1000,900 });
-            registry.motions.get(entity).position = {2000, 300};
+            registry.motions.get(entity).position = {2000, 2000};
             registry.motions.get(entity).velocity = {0,0};
-            toggle = false;
+            toggle[0] = false;
         }
 
         if (!helpMenu.showStory1) {
-            printf("deleting story1\n");
-//            registry.storyBox.(story1);
             registry.remove_all_components_of(story1);
             registry.motions.get(entity).position = oldPosition;
         }
     }
+
+    // show storybox 2
+    if(abs(registry.motions.get(player_salmon).position.x -  300)  < 50
+       && abs(registry.motions.get(player_salmon).position.y - 900) < 50) {
+
+        if(toggle[1]) {
+            oldPosition = registry.motions.get(entity).position;
+            story2 = helpMenu.createStroy2(renderer, window, { 300,900 });
+            registry.motions.get(entity).position = {2000, 2000};
+            registry.motions.get(entity).velocity = {0,0};
+            toggle[1] = false;
+        }
+
+        if (!helpMenu.showStory2) {
+            registry.remove_all_components_of(story2);
+            registry.motions.get(entity).position = oldPosition;
+        }
+    }
+
+    // show storybox 3
+    if(abs(registry.motions.get(player_salmon).position.x -  300)  < 50
+       && abs(registry.motions.get(player_salmon).position.y - 1200) < 50) {
+
+        if(toggle[2]) {
+            oldPosition = registry.motions.get(entity).position;
+            story3 = helpMenu.createStroy3(renderer, window, { 300,1200 });
+            registry.motions.get(entity).position = {2000, 2000};
+            registry.motions.get(entity).velocity = {0,0};
+            toggle[2] = false;
+        }
+
+        if (!helpMenu.showStory3) {
+            registry.remove_all_components_of(story3);
+            registry.motions.get(entity).position = oldPosition;
+        }
+    }
+
+    // show storybox 4
+    if(abs(registry.motions.get(player_salmon).position.x -  300)  < 50
+       && abs(registry.motions.get(player_salmon).position.y - 1500) < 50) {
+
+        if(toggle[3]) {
+            oldPosition = registry.motions.get(entity).position;
+            story4 = helpMenu.createStroy4(renderer, window, { 300,1500 });
+            registry.motions.get(entity).position = {2000, 2000};
+            registry.motions.get(entity).velocity = {0,0};
+            toggle[3] = false;
+        }
+
+        if (!helpMenu.showStory4) {
+            registry.remove_all_components_of(story4);
+            registry.motions.get(entity).position = oldPosition;
+        }
+    }
+
 
 
 	// process shooting bullets for player
@@ -353,7 +412,10 @@ void WorldSystem::restart_game()
 	createWall(renderer, {300, 300}, 2.f, {200, 200});
 
     // create story box
-    createStoryBox(renderer, {1000, 900});
+    box1 = createStoryBox(renderer, {1000, 900});
+    box2 = createStoryBox(renderer, {300, 900});
+    box3 = createStoryBox(renderer, {300, 1200});
+    box4 = createStoryBox(renderer, {300, 1500});
 
 	// CLEAN
 
@@ -430,9 +492,25 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    if (action == GLFW_PRESS && key == GLFW_KEY_4)
+    if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory1)
     {
-            helpMenu.showStory1 = false;
+        helpMenu.showStory1 = false;
+        registry.remove_all_components_of(box1);
+
+    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory2)
+    {
+        helpMenu.showStory2 = false;
+        registry.remove_all_components_of(box2);
+
+    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory3)
+    {
+        helpMenu.showStory3 = false;
+        registry.remove_all_components_of(box3);
+
+    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory4)
+    {
+        helpMenu.showStory4 = false;
+        registry.remove_all_components_of(box4);
     }
 
 	// Resetting game
