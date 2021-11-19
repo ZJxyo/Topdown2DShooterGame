@@ -20,14 +20,6 @@ const size_t BULLET_TIMER_MS = 100;
 int toggle[4] = {-1, -1, -1, -1};
 Entity stories[4];
 Entity boxes[4];
-Entity story1;
-Entity story2;
-Entity story3;
-Entity story4;
-Entity box1;
-Entity box2;
-Entity box3;
-Entity box4;
 vec2 oldPosition;
 
 // Create the fish world
