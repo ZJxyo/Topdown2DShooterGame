@@ -221,11 +221,6 @@ void createMatrix() {// matrix 2d array
 			}
 			
 		}
-		// for (int i = 0;i <= scale_y; i++) {
-		// 	T[value_y + i][value_x] = 1;
-		// 	T[value_y - i][value_x] = 1;
-		// }
-
 
 		
 	}
@@ -241,7 +236,20 @@ int SetupMap(RenderSystem *renderer)
 	json j;
 	ifs >> j;
 
-	
+	for (json w : j["plant_spots"]) {
+		auto entity = Entity();
+
+		Motion &motion = registry.motions.emplace(entity);
+		registry.plantAreas.emplace(entity);
+
+		int pre_value1 = int(w["position"]["x"]);
+		int pre_value2 = int(w["position"]["y"]);
+		int value1 = pre_value1 + 50;
+		int value2 = pre_value2 + 50;
+
+		motion.position = vec2(value1, value2);
+		motion.scale = vec2(w["scale"]["x"], w["scale"]["y"]);
+	}
 	
 	for (json w : j["walls"])
 	{

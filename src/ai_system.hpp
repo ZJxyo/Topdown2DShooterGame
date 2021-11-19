@@ -342,7 +342,7 @@ private:
 
     BTState process(Entity e) override {
        
-        printf("After shooting, start to build a wall\n");
+        // printf("After shooting, start to build a wall\n");
 
         return BTState::Success;
     }

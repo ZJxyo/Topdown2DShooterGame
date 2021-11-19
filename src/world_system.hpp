@@ -65,6 +65,11 @@ private:
 	Entity player_salmon;
 	bool mouse_down;
 	bool tap;
+	bool can_plant;
+	bool bomb_planted;
+	float plant_timer;
+	float explode_timer;
+	bool is_planting;
 
 	// music references
 	Mix_Music *background_music;

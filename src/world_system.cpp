@@ -22,7 +22,9 @@ const size_t BULLET_TIMER_MS = 100;
 
 // Create the fish world
 WorldSystem::WorldSystem()
-	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f), tap(false)
+	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f), tap(false), can_plant(false),
+	plant_timer(5000.0f), explode_timer(30000.0f), bomb_planted(false), is_planting(false)
+
 {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
@@ -297,12 +299,61 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			}
 		}
 	}
+	
 
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A3: HANDLE PEBBLE SPAWN HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 3
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// check if player is in designated area to plant bomb
 
+	Motion &motion = registry.motions.get(player_salmon);
+	int player_x = motion.position.x ;
+	int player_y = motion.position.y ;
+
+	// if (player_x > 5 && player_x < 13) {
+	// 	if (player_y > 0 && player_y < 6) {
+	// 		can_plant = true;
+	// 	}
+	// } 
+
+
+	auto &pa_entities = registry.plantAreas.entities;
+	for (int i = 0; i < registry.plantAreas.components.size(); i++)
+	{
+		PlantArea &pa = registry.plantAreas.get(pa_entities[i]);
+		Motion &m = registry.motions.get(pa_entities[i]);
+		if (player_x > (m.position.x - (m.scale.x - 100 / 2)) && 
+				player_x < (m.position.x + (m.scale.x - 100 / 2))
+				&& player_y > (m.position.y - (m.scale.y - 100 / 2)) &&
+				player_y < (m.position.y + (m.scale.y - 100 / 2)))
+				 {
+				
+					can_plant = true;
+					break;
+
+			}  else {
+				can_plant = false;
+			}
+
+	}
+
+	plant_timer -= elapsed_ms_since_last_update * current_speed;
+
+	if (plant_timer < 0 ) {
+		bomb_planted = true;
+	} 
+
+
+
+
+
+
+	
+	
+	
+	
+
+
+
+
+	
 	// Processing the salmon state
 	assert(registry.screenStates.components.size() <= 1);
 	ScreenState &screen = registry.screenStates.components[0];
@@ -330,7 +381,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	// reduce window brightness if any of the present salmons is dying
 	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
 
-	// !!! TODO A1: update LightUp timers and remove if time drops below zero, similar to the death counter
+
 
 	return true;
 }
@@ -455,7 +506,28 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			debugging.in_debug_mode = true;
 	}
 
-	// Player movment WASD
+	// Player planting bomb
+
+	if (!registry.deathTimers.has(player_salmon)) {
+		if (key == GLFW_KEY_E) {
+			if (action == GLFW_PRESS) {
+				if (can_plant && !bomb_planted) {
+					is_planting = true;
+					
+				
+				} 
+
+			}
+			else if (action == GLFW_RELEASE) {
+				plant_timer = 5000.0f;
+			}
+		}
+		
+	}
+	
+	
+
+	// Player movment WASD 
 
 	if (!registry.deathTimers.has(player_salmon))
 	{
@@ -546,11 +618,11 @@ void WorldSystem::handle_collision(Entity entity_1, Entity entity_2)
 	if (registry.healths.has(entity_1) && registry.bullets.has(entity_2))
 	{
 		registry.healths.get(entity_1).health -= 10;
-		printf("HP - 10\n");
+		// printf("HP - 10\n");
 	}
 	else if (registry.healths.has(entity_2) && registry.bullets.has(entity_1))
 	{
 		registry.healths.get(entity_2).health -= 10;
-		printf("HP - 10\n");
+		// printf("HP - 10\n");
 	}
 }
