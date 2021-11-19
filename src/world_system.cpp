@@ -23,7 +23,7 @@ const size_t BULLET_TIMER_MS = 100;
 // Create the fish world
 WorldSystem::WorldSystem()
 	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f), tap(false), can_plant(false),
-	plant_timer(5000.0f), explode_timer(30000.0f), bomb_planted(false), is_planting(false)
+	plant_timer(5000.0f), explode_timer(5000.0f), bomb_planted(false), is_planting(false), bomb_exploded(false)
 
 {
 	// Seeding rng with random device
@@ -307,11 +307,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	int player_x = motion.position.x ;
 	int player_y = motion.position.y ;
 
-	// if (player_x > 5 && player_x < 13) {
-	// 	if (player_y > 0 && player_y < 6) {
-	// 		can_plant = true;
-	// 	}
-	// } 
+
 
 
 	auto &pa_entities = registry.plantAreas.entities;
@@ -341,8 +337,20 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	if (plant_timer < 0 && !bomb_planted) {
 		is_planting = false;
 		bomb_planted = true;
-		cout << "planted";
+		
 	} 
+
+	if (bomb_planted) {
+		
+		explode_timer -= elapsed_ms_since_last_update * current_speed;
+	}
+
+	if (explode_timer < 0 ) {
+		bomb_exploded =true;
+		
+	}
+
+	
 
 
 
@@ -514,6 +522,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 	if (!registry.deathTimers.has(player_salmon)) {
 		if (key == GLFW_KEY_E) {
+
 			if (!bomb_planted){
 				if (action == GLFW_PRESS) {
 					if (can_plant ) {
@@ -526,6 +535,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 				}
 				else if (action == GLFW_RELEASE) {
 					plant_timer = 5000.0f;
+					is_planting = false;
 					cout << "plant release";
 				}
 			}
@@ -578,6 +588,13 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			{
 				player.velocity_left = 0;
 			}
+		}
+
+		if (is_planting) {
+			player.velocity_up = 0;
+			player.velocity_right = 0;
+			player.velocity_left = 0;
+			player.velocity_down = 0;
 		}
 	}
 
