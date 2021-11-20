@@ -364,7 +364,7 @@ void RenderSystem::drawToScreen()
 	// Set clock
 	GLuint time_uloc = glGetUniformLocation(water_program, "time");
 	GLuint dead_timer_uloc = glGetUniformLocation(water_program, "darken_screen_factor");
-	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
+	glUniform1f(time_uloc, (float)glfwGetTime());
 	ScreenState &screen = registry.screenStates.get(screen_state_entity);
 	glUniform1f(dead_timer_uloc, screen.darken_screen_factor);
 	gl_has_errors();
