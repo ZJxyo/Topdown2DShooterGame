@@ -32,3 +32,4 @@ void Fill(MyArray &T);
 void Print(const MyArray &T);
 
 Entity createBullet(RenderSystem *renderer, vec2 position, float angle);
+Entity createLightSource(float radius, vec2 pos, std::vector<vec2>& vertices, std::vector<unsigned int>& indices);

@@ -325,6 +325,7 @@ void PhysicsSystem::step(float elapsed_ms)
 	vec2 player_pos = registry.motions.get(registry.players.entities[0]).position;
 	std::vector<vec2> light_polygon = compute_light_polygon(500.f, player_pos, wall_vertices);
 	std::vector<unsigned int> light_polygon_indices = compute_light_polygon_indices(light_polygon.size());
+	createLightSource(500.f, player_pos, light_polygon, light_polygon_indices);
 
 	// debugging of bounding boxes
 	if (debugging.in_debug_mode)
