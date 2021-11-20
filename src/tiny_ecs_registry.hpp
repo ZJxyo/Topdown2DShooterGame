@@ -35,6 +35,7 @@ public:
 	ComponentContainer<Animate> animates;
 	ComponentContainer<FireRate> fireRates;
 	ComponentContainer<ParticleSource> particleSources;
+	ComponentContainer<LightSource> lightSources;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -64,6 +65,7 @@ public:
 		registry_list.push_back(&animates);
 		registry_list.push_back(&fireRates);
 		registry_list.push_back(&particleSources);
+		registry_list.push_back(&lightSources);
 	}
 
 	void clear_all_components()

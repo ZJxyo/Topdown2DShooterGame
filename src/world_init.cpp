@@ -366,3 +366,11 @@ Entity createBullet(RenderSystem *renderer, vec2 pos, float angle)
 
 	return entity;
 }
+
+Entity createLightSource(float radius, vec2 pos, std::vector<vec2>& vertices, std::vector<unsigned int>& indices) {
+	
+	Entity entity = Entity();
+	registry.lightSources.emplace(entity, radius, pos, vertices, indices);
+
+	return entity;
+}

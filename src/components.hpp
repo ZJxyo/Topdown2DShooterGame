@@ -146,6 +146,15 @@ struct ParticleSource {
 		size(size), radius(radius), decay(decay), color(color), positions(positions), velocities(velocities) {}
 };
 
+struct LightSource {
+	float radius;
+	vec2 pos = vec2(0.f, 0.f);
+	std::vector<vec2> vertices;
+	std::vector<unsigned int> indices;
+	LightSource(float radius, vec2 pos, std::vector<vec2> vertices, std::vector<unsigned int> indices) :
+		radius(radius), pos(pos), vertices(vertices), indices(indices) {}
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
