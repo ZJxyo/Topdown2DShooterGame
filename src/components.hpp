@@ -146,6 +146,10 @@ struct ParticleSource {
 		size(size), radius(radius), decay(decay), color(color), positions(positions), velocities(velocities) {}
 };
 
+struct StoryBox {
+    bool isOpened = false;
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
@@ -183,7 +187,12 @@ enum class TEXTURE_ASSET_ID
 	HELP1 = HELP0 + 1,
 	HELP2 = HELP1 + 1,
 	HELP3 = HELP2 + 1,
-	TEXTURE_COUNT = HELP3 + 1
+    STORY_BOX = HELP3 + 1,
+    STORY1 = STORY_BOX + 1,
+    STORY2 = STORY1 + 1,
+    STORY3 = STORY2 + 1,
+    STORY4 = STORY3 + 1,
+	TEXTURE_COUNT = STORY4 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
