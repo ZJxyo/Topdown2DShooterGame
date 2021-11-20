@@ -498,22 +498,22 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory1)
+    if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory1 && toggle[0] == 0)
     {
         helpMenu.showStory1 = false;
         registry.remove_all_components_of(boxes[0]);
 
-    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory2)
+    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory2 && toggle[1] == 0)
     {
         helpMenu.showStory2 = false;
         registry.remove_all_components_of(boxes[1]);
 
-    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory3)
+    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory3 && toggle[2] == 0)
     {
         helpMenu.showStory3 = false;
         registry.remove_all_components_of(boxes[2]);
 
-    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory4)
+    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory4 && toggle[3] == 0)
     {
         helpMenu.showStory4 = false;
         registry.remove_all_components_of(boxes[3]);
