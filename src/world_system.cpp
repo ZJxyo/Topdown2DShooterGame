@@ -428,6 +428,17 @@ void WorldSystem::restart_game()
 
 	SetupMap(renderer);
 	createMatrix();
+	/*const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+	float height = (float)(mode->height / 6 * 4) / 2.f;
+	float width = (float)(mode->height) / 2.f;
+	std::vector<vec2> vertices = {
+		vec2(-width, -height),
+		vec2(width, -height),
+		vec2(width, height),
+		vec2(-width, height),
+	};
+	std::vector<unsigned int> indices = { 0, 1, 3, 1, 3, 2 };
+	createLightSource(500.f, vec2(0, 0), vertices, indices);*/
 	createWall(renderer, {300, 300}, 2.f, {200, 200});
 
     // create story box

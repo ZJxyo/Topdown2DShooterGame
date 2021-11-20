@@ -28,7 +28,8 @@ std::vector<vec2> compute_light_polygon(float radius, vec2& pos, std::vector<std
 		for (int i = 0; i < wv.size(); i++) {
 			vec2 v1 = wv[i] - pos;
 			vec2 v2 = wv[(i + 1) % wv.size()] - pos;
-			if (length(v1) < radius || length(v2) < radius) {
+			if ((v1.x > -radius && v1.x < radius) || (v1.y > -radius && v1.y < radius) ||
+				(v2.x > -radius && v2.x < radius) || (v2.y > -radius && v2.y < radius)) {
 				segments.push_back(vec4(v1, v2));
 			}
 
@@ -331,10 +332,11 @@ void PhysicsSystem::step(float elapsed_ms)
 		}
 	}
 
+	/*registry.remove_all_components_of(registry.lightSources.entities[0]);
 	vec2 player_pos = registry.motions.get(registry.players.entities[0]).position;
 	std::vector<vec2> light_polygon = compute_light_polygon(500.f, player_pos, wall_vertices);
 	std::vector<unsigned int> light_polygon_indices = compute_light_polygon_indices(light_polygon.size());
-	createLightSource(500.f, player_pos, light_polygon, light_polygon_indices);
+	createLightSource(1000.f, player_pos, light_polygon, light_polygon_indices);*/
 
 	// debugging of bounding boxes
 	if (debugging.in_debug_mode)
