@@ -134,6 +134,12 @@ struct FireRate
 	float fire_rate = 0;
 };
 
+struct PlantArea
+{
+	
+};
+
+
 struct ParticleSource {
 	uint8 size;
 	float radius;
@@ -198,7 +204,9 @@ enum class TEXTURE_ASSET_ID
 	GROUND_WOOD = FEET + 1,
 	WALL = GROUND_WOOD + 1,
 	BULLET = WALL + 1,
-	HELP0 = BULLET + 1,
+	WIN = BULLET + 1,
+	BOMB = WIN + 1,
+	HELP0 = BOMB + 1,
 	HELP1 = HELP0 + 1,
 	HELP2 = HELP1 + 1,
 	HELP3 = HELP2 + 1,
@@ -220,7 +228,8 @@ enum class EFFECT_ASSET_ID
 	TEXTURED = TURTLE + 1,
 	WATER = TEXTURED + 1,
 	LIGHT = WATER + 1,
-	INSTANCES = LIGHT + 1,
+	PLANTSPOT = LIGHT + 1,
+	INSTANCES = PLANTSPOT + 1,
 	ANIMATE = INSTANCES + 1,
 	PARTICLE = ANIMATE + 1,
 	EFFECT_COUNT = PARTICLE + 1
