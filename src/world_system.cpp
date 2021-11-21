@@ -336,6 +336,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	if (plant_timer < 0 && !bomb_planted) {
 		cout << "planted";
+		createBomb(renderer,motion.position);
 		is_planting = false;
 		bomb_planted = true;
 		

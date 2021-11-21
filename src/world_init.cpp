@@ -185,6 +185,25 @@ Entity createPebble(vec2 pos, vec2 size)
 
 	return entity;
 }
+
+Entity createBomb(RenderSystem *renderer, vec2 pos){
+
+	Entity bomb = Entity();
+	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(bomb, &mesh);
+	Motion &m = registry.motions.emplace(bomb);
+	m.position = pos;
+	m.scale = {50.f,50.f};
+	m.velocity = {0.f,0.f};
+	m.angle = 0.f;
+	registry.renderRequests.insert(
+			bomb,
+			{TEXTURE_ASSET_ID::WALL,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	return bomb;
+}
+
 struct wall
 {
 	vec2 position;
