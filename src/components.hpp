@@ -7,11 +7,6 @@
 // Player component
 struct Player
 {
-	float speed = 500;
-	float velocity_left;
-	float velocity_right;
-	float velocity_up;
-	float velocity_down;
 };
 
 struct Bullet
@@ -20,7 +15,7 @@ struct Bullet
 };
 
 // Turtles and pebbles have a hard shell
-struct HardShell
+struct Enemy
 {
 };
 
@@ -102,7 +97,7 @@ struct Health
 };
 
 // Collider shapes for collision detection, default box collider
-struct Collider
+struct PolygonCollider
 {
 	std::vector<vec3> vertices = {
 		{-0.5f, -0.5f, 1.f},
@@ -111,14 +106,27 @@ struct Collider
 		{-0.5f, 0.5f, 1.f}};
 };
 
+struct CircleCollider {
+	float radius;
+	CircleCollider(float radius) : radius(radius) {}
+};
+
+struct PointCollider {};
+
 // indicate this is a wall type object
 struct Wall
 {
 };
 
+
 struct Animate
 {
 	float counter_ms = 100;
+	int sprite_frame = 0;
+	int feet_frames = 7;
+	int player_frames = 7;
+	int feet_width = 204;
+	int player_width = 254;
 };
 
 struct FireRate
@@ -132,6 +140,28 @@ struct PlantArea
 };
 
 
+struct ParticleSource {
+	uint8 size;
+	float radius;
+	float alpha = 1.f;
+	float decay;
+	vec3 color;
+	std::vector<vec2> positions;
+	std::vector<vec2> velocities;
+	ParticleSource(uint8 size, float radius, float decay, vec3 color, std::vector<vec2> positions, std::vector<vec2> velocities) :
+		size(size), radius(radius), decay(decay), color(color), positions(positions), velocities(velocities) {}
+};
+
+
+struct ShockwaveSource {
+	vec2 pos = vec2(0.f, 0.f);
+	float time_elapsed = 0.f;
+	ShockwaveSource(vec2 pos) : pos(pos), time_elapsed(time_elapsed) {}
+};
+
+struct StoryBox {
+    bool isOpened = false;
+};
 
 /**
  * The following enumerators represent global identifiers refering to graphic
@@ -162,27 +192,20 @@ enum class TEXTURE_ASSET_ID
 	FISH = 0,
 	TURTLE = FISH + 1,
 	PLAYER = TURTLE + 1,
-	PLAYER2 = PLAYER + 1,
-	PLAYER3 = PLAYER2 + 1,
-	PLAYER4 = PLAYER3 + 1,
-	PLAYER5 = PLAYER4 + 1,
-	PLAYER6 = PLAYER5 + 1,
-	PLAYER7 = PLAYER6 + 1,
-	FEET1 = PLAYER7 + 1,
-	FEET2 = FEET1 + 1,
-	FEET3 = FEET2 + 1,
-	FEET4 = FEET3 + 1,
-	FEET5 = FEET4 + 1,
-	FEET6 = FEET5 + 1,
-	FEET7 = FEET6 + 1,
-	GROUND_WOOD = FEET7 + 1,
+	FEET = PLAYER + 1,
+	GROUND_WOOD = FEET + 1,
 	WALL = GROUND_WOOD + 1,
 	BULLET = WALL + 1,
 	HELP0 = BULLET + 1,
 	HELP1 = HELP0 + 1,
 	HELP2 = HELP1 + 1,
 	HELP3 = HELP2 + 1,
-	TEXTURE_COUNT = HELP3 + 1
+    STORY_BOX = HELP3 + 1,
+    STORY1 = STORY_BOX + 1,
+    STORY2 = STORY1 + 1,
+    STORY3 = STORY2 + 1,
+    STORY4 = STORY3 + 1,
+	TEXTURE_COUNT = STORY4 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -196,7 +219,10 @@ enum class EFFECT_ASSET_ID
 	WATER = TEXTURED + 1,
 	LIGHT = WATER + 1,
 	PLANTSPOT = LIGHT + 1,
-	EFFECT_COUNT = PLANTSPOT + 1
+	INSTANCES = PLANTSPOT + 1,
+	ANIMATE = INSTANCES + 1,
+	PARTICLE = ANIMATE + 1,
+	EFFECT_COUNT = PARTICLE + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 

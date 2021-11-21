@@ -75,7 +75,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
 	}
-	else if ((render_request.used_texture >= TEXTURE_ASSET_ID::PLAYER && render_request.used_texture <= TEXTURE_ASSET_ID::PLAYER7) || (render_request.used_texture >= TEXTURE_ASSET_ID::FEET1 && render_request.used_texture <= TEXTURE_ASSET_ID::FEET7))
+	else if (render_request.used_texture == TEXTURE_ASSET_ID::PLAYER || render_request.used_texture == TEXTURE_ASSET_ID::FEET)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
@@ -96,10 +96,26 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glActiveTexture(GL_TEXTURE0);
 		gl_has_errors();
 
+
+		GLint sprite_width_loc = glGetUniformLocation(program, "spriteWidth");
+		GLint cur_frame_loc = glGetUniformLocation(program, "curframe");
+		GLint frames_loc = glGetUniformLocation(program, "frames");
+		Animate &a = registry.animates.get(entity);
+		if (render_request.used_texture == TEXTURE_ASSET_ID::FEET){
+			glUniform1i(sprite_width_loc, a.feet_width);
+			glUniform1i(cur_frame_loc, a.sprite_frame);
+			glUniform1i(frames_loc, a.feet_frames);
+		} else {
+			glUniform1i(sprite_width_loc, a.player_width);
+			glUniform1i(cur_frame_loc, a.sprite_frame);
+			glUniform1i(frames_loc, a.player_frames);
+		}
+		gl_has_errors();
+
 		GLint light_up_uloc = glGetUniformLocation(program, "team_color");
 		assert(light_up_uloc >= 0);
 		// lightup red for enemy
-		if (registry.hardShells.has(entity))
+		if (registry.enemies.has(entity))
 		{
 			glUniform1i(light_up_uloc, 1);
 		}
@@ -111,9 +127,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		assert(registry.renderRequests.has(entity));
 		GLuint texture_id =
 			texture_gl_handles[(GLuint)render_request.used_texture];
-
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		
 		gl_has_errors();
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
@@ -183,6 +197,139 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	gl_has_errors();
 }
 
+void RenderSystem::drawTexturedInstances(std::vector<Entity>& entities,
+	const mat3& projection, RenderRequest& request) {
+
+	const GLuint program = (GLuint)effects[(GLuint)request.used_effect];
+	glUseProgram(program);
+	gl_has_errors();
+
+	const GLuint vbo = vertex_buffers[(GLuint)request.used_geometry];
+	const GLuint ibo = index_buffers[(GLuint)request.used_geometry];
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	gl_has_errors();
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), 0);
+	glEnableVertexAttribArray(0);
+	gl_has_errors();
+
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)sizeof(vec3));
+	glEnableVertexAttribArray(1);
+	gl_has_errors();
+
+	glActiveTexture(GL_TEXTURE0);
+	gl_has_errors();
+
+	GLuint texture_id = texture_gl_handles[(GLuint)request.used_texture];
+
+	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//gl_has_errors();
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+	gl_has_errors();
+
+	vec2 player_postion = registry.motions.get(registry.players.entities[0]).position;
+	vec2 offset = vec2(window_width_px / 2.f - player_postion.x, window_height_px / 2.f - player_postion.y);
+
+	std::vector<glm::mat3> transforms;
+
+	for (auto e : entities) {
+		Motion& motion = registry.motions.get(e);
+		Transform transform;
+		transform.translate(motion.position + offset);
+		transform.rotate(motion.angle);
+		transform.scale(motion.scale);
+		transforms.push_back(transform.mat);
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, transform_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat3) * transforms.size(), transforms.data(), GL_STREAM_DRAW);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 3, 0);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 3, (void*)sizeof(vec3));
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 3, (void*)(sizeof(vec3) * 2));
+	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(3);
+	glEnableVertexAttribArray(4);
+	glVertexAttribDivisor(2, 1);
+	glVertexAttribDivisor(3, 1);
+	glVertexAttribDivisor(4, 1);
+	gl_has_errors();
+
+	GLint projection_loc = glGetUniformLocation(program, "projection");
+	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projection);
+	gl_has_errors();
+
+	GLint size = 0;
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+	gl_has_errors();
+
+	GLsizei num_indices = size / sizeof(uint16_t);
+
+	glDrawElementsInstanced(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr, entities.size());
+	gl_has_errors();
+}
+
+void RenderSystem::drawParticles(ParticleSource ps, mat3 projection) {
+	const GLuint program = (GLuint)effects[(GLuint)EFFECT_ASSET_ID::PARTICLE];
+	glUseProgram(program);
+	gl_has_errors();
+
+	const GLuint vbo = vertex_buffers[(GLuint)GEOMETRY_BUFFER_ID::SPRITE];
+	const GLuint ibo = index_buffers[(GLuint)GEOMETRY_BUFFER_ID::SPRITE];
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	gl_has_errors();
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), 0);
+	glEnableVertexAttribArray(0);
+	gl_has_errors();
+
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)sizeof(vec3));
+	glEnableVertexAttribArray(1);
+	gl_has_errors();
+
+	vec2 player_postion = registry.motions.get(registry.players.entities[0]).position;
+	vec2 offset = vec2(window_width_px / 2.f - player_postion.x, window_height_px / 2.f - player_postion.y);
+
+	std::vector<vec2> positions;
+	for (int i = 0; i < ps.size; i++) {
+		positions.push_back(ps.positions[i] + offset);
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, transform_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vec2) * positions.size(), positions.data(), GL_STREAM_DRAW);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vec2), 0);
+	glEnableVertexAttribArray(2);
+	glVertexAttribDivisor(2, 1);
+	gl_has_errors();
+
+	GLint radius_loc = glGetUniformLocation(program, "radius");
+	glUniform1f(radius_loc, ps.radius);
+	gl_has_errors();
+
+	GLint alpha_loc = glGetUniformLocation(program, "alpha");
+	glUniform1f(alpha_loc, ps.alpha);
+	gl_has_errors();
+
+	GLint color_loc = glGetUniformLocation(program, "color");
+	glUniform3f(color_loc, ps.color.x, ps.color.y, ps.color.z);
+	gl_has_errors();
+
+	GLint projection_loc = glGetUniformLocation(program, "projection");
+	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projection);
+	gl_has_errors();
+
+	GLint size = 0;
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+	gl_has_errors();
+
+	GLsizei num_indices = size / sizeof(uint16_t);
+
+	glDrawElementsInstanced(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr, ps.size);
+	gl_has_errors();
+}
+
 // draw the intermediate texture to the screen, with some distortion to simulate
 // water
 void RenderSystem::drawToScreen()
@@ -215,11 +362,21 @@ void RenderSystem::drawToScreen()
 	gl_has_errors();
 	const GLuint water_program = effects[(GLuint)EFFECT_ASSET_ID::WATER];
 	// Set clock
+
 	GLuint time_uloc = glGetUniformLocation(water_program, "time");
-	GLuint dead_timer_uloc = glGetUniformLocation(water_program, "darken_screen_factor");
-	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
-	ScreenState &screen = registry.screenStates.get(screen_state_entity);
-	glUniform1f(dead_timer_uloc, screen.darken_screen_factor);
+	GLuint pos_uloc = glGetUniformLocation(water_program, "shockwave_position");
+
+	if (registry.shockwaveSource.size() > 0) {
+		ShockwaveSource& sws = registry.shockwaveSource.components[0];
+		vec2 pos = registry.motions.get(registry.players.entities[0]).position;
+		glUniform1f(time_uloc, sws.time_elapsed);
+		glUniform2f(pos_uloc, (sws.pos.x - pos.x) / window_width_px + 0.5f, -(sws.pos.y - pos.y) / window_height_px + 0.5f);
+	}
+	else {
+		glUniform1f(time_uloc, 100.f);
+		glUniform2f(pos_uloc, 0.f, 0.f);
+	}
+
 	gl_has_errors();
 	// Set the vertex position and vertex texture coordinates (both stored in the
 	// same VBO)
@@ -292,6 +449,14 @@ void RenderSystem::draw()
 
 		RenderRequest &render_request = registry.renderRequests.get(entity);
 		drawTexturedMesh(entity, projection_2D, render_request);
+	}
+
+	if (registry.bulletsRenderRequests.entities.size() > 0) {
+		drawTexturedInstances(registry.bulletsRenderRequests.entities, projection_2D, registry.bulletsRenderRequests.components[0]);
+	}
+
+	for (ParticleSource ps : registry.particleSources.components) {
+		drawParticles(ps, projection_2D);
 	}
 
 	// Truely render to the screen

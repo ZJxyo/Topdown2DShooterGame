@@ -13,6 +13,7 @@
 #include "HelpMenu.h"
 
 using Clock = std::chrono::high_resolution_clock;
+const vec2 INTRO_LOCATION = {1000, 1000};
 
 
 // Entry point
@@ -40,7 +41,7 @@ int main()
 	renderer.init(window_width_px, window_height_px, window);
 	world.init(&renderer);
 
-	physics.callbacks.emplace_back(WorldSystem::handle_collision);
+	physics.bullet_hit_callbacks.emplace_back(WorldSystem::handle_bullet_hit);
 
 	// variable timestep loop
 	auto t = Clock::now();
@@ -58,14 +59,14 @@ int main()
         renderer.draw();
         // menu intro loop
         if(helpMenu.showInto) {
-            helpMenu.createInto(&renderer, window, { 1000,1000 });
+            helpMenu.createInto(&renderer, window, INTRO_LOCATION);
 //            ai.BFS(0,0, 40,35);
             helpMenu.showInto = false;
         }
 
         // show menu page loop
         if(helpMenu.showMenu && !helpMenu.showInto) {
-            helpMenu.createMenu(&renderer, window, { 1000,1000 });
+            helpMenu.createMenu(&renderer, window, INTRO_LOCATION);
             if(!helpMenu.showMenu) {
                 world.init(&renderer);
             }

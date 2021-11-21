@@ -12,6 +12,7 @@
 #include <SDL_mixer.h>
 
 #include "render_system.hpp"
+#include "HelpMenu.h"
 
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
@@ -36,7 +37,11 @@ public:
 
 	// Check for collisions
 	void handle_collisions();
-	static void handle_collision(Entity entity_1, Entity entity_2);
+	static void handle_bullet_hit(Entity entity_1, Entity entity_2);
+
+	void update_player_velocity();
+
+	static Entity createParticleSource(uint8 size, float radius, float decay, vec3 color, vec2 pos, vec2 dir, float speed);
 
 	// Should the game be over ?
 	bool is_over() const;
@@ -59,6 +64,7 @@ private:
 	// Game state
 	RenderSystem *renderer;
 	float current_speed;
+	float player_speed = 500;
 	float next_turtle_spawn;
 	float next_fish_spawn;
 	float next_animation;
@@ -80,4 +86,18 @@ private:
 	// C++ random number generator
 	std::default_random_engine rng;
 	std::uniform_real_distribution<float> uniform_dist; // number between 0..1
+
+	struct Input {
+		float up = 0;
+		float down = 0;
+		float left = 0;
+		float right = 0;
+	};
+
+	Input input;
+    HelpMenu helpMenu;
+    const vec2 BOX1_LOCATION = {1000, 900};
+    const vec2 BOX2_LOCATION = {300, 900};
+    const vec2 BOX3_LOCATION = {300, 1200};
+    const vec2 BOX4_LOCATION = {300, 1500};
 };

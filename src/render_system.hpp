@@ -33,27 +33,20 @@ class RenderSystem
 	const std::array<std::string, texture_count> texture_paths = {
 		textures_path("fish.png"),
 		textures_path("turtle.png"),
-		textures_path("survivor-idle_rifle_0.png"),
-		textures_path("survivor-move_rifle_3.png"),
-		textures_path("survivor-move_rifle_6.png"),
-		textures_path("survivor-move_rifle_9.png"),
-		textures_path("survivor-move_rifle_12.png"),
-		textures_path("survivor-move_rifle_15.png"),
-		textures_path("survivor-move_rifle_18.png"),
-		textures_path("survivor-run_0.png"),
-		textures_path("survivor-run_3.png"),
-		textures_path("survivor-run_6.png"),
-		textures_path("survivor-run_9.png"),
-		textures_path("survivor-run_12.png"),
-		textures_path("survivor-run_15.png"),
-		textures_path("survivor-run_18.png"),
+		textures_path("survivorSpriteSheet.png"),
+		textures_path("runSpriteSheet.png"),
 		textures_path("floor_tile_81.png"),
 		textures_path("wall.png"),
 		textures_path("bullet.png"),
     textures_path("help0.png"),
     textures_path("help1.png"),
     textures_path("help2.png"),
-    textures_path("help3.png")};
+    textures_path("help3.png"),
+        textures_path("storyBox.png"),
+        textures_path("story1.png"),
+        textures_path("story2.png"),
+        textures_path("story3.png"),
+        textures_path("story4.png")};
 
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -65,8 +58,11 @@ class RenderSystem
 		shader_path("textured"),
 		shader_path("water"),
         shader_path("light"),
-        shader_path("plantspot")
-		};
+        shader_path("plantspot"),
+		shader_path("instances"),
+        shader_path("animate"),
+		shader_path("particle")
+	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
 	std::array<GLuint, geometry_count> index_buffers;
@@ -103,6 +99,8 @@ public:
 private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3 &projection, RenderRequest &render_request, vec2 scaling);
+	void drawTexturedInstances(std::vector<Entity>& entities, const mat3& projection, RenderRequest& request);
+	void drawParticles(ParticleSource ps, mat3 projection_2d);
 	void drawToScreen();
 
 	// Window handle
@@ -114,6 +112,8 @@ private:
 	GLuint frame_buffer;
 	GLuint off_screen_render_buffer_color;
 	GLuint off_screen_render_buffer_depth;
+
+	GLuint transform_buffer;
 
 	Entity screen_state_entity;
 };
