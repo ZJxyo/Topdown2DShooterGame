@@ -38,6 +38,7 @@ class RenderSystem
 		textures_path("floor_tile_81.png"),
 		textures_path("wall.png"),
 		textures_path("bullet.png"),
+		textures_path("win.png"),
     textures_path("help0.png"),
     textures_path("help1.png"),
     textures_path("help2.png"),

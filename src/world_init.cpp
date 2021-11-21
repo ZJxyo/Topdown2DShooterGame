@@ -206,6 +206,25 @@ Entity createBomb(RenderSystem *renderer, vec2 pos){
 	return bomb;
 }
 
+
+
+Entity createEndScreen(RenderSystem *renderer, vec2 pos){
+
+	Entity endscreen = Entity();
+	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(endscreen, &mesh);
+	Motion &m = registry.motions.emplace(endscreen);
+	m.position = pos;
+	m.scale = {600.f,300.f};
+	m.velocity = {0.f,0.f};
+	m.angle = 0.f;
+	registry.renderRequests.insert(
+			endscreen,
+			{TEXTURE_ASSET_ID::WIN,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	return endscreen;
+}
 struct wall
 {
 	vec2 position;

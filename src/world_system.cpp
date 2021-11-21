@@ -169,6 +169,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	while (registry.debugComponents.entities.size() > 0)
 		registry.remove_all_components_of(registry.debugComponents.entities.back());
 
+	if(bomb_exploded){
+		return true;
+	}
+
 	//update animation
 	Player p = registry.players.get(player_salmon);
 	auto &a_entities = registry.animates.entities;
@@ -398,27 +402,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		explode_timer -= elapsed_ms_since_last_update * current_speed;
 	}
 
-	if (explode_timer < 0 ) {
+	if (explode_timer < 0 && !bomb_exploded) {
 		cout << "explode";
-		bomb_exploded =true;
+		bomb_exploded = true;
 		
+		createEndScreen(renderer,motion.position);
 	}
 
 	
-
-
-
-
-
-
-	
-	
-	
-	
-
-
-
-
 	
 	// Processing the salmon state
 	assert(registry.screenStates.components.size() <= 1);
@@ -493,7 +484,7 @@ void WorldSystem::restart_game()
 
 	SetupMap(renderer);
 	createMatrix();
-	createWall(renderer, {300, 300}, 2.f, {200, 200});
+	//createWall(renderer, {300, 300}, 2.f, {200, 200});
 
     // create story box
     boxes[0] = createStoryBox(renderer, BOX1_LOCATION);
@@ -571,6 +562,9 @@ bool WorldSystem::is_over() const
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod)
 {
+
+	
+
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// key is of 'type' GLFW_KEY_
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
@@ -601,6 +595,15 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
 	{
 		restart_game();
+	}
+
+	if(bomb_exploded){
+		input.up = 0;
+		input.down = 0;
+		input.left = 0;
+		input.right = 0;
+		update_player_velocity();
+		return;
 	}
 
 	// Debugging
@@ -691,11 +694,11 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		}
 
 		if (is_planting) {
-				input.up = 0;
-				input.down = 0;
-				input.left = 0;
-				input.right = 0;
-				update_player_velocity();
+			input.up = 0;
+			input.down = 0;
+			input.left = 0;
+			input.right = 0;
+			update_player_velocity();
 		}
 	}
 
