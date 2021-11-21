@@ -8,7 +8,7 @@ in vec2 texcoord;
 
 layout(location = 0) out vec4 color;
 
-//
+// adapted from Darthmarshie's work on shadertoy.com
 void main()
 {
 	color = texture(screen_texture, texcoord);
