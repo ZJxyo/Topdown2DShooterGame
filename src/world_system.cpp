@@ -19,6 +19,7 @@ const size_t ANIMATION_DELAY_MS = 100;
 const size_t BULLET_TIMER_MS = 100;
 const size_t BOMB_TIMER_MS = 40000.f;
 const size_t FOOTSTEPS_SOUND_TIMER_MS = 400.f;
+const size_t PLANT_TIMER_MS = 2000.0f;
 int toggle[4] = {-1, -1, -1, -1};
 Entity stories[4];
 Entity boxes[4];
@@ -27,7 +28,7 @@ vec2 oldPosition;
 // Create the fish world
 WorldSystem::WorldSystem()
 	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f), tap(false), can_plant(false),
-	plant_timer(2000.0f), explode_timer(BOMB_TIMER_MS), bomb_planted(false), is_planting(false), bomb_exploded(false),footsteps_timer(FOOTSTEPS_SOUND_TIMER_MS)
+	plant_timer(PLANT_TIMER_MS), explode_timer(BOMB_TIMER_MS), bomb_planted(false), is_planting(false), bomb_exploded(false),footsteps_timer(FOOTSTEPS_SOUND_TIMER_MS)
 
 {
 	// Seeding rng with random device
@@ -682,7 +683,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 				}
 				else if (action == GLFW_RELEASE) {
-					plant_timer = 5000.0f;
+					plant_timer = PLANT_TIMER_MS;
 					is_planting = false;
 					//cout << "plant release";
 				}
