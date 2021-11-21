@@ -17,6 +17,8 @@ const size_t MAX_TURTLES = 0;
 const size_t TURTLE_DELAY_MS = 2000 * 3;
 const size_t ANIMATION_DELAY_MS = 100;
 const size_t BULLET_TIMER_MS = 100;
+const size_t BOMB_TIMER_MS = 40000.f;
+const size_t FOOTSTEPS_SOUND_TIMER_MS = 400.f;
 int toggle[4] = {-1, -1, -1, -1};
 Entity stories[4];
 Entity boxes[4];
@@ -25,7 +27,7 @@ vec2 oldPosition;
 // Create the fish world
 WorldSystem::WorldSystem()
 	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f), tap(false), can_plant(false),
-	plant_timer(5000.0f), explode_timer(5000.0f), bomb_planted(false), is_planting(false), bomb_exploded(false)
+	plant_timer(2000.0f), explode_timer(BOMB_TIMER_MS), bomb_planted(false), is_planting(false), bomb_exploded(false),footsteps_timer(FOOTSTEPS_SOUND_TIMER_MS)
 
 {
 	// Seeding rng with random device
@@ -41,6 +43,17 @@ WorldSystem::~WorldSystem()
 		Mix_FreeChunk(salmon_dead_sound);
 	if (salmon_eat_sound != nullptr)
 		Mix_FreeChunk(salmon_eat_sound);
+	if (bomb_planted_sound != nullptr)
+		Mix_FreeChunk(bomb_planted_sound);
+	if (bomb_planting_sound != nullptr)
+		Mix_FreeChunk(bomb_planting_sound);
+	if (bomb_countdown_sound != nullptr)
+		Mix_FreeChunk(bomb_countdown_sound);
+	if (bomb_explosion_sound != nullptr)
+		Mix_FreeChunk(bomb_explosion_sound);
+	if (footsteps_sound != nullptr)
+		Mix_FreeChunk(footsteps_sound);
+	
 	Mix_CloseAudio();
 
 	// Destroy all created components
@@ -129,13 +142,25 @@ GLFWwindow *WorldSystem::create_window()
 	background_music = Mix_LoadMUS(audio_path("music.wav").c_str());
 	salmon_dead_sound = Mix_LoadWAV(audio_path("salmon_dead.wav").c_str());
 	salmon_eat_sound = Mix_LoadWAV(audio_path("salmon_eat.wav").c_str());
+	bomb_planted_sound = Mix_LoadWAV(audio_path("bomb_planted.wav").c_str());
+	bomb_planting_sound = Mix_LoadWAV(audio_path("bomb_planting.wav").c_str());
+	bomb_countdown_sound = Mix_LoadWAV(audio_path("bomb_countdown.wav").c_str());
+	bomb_explosion_sound = Mix_LoadWAV(audio_path("bomb_explosion.wav").c_str());
+	footsteps_sound = Mix_LoadWAV(audio_path("footsteps.wav").c_str());
 
-	if (background_music == nullptr || salmon_dead_sound == nullptr || salmon_eat_sound == nullptr)
+	if (background_music == nullptr || salmon_dead_sound == nullptr || salmon_eat_sound == nullptr || bomb_planted_sound == nullptr||bomb_planting_sound == nullptr
+	|| bomb_countdown_sound == nullptr || bomb_explosion_sound == nullptr || footsteps_sound == nullptr)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
 				audio_path("music.wav").c_str(),
 				audio_path("salmon_dead.wav").c_str(),
-				audio_path("salmon_eat.wav").c_str());
+				audio_path("salmon_eat.wav").c_str()),
+				audio_path("bomb_planted.wav").c_str(),
+				audio_path("bomb_planting.wav").c_str(),
+				audio_path("bomb_countdown.wav").c_str(),
+				audio_path("bomb_explosion.wav").c_str(),
+				audio_path("footsteps.wav").c_str()
+				;
 		return nullptr;
 	}
 
@@ -146,8 +171,8 @@ void WorldSystem::init(RenderSystem *renderer_arg)
 {
 	this->renderer = renderer_arg;
 	// Playing background music indefinitely
-	Mix_PlayMusic(background_music, -1);
-	fprintf(stderr, "Loaded music\n");
+	// Mix_PlayMusic(background_music, -1);
+	// fprintf(stderr, "Loaded music\n");
 
 	// Set all states to default
 	restart_game();
@@ -357,11 +382,22 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	}
 	
 
-	// check if player is in designated area to plant bomb
-
 	Motion &motion = registry.motions.get(player_salmon);
+	// check if moving
+	if (motion.velocity.x != 0 || motion.velocity.y !=  0) {
+
+		
+		footsteps_timer -= elapsed_ms_since_last_update * current_speed;
+		if (footsteps_timer < 0) {
+				Mix_PlayChannel(-1, footsteps_sound, 0);
+				footsteps_timer = FOOTSTEPS_SOUND_TIMER_MS;
+		}
+	}
+
+	// check if player is in designated area to plant bomb
 	int player_x = motion.position.x ;
 	int player_y = motion.position.y ;
+
 
 
 
@@ -393,18 +429,26 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	if (plant_timer < 0 && !bomb_planted) {
 		cout << "planted";
 		createBomb(renderer,motion.position);
+		Mix_PlayChannel(-1, bomb_planted_sound, 0);
 		is_planting = false;
 		bomb_planted = true;
 		
 	} 
 
 	if (bomb_planted) {
+		if (explode_timer == BOMB_TIMER_MS) {
+			Mix_PlayChannel(-1, bomb_countdown_sound, 0);	
+		}
 		explode_timer -= elapsed_ms_since_last_update * current_speed;
+		
+		
 	}
 
 	if (explode_timer < 0 && !bomb_exploded) {
 		cout << "explode";
 		bomb_exploded = true;
+		
+		Mix_PlayChannel(-1, bomb_explosion_sound, 0);
 		
 		createEndScreen(renderer,motion.position);
 	}
@@ -625,6 +669,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 					if (can_plant ) {
 						is_planting = true;
 						cout << "planting";
+						Mix_PlayChannel(-1, bomb_planting_sound, 0);
 						
 					
 					} 
@@ -648,6 +693,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	{
 		if (action == GLFW_PRESS)
 		{
+			
 			if (key == GLFW_KEY_W)
 			{
 				input.up = 1.f;
