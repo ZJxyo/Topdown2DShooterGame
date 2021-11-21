@@ -24,12 +24,15 @@ std::vector<vec2> compute_light_polygon(float radius, vec2& pos, std::vector<std
 		vec4(corners[3], corners[0])
 	};
 
+	std::vector<float> bb = get_bounding_box(corners);
+
 	for (std::vector<vec2> wv : wall_vertices) {
 		for (int i = 0; i < wv.size(); i++) {
 			vec2 v1 = wv[i] - pos;
 			vec2 v2 = wv[(i + 1) % wv.size()] - pos;
-			if ((v1.x > -radius && v1.x < radius) || (v1.y > -radius && v1.y < radius) ||
-				(v2.x > -radius && v2.x < radius) || (v2.y > -radius && v2.y < radius)) {
+			std::vector<vec2> line_vertices = {v1, v2};
+			std::vector<float> wbb = get_bounding_box(line_vertices);
+			if (aabb_collides(bb, wbb)) {
 				segments.push_back(vec4(v1, v2));
 			}
 
@@ -40,19 +43,15 @@ std::vector<vec2> compute_light_polygon(float radius, vec2& pos, std::vector<std
 	}
 
 	std::sort(angles.begin(), angles.end());
+	angles.erase(std::unique(angles.begin(), angles.end()), angles.end());
 
 	std::vector<vec2> light_polygon;
 
 	// smaller than all angles
-	float new_angle = angles[0] - 0.00002;
-	for (int i = 0; i < angles.size(); i++) {
-		if (new_angle > angles[i]) {
-			continue;
-		}
-
-		vec2 l1v1 = vec2(0, 0);
+	vec2 l1v1 = vec2(0, 0);
+	for (float angle : angles) {
 		for (int j = -1; j < 2; j+=2) {
-			new_angle = angles[i] + (float)j * 0.00001;
+			float new_angle = angle + (float)j * 0.00001;
 			vec2 d1 = vec2(cos(new_angle), sin(new_angle)) * radius * 1.5f;
 			vec2 l1v2 = l1v1 + d1;
 
@@ -81,7 +80,7 @@ std::vector<vec2> compute_light_polygon(float radius, vec2& pos, std::vector<std
 					smallest_t = min(t1, smallest_t);
 				}
 			}
-			light_polygon.push_back(smallest_t * d1);
+			light_polygon.push_back(vec2(d1.x * smallest_t / window_width_px, -d1.y * smallest_t * window_height_px));
 		}
 	}
 	light_polygon.push_back(vec2(0.f, 0.f));
