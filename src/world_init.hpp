@@ -24,6 +24,8 @@ Entity createTurtle(RenderSystem *renderer, vec2 position);
 Entity createLine(vec2 position, float angle, vec2 size);
 // a pebble
 Entity createPebble(vec2 pos, vec2 size);
+Entity createBomb(RenderSystem *renderer, vec2 pos);
+Entity createEndScreen(RenderSystem *renderer, vec2 pos);
 MyArray createMatrix();
 int createGround(RenderSystem *renderer);
 int SetupMap(RenderSystem *renderer);

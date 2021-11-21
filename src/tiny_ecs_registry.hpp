@@ -34,6 +34,7 @@ public:
 	ComponentContainer<Bullet> bullets;
 	ComponentContainer<Animate> animates;
 	ComponentContainer<FireRate> fireRates;
+	ComponentContainer<PlantArea> plantAreas;
 	ComponentContainer<ParticleSource> particleSources;
 	ComponentContainer<ShockwaveSource> shockwaveSource;
   ComponentContainer<StoryBox> storyBox;
@@ -65,6 +66,7 @@ public:
 		registry_list.push_back(&bullets);
 		registry_list.push_back(&animates);
 		registry_list.push_back(&fireRates);
+		registry_list.push_back(&plantAreas);
 		registry_list.push_back(&particleSources);
 		registry_list.push_back(&shockwaveSource);
     registry_list.push_back(&storyBox);

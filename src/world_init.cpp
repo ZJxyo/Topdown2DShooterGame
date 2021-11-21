@@ -187,6 +187,44 @@ Entity createPebble(vec2 pos, vec2 size)
 
 	return entity;
 }
+
+Entity createBomb(RenderSystem *renderer, vec2 pos){
+
+	Entity bomb = Entity();
+	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(bomb, &mesh);
+	Motion &m = registry.motions.emplace(bomb);
+	m.position = pos;
+	m.scale = {50.f,80.f};
+	m.velocity = {0.f,0.f};
+	m.angle = 0.f;
+	registry.renderRequests.insert(
+			bomb,
+			{TEXTURE_ASSET_ID::BOMB,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	return bomb;
+}
+
+
+
+Entity createEndScreen(RenderSystem *renderer, vec2 pos){
+
+	Entity endscreen = Entity();
+	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(endscreen, &mesh);
+	Motion &m = registry.motions.emplace(endscreen);
+	m.position = pos;
+	m.scale = {600.f,300.f};
+	m.velocity = {0.f,0.f};
+	m.angle = 0.f;
+	registry.renderRequests.insert(
+			endscreen,
+			{TEXTURE_ASSET_ID::WIN,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	return endscreen;
+}
 struct wall
 {
 	vec2 position;
@@ -241,7 +279,25 @@ int SetupMap(RenderSystem *renderer)
 	json j;
 	ifs >> j;
 
-	
+	for (json w : j["plant_spots"]) {
+		auto entity = Entity();
+
+		Motion &motion = registry.motions.emplace(entity);
+		registry.plantAreas.emplace(entity);
+
+		int pre_value1 = int(w["position"]["x"]);
+		int pre_value2 = int(w["position"]["y"]);
+		int value1 = pre_value1 + 50;
+		int value2 = pre_value2 + 50;
+
+		motion.position = vec2(value1, value2);
+		motion.scale = vec2(w["scale"]["x"], w["scale"]["y"]);
+		registry.floorRenderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			 EFFECT_ASSET_ID::PLANTSPOT,
+			 GEOMETRY_BUFFER_ID::RECTANGLE});
+	}
 	
 	for (json w : j["walls"])
 	{
