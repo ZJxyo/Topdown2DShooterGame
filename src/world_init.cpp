@@ -195,12 +195,12 @@ Entity createBomb(RenderSystem *renderer, vec2 pos){
 	registry.meshPtrs.emplace(bomb, &mesh);
 	Motion &m = registry.motions.emplace(bomb);
 	m.position = pos;
-	m.scale = {50.f,50.f};
+	m.scale = {50.f,80.f};
 	m.velocity = {0.f,0.f};
 	m.angle = 0.f;
 	registry.renderRequests.insert(
 			bomb,
-			{TEXTURE_ASSET_ID::WALL,
+			{TEXTURE_ASSET_ID::BOMB,
 				EFFECT_ASSET_ID::TEXTURED,
 				GEOMETRY_BUFFER_ID::SPRITE});
 	return bomb;

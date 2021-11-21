@@ -517,6 +517,11 @@ void WorldSystem::restart_game()
 	// Reset the game speed
 	current_speed = 1.f;
 	mouse_down = false;
+	plant_timer=PLANT_TIMER_MS;
+	explode_timer=BOMB_TIMER_MS;
+	bomb_planted=false;
+	is_planting=false;
+	bomb_exploded=false;
 
 	// Remove all entities that we created
 	// All that have a motion, we could also iterate over all fish, turtles, ... but that would be more cumbersome
