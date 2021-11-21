@@ -113,6 +113,8 @@ private:
 	GLuint off_screen_render_buffer_depth;
 
 	GLuint transform_buffer;
+	GLuint vertices_buffer;
+	GLuint indices_buffer;
 
 	Entity screen_state_entity;
 };

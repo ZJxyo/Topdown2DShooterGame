@@ -375,10 +375,10 @@ Entity createShockwave(vec2 pos) {
 	return entity;
 }
 
-Entity createLightSource(float radius, vec2 pos, std::vector<vec2>& vertices, std::vector<unsigned int>& indices) {
+Entity createLightSource(vec2 pos, std::vector<vec3>& vertices, std::vector<unsigned int>& indices) {
 	
 	Entity entity = Entity();
-	registry.lightSources.emplace(entity, radius, pos, vertices, indices);
+	registry.lightSources.emplace(entity, pos, vertices, indices);
 
 	return entity;
 }

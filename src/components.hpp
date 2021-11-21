@@ -147,12 +147,11 @@ struct ParticleSource {
 };
 
 struct LightSource {
-	float radius;
 	vec2 pos = vec2(0.f, 0.f);
-	std::vector<vec2> vertices;
+	std::vector<vec3> vertices;
 	std::vector<unsigned int> indices;
-	LightSource(float radius, vec2 pos, std::vector<vec2> vertices, std::vector<unsigned int> indices) :
-		radius(radius), pos(pos), vertices(vertices), indices(indices) {}
+	LightSource(vec2 pos, std::vector<vec3> vertices, std::vector<unsigned int> indices) :
+		pos(pos), vertices(vertices), indices(indices) {}
 };
 
 

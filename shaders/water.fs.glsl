@@ -3,7 +3,7 @@
 uniform sampler2D screen_texture;
 uniform float time;
 uniform vec2 shockwave_position;
-uniform float dimming_factor;
+uniform float dimming;
 
 in vec2 texcoord;
 
@@ -13,7 +13,7 @@ layout(location = 0) out vec4 color;
 void main()
 {
 	color = texture(screen_texture, texcoord);
-	color.xy *= dimming_factor;
+	color.xyz *= dimming;
 
 	if (time > 10.f) {
 		return;
@@ -39,7 +39,7 @@ void main()
         //Perform the distortion and reduce the effect over time
 		coord += ((Diffcoord * DiffTime) / (CurrentTime * Dist * 40.f));
 		color = texture(screen_texture, coord);
-        color.xy *= dimming_factor;
+        color.xyz *= dimming;
 
         //Blow out the color and reduce the effect over time
 		color += (color * ScaleDiff) / (CurrentTime * Dist * 100.f + 0.3);
