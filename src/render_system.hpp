@@ -41,7 +41,12 @@ class RenderSystem
     textures_path("help0.png"),
     textures_path("help1.png"),
     textures_path("help2.png"),
-    textures_path("help3.png")};
+    textures_path("help3.png"),
+        textures_path("storyBox.png"),
+        textures_path("story1.png"),
+        textures_path("story2.png"),
+        textures_path("story3.png"),
+        textures_path("story4.png")};
 
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.

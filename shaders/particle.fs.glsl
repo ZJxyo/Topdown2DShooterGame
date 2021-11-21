@@ -3,7 +3,6 @@
 // From vertex shader
 in vec2 texcoord;
 
-uniform float radius;
 uniform float alpha;
 uniform vec3 color;
 
@@ -12,7 +11,7 @@ layout(location = 0) out vec4 out_color;
 
 void main()
 {
-	if (length(texcoord - vec2(0.5, 0.5)) > radius) {
+	if (length(texcoord - vec2(0.5f, 0.5f)) > 0.5f) {
 		discard;
 	} else {
 		out_color = vec4(color, alpha);

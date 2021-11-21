@@ -12,6 +12,7 @@
 #include <SDL_mixer.h>
 
 #include "render_system.hpp"
+#include "HelpMenu.h"
 
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
@@ -88,4 +89,9 @@ private:
 	};
 
 	Input input;
+    HelpMenu helpMenu;
+    const vec2 BOX1_LOCATION = {1000, 900};
+    const vec2 BOX2_LOCATION = {300, 900};
+    const vec2 BOX3_LOCATION = {300, 1200};
+    const vec2 BOX4_LOCATION = {300, 1500};
 };
