@@ -315,10 +315,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	{
 		PlantArea &pa = registry.plantAreas.get(pa_entities[i]);
 		Motion &m = registry.motions.get(pa_entities[i]);
-		if (player_x > (m.position.x - (m.scale.x - 100 / 2)) && 
-				player_x < (m.position.x + (m.scale.x - 100 / 2))
-				&& player_y > (m.position.y - (m.scale.y - 100 / 2)) &&
-				player_y < (m.position.y + (m.scale.y - 100 / 2)))
+		if (player_x > (m.position.x - ((m.scale.x - 100) / 2)) && 
+				player_x < (m.position.x + ((m.scale.x - 100) / 2))
+				&& player_y > (m.position.y - ((m.scale.y - 100) / 2)) &&
+				player_y < (m.position.y + ((m.scale.y - 100) / 2)))
 				 {
 				
 					can_plant = true;
@@ -537,7 +537,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 				else if (action == GLFW_RELEASE) {
 					plant_timer = 5000.0f;
 					is_planting = false;
-					cout << "plant release";
+					//cout << "plant release";
 				}
 			}
 		}

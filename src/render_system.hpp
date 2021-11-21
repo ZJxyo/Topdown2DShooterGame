@@ -64,7 +64,9 @@ class RenderSystem
 		shader_path("turtle"),
 		shader_path("textured"),
 		shader_path("water"),
-        shader_path("light")};
+        shader_path("light"),
+        shader_path("plantspot")
+		};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
 	std::array<GLuint, geometry_count> index_buffers;

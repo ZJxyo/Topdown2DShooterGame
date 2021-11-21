@@ -249,6 +249,11 @@ int SetupMap(RenderSystem *renderer)
 
 		motion.position = vec2(value1, value2);
 		motion.scale = vec2(w["scale"]["x"], w["scale"]["y"]);
+		registry.floorRenderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			 EFFECT_ASSET_ID::PLANTSPOT,
+			 GEOMETRY_BUFFER_ID::RECTANGLE});
 	}
 	
 	for (json w : j["walls"])
