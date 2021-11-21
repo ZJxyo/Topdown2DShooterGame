@@ -531,6 +531,10 @@ void WorldSystem::handle_bullet_hit(Entity bullet, Entity entity) {
 	assert(registry.motions.has(bullet));
 	Motion& bullet_motion = registry.motions.get(bullet);
 	createParticleSource(20, 3.f, 1.5f, vec3(1.f, 0.f, 0.f), bullet_motion.position, -normalize(bullet_motion.velocity), 300.f);
+
+	if (registry.shockwaveSource.size() == 0) {
+		createShockwave(bullet_motion.position);
+	}
 }
 
 void WorldSystem::update_player_velocity() {

@@ -146,6 +146,12 @@ struct ParticleSource {
 		size(size), radius(radius), decay(decay), color(color), positions(positions), velocities(velocities) {}
 };
 
+struct ShockwaveSource {
+	vec2 pos = vec2(0.f, 0.f);
+	float time_elapsed = 0.f;
+	ShockwaveSource(vec2 pos) : pos(pos), time_elapsed(time_elapsed) {}
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture

@@ -32,3 +32,4 @@ void Fill(MyArray &T);
 void Print(const MyArray &T);
 
 Entity createBullet(RenderSystem *renderer, vec2 position, float angle);
+Entity createShockwave(vec2 pos);

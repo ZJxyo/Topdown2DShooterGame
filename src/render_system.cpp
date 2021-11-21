@@ -362,11 +362,21 @@ void RenderSystem::drawToScreen()
 	gl_has_errors();
 	const GLuint water_program = effects[(GLuint)EFFECT_ASSET_ID::WATER];
 	// Set clock
+
 	GLuint time_uloc = glGetUniformLocation(water_program, "time");
-	GLuint dead_timer_uloc = glGetUniformLocation(water_program, "darken_screen_factor");
-	glUniform1f(time_uloc, (float)glfwGetTime());
-	ScreenState &screen = registry.screenStates.get(screen_state_entity);
-	glUniform1f(dead_timer_uloc, screen.darken_screen_factor);
+	GLuint pos_uloc = glGetUniformLocation(water_program, "shockwave_position");
+
+	if (registry.shockwaveSource.size() > 0) {
+		ShockwaveSource& sws = registry.shockwaveSource.components[0];
+		vec2 pos = registry.motions.get(registry.players.entities[0]).position;
+		glUniform1f(time_uloc, sws.time_elapsed);
+		glUniform2f(pos_uloc, (sws.pos.x - pos.x) / window_width_px + 0.5f, -(sws.pos.y - pos.y) / window_height_px + 0.5f);
+	}
+	else {
+		glUniform1f(time_uloc, 100.f);
+		glUniform2f(pos_uloc, 0.f, 0.f);
+	}
+
 	gl_has_errors();
 	// Set the vertex position and vertex texture coordinates (both stored in the
 	// same VBO)

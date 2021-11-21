@@ -90,12 +90,21 @@ void PhysicsSystem::step(float elapsed_ms)
 	// Move fish based on how much time has passed, this is to (partially) avoid
 	// having entities move at different speed based on the machine.
 
+	float time = elapsed_ms / 1000.f;
+
 	auto &motion_registry = registry.motions;
 	for (uint i = 0; i < motion_registry.size(); i++)
 	{
 		Motion &motion = motion_registry.components[i];
 		Entity entity = motion_registry.entities[i];
-		motion.position += motion.velocity * elapsed_ms / 1000.f;
+		motion.position += motion.velocity * time;
+	}
+
+	for (int i = registry.shockwaveSource.size() - 1; i >= 0; i--) {
+		registry.shockwaveSource.components[i].time_elapsed += time;
+		if (registry.shockwaveSource.components[i].time_elapsed > 1.f) {
+			registry.remove_all_components_of(registry.shockwaveSource.entities[i]);
+		}
 	}
 
 	// all walls' bounding box

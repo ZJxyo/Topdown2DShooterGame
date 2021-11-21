@@ -2,7 +2,7 @@
 
 uniform sampler2D screen_texture;
 uniform float time;
-uniform float darken_screen_factor;
+uniform vec2 shockwave_position;
 
 in vec2 texcoord;
 
@@ -11,19 +11,19 @@ layout(location = 0) out vec4 color;
 //
 void main()
 {
-    vec2 resolution = vec2(1080, 720);
+	color = texture(screen_texture, texcoord);
 
-    float offset = (time- floor(time))/time;
-	float CurrentTime = (time)*(offset);    
+	if (time > 10.f) {
+		return;
+	}
+
+	float CurrentTime = time;    
     
 	vec3 WaveParams = vec3(10.0, 0.8, 0.1 ); 
-    
-    vec2 WaveCentre = vec2(0.5, 0.5);
-   
+       
 	vec2 coord = texcoord;
-	float Dist = distance(coord, WaveCentre);
+	float Dist = distance(coord, shockwave_position);
     
-	color = texture(screen_texture, coord);
     if (Dist <= (CurrentTime + WaveParams.z) && Dist >= (CurrentTime - WaveParams.z)) 
 	{
         //The pixel offset distance based on the input parameters
@@ -32,13 +32,13 @@ void main()
 		float DiffTime = (Diff  * ScaleDiff);
         
         //The direction of the distortion
-		vec2 Diffcoord = normalize(coord - WaveCentre);         
+		vec2 Diffcoord = normalize(coord - shockwave_position);         
         
         //Perform the distortion and reduce the effect over time
-		coord += ((Diffcoord * DiffTime) / (CurrentTime * Dist * 40.0));
+		coord += ((Diffcoord * DiffTime) / (CurrentTime * Dist * 40.f));
 		color = texture(screen_texture, coord);
         
         //Blow out the color and reduce the effect over time
-		color += (color * ScaleDiff) / (CurrentTime * Dist * 40.0);
+		color += (color * ScaleDiff) / (CurrentTime * Dist * 100.f + 0.3);
 	}
 }

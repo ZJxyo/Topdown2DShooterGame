@@ -366,3 +366,9 @@ Entity createBullet(RenderSystem *renderer, vec2 pos, float angle)
 
 	return entity;
 }
+
+Entity createShockwave(vec2 pos) {
+	Entity entity = Entity();
+	registry.shockwaveSource.emplace(entity, pos);
+	return entity;
+}
