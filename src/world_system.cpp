@@ -53,7 +53,8 @@ WorldSystem::~WorldSystem()
 		Mix_FreeChunk(bomb_explosion_sound);
 	if (footsteps_sound != nullptr)
 		Mix_FreeChunk(footsteps_sound);
-	
+	if (ak47_sound != nullptr) 
+		Mix_FreeChunk(ak47_sound);
 	Mix_CloseAudio();
 
 	// Destroy all created components
@@ -147,9 +148,10 @@ GLFWwindow *WorldSystem::create_window()
 	bomb_countdown_sound = Mix_LoadWAV(audio_path("bomb_countdown.wav").c_str());
 	bomb_explosion_sound = Mix_LoadWAV(audio_path("bomb_explosion.wav").c_str());
 	footsteps_sound = Mix_LoadWAV(audio_path("footsteps.wav").c_str());
+	ak47_sound = Mix_LoadWAV(audio_path("ak47.wav").c_str());
 
 	if (background_music == nullptr || salmon_dead_sound == nullptr || salmon_eat_sound == nullptr || bomb_planted_sound == nullptr||bomb_planting_sound == nullptr
-	|| bomb_countdown_sound == nullptr || bomb_explosion_sound == nullptr || footsteps_sound == nullptr)
+	|| bomb_countdown_sound == nullptr || bomb_explosion_sound == nullptr || footsteps_sound == nullptr || ak47_sound == nullptr)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
 				audio_path("music.wav").c_str(),
@@ -159,7 +161,8 @@ GLFWwindow *WorldSystem::create_window()
 				audio_path("bomb_planting.wav").c_str(),
 				audio_path("bomb_countdown.wav").c_str(),
 				audio_path("bomb_explosion.wav").c_str(),
-				audio_path("footsteps.wav").c_str()
+				audio_path("footsteps.wav").c_str(),
+				audio_path("ak47.wav").c_str()
 				;
 		return nullptr;
 	}
@@ -373,10 +376,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				float r3 = LO + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (HI - LO)));
 
 				createBullet(renderer, motion.position, motion.angle + 1.5708 + r3);
+				Mix_PlayChannel(-1, ak47_sound, 0);
+
 			}
 
 			else {
 				createBullet(renderer, motion.position, motion.angle + 1.5708);
+				Mix_PlayChannel(-1, ak47_sound, 0);
 			}
 		}
 	}
