@@ -146,6 +146,13 @@ struct ParticleSource {
 		size(size), radius(radius), decay(decay), color(color), positions(positions), velocities(velocities) {}
 };
 
+
+struct ShockwaveSource {
+	vec2 pos = vec2(0.f, 0.f);
+	float time_elapsed = 0.f;
+	ShockwaveSource(vec2 pos) : pos(pos), time_elapsed(time_elapsed) {}
+};
+
 struct StoryBox {
     bool isOpened = false;
 };
