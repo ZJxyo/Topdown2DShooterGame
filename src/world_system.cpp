@@ -17,6 +17,10 @@ const size_t MAX_TURTLES = 0;
 const size_t TURTLE_DELAY_MS = 2000 * 3;
 const size_t ANIMATION_DELAY_MS = 100;
 const size_t BULLET_TIMER_MS = 100;
+int toggle[4] = {-1, -1, -1, -1};
+Entity stories[4];
+Entity boxes[4];
+vec2 oldPosition;
 
 // Create the fish world
 WorldSystem::WorldSystem()
@@ -147,7 +151,7 @@ void WorldSystem::init(RenderSystem *renderer_arg)
 	restart_game();
 }
 
-// AIvy
+// AIvy for turtle
 Entity entity;
 // Update our game world
 
@@ -230,6 +234,92 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	BTIfCondition btIfCondition(&chase, &shoot, &build);
 	btIfCondition.init(entity);
 	btIfCondition.process(entity);
+
+    // show storybox 1
+    if(abs(registry.motions.get(player_salmon).position.x -  BOX1_LOCATION.x)  < 50
+    && abs(registry.motions.get(player_salmon).position.y - BOX1_LOCATION.y) < 50) {
+
+        if(toggle[0] == -1) {
+            oldPosition = registry.motions.get(entity).position;
+            stories[0] = helpMenu.createStroy1(renderer, window, { BOX1_LOCATION.x,BOX1_LOCATION.y });
+            registry.motions.get(entity).position = {2000, 2000};
+            registry.motions.get(entity).velocity = {0,0};
+            toggle[0] = 0;
+        }
+
+        if (!helpMenu.showStory1 && toggle[0] == 0) {
+            registry.remove_all_components_of(stories[0]);
+            toggle[0] = 1;
+            if(toggle[0] == 1) {
+                registry.motions.get(entity).position = oldPosition;
+            }
+        }
+    }
+
+    // show storybox 2
+    if(abs(registry.motions.get(player_salmon).position.x -  BOX2_LOCATION.x)  < 50
+       && abs(registry.motions.get(player_salmon).position.y - BOX2_LOCATION.y) < 50) {
+
+        if(toggle[1] == -1) {
+            oldPosition = registry.motions.get(entity).position;
+            stories[1] = helpMenu.createStroy2(renderer, window, { BOX2_LOCATION.x,BOX2_LOCATION.y });
+            registry.motions.get(entity).position = {2000, 2000};
+            registry.motions.get(entity).velocity = {0,0};
+            toggle[1] = 0;
+        }
+
+        if (!helpMenu.showStory2&& toggle[1] == 0) {
+            registry.remove_all_components_of(stories[1]);
+            toggle[1] = 1;
+            if(toggle[1] == 1) {
+                registry.motions.get(entity).position = oldPosition;
+            }
+        }
+    }
+
+    // show storybox 3
+    if(abs(registry.motions.get(player_salmon).position.x -  BOX3_LOCATION.x)  < 50
+       && abs(registry.motions.get(player_salmon).position.y - BOX3_LOCATION.y) < 50) {
+
+        if(toggle[2] == -1) {
+            oldPosition = registry.motions.get(entity).position;
+            stories[2] = helpMenu.createStroy3(renderer, window, { BOX3_LOCATION.x,BOX3_LOCATION.y });
+            registry.motions.get(entity).position = {2000, 2000};
+            registry.motions.get(entity).velocity = {0,0};
+            toggle[2] = 0;
+        }
+
+        if (!helpMenu.showStory3 && toggle[2] == 0) {
+            registry.remove_all_components_of(stories[2]);
+            toggle[2] = 1;
+            if(toggle[2] == 1) {
+                registry.motions.get(entity).position = oldPosition;
+            }
+        }
+    }
+
+    // show storybox 4
+    if(abs(registry.motions.get(player_salmon).position.x -  BOX4_LOCATION.x)  < 50
+       && abs(registry.motions.get(player_salmon).position.y - BOX4_LOCATION.y) < 50) {
+
+        if(toggle[3] == -1) {
+            oldPosition = registry.motions.get(entity).position;
+            stories[3] = helpMenu.createStroy4(renderer, window, { BOX4_LOCATION.x,BOX4_LOCATION.y });
+            registry.motions.get(entity).position = {2000, 2000};
+            registry.motions.get(entity).velocity = {0,0};
+            toggle[3] = 0;
+        }
+
+        if (!helpMenu.showStory4 && toggle[3] == 0) {
+            registry.remove_all_components_of(stories[3]);
+            toggle[3] = 1;
+            if(toggle[3] == 1) {
+                registry.motions.get(entity).position = oldPosition;
+            }
+        }
+    }
+
+
 
 	// process shooting bullets for player
 
@@ -340,6 +430,12 @@ void WorldSystem::restart_game()
 	createMatrix();
 	createWall(renderer, {300, 300}, 2.f, {200, 200});
 
+    // create story box
+    boxes[0] = createStoryBox(renderer, BOX1_LOCATION);
+    boxes[1] = createStoryBox(renderer, BOX2_LOCATION);
+    boxes[2] = createStoryBox(renderer, BOX3_LOCATION);
+    boxes[3] = createStoryBox(renderer, BOX4_LOCATION);
+
 	// CLEAN
 
 	//createWall(renderer, { 300, 100 }, 0.f, { 200, 200 });
@@ -414,6 +510,27 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	// key is of 'type' GLFW_KEY_
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory1 && toggle[0] == 0)
+    {
+        helpMenu.showStory1 = false;
+        registry.remove_all_components_of(boxes[0]);
+
+    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory2 && toggle[1] == 0)
+    {
+        helpMenu.showStory2 = false;
+        registry.remove_all_components_of(boxes[1]);
+
+    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory3 && toggle[2] == 0)
+    {
+        helpMenu.showStory3 = false;
+        registry.remove_all_components_of(boxes[2]);
+
+    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory4 && toggle[3] == 0)
+    {
+        helpMenu.showStory4 = false;
+        registry.remove_all_components_of(boxes[3]);
+    }
 
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
