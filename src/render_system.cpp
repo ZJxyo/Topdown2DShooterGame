@@ -355,6 +355,10 @@ void RenderSystem::drawToScreen()
 	glDisable(GL_DEPTH_TEST);
 	gl_has_errors();
 
+	const GLuint water_program = effects[(GLuint)EFFECT_ASSET_ID::WATER];
+
+	GLuint dimming_uloc = glGetUniformLocation(water_program, "dimming_factor");
+
 	//if (registry.lightSources.size() > 0) {
 
 	//}
@@ -366,11 +370,11 @@ void RenderSystem::drawToScreen()
 	// Note, GL_ELEMENT_ARRAY_BUFFER associates
 																	 // indices to the bound GL_ARRAY_BUFFER
 	gl_has_errors();
-	const GLuint water_program = effects[(GLuint)EFFECT_ASSET_ID::WATER];
-	// Set clock
 
 	GLuint time_uloc = glGetUniformLocation(water_program, "time");
 	GLuint pos_uloc = glGetUniformLocation(water_program, "shockwave_position");
+
+	glUniform1f(dimming_uloc, 0.5f);
 
 	if (registry.shockwaveSource.size() > 0) {
 		ShockwaveSource& sws = registry.shockwaveSource.components[0];
