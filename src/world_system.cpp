@@ -540,7 +540,15 @@ void WorldSystem::restart_game()
 
 	SetupMap(renderer);
 	createMatrix();
-	//createWall(renderer, {300, 300}, 2.f, {200, 200});
+  
+	std::vector<vec3> vertices = {
+		vec3(-1.f, 1.f, 0.f),
+		vec3(1.f, 1.f, 0.f),
+		vec3(1.f, -1.f, 0.f),
+		vec3(-1.f, -1.f, 0.f),
+	};
+	std::vector<unsigned int> indices = { 0, 1, 3, 1, 3, 2 };
+	createLightSource(vec2(0, 0), vertices, indices);
 
     // create story box
     boxes[0] = createStoryBox(renderer, BOX1_LOCATION);

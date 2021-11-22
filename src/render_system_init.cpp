@@ -54,6 +54,8 @@ bool RenderSystem::init(int width, int height, GLFWwindow* window_arg)
 	glBindVertexArray(vao);
 
 	glGenBuffers(1, &transform_buffer);
+	glGenBuffers(1, &vertices_buffer);
+	glGenBuffers(1, &indices_buffer);
 
 	gl_has_errors();
 

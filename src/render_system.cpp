@@ -346,26 +346,29 @@ void RenderSystem::drawToScreen()
 	glDepthRange(0, 10);
 	glClearColor(1.f, 0, 0, 1.0);
 	glClearDepth(1.f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearStencil(0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	gl_has_errors();
 	// Enabling alpha channel for textures
 	glDisable(GL_BLEND);
 	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST);
-
-	// Draw the screen texture on the quad geometry
-	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffers[(GLuint)GEOMETRY_BUFFER_ID::SCREEN_TRIANGLE]);
-	glBindBuffer(
-		GL_ELEMENT_ARRAY_BUFFER,
-		index_buffers[(GLuint)GEOMETRY_BUFFER_ID::SCREEN_TRIANGLE]); // Note, GL_ELEMENT_ARRAY_BUFFER associates
-																	 // indices to the bound GL_ARRAY_BUFFER
 	gl_has_errors();
-	const GLuint water_program = effects[(GLuint)EFFECT_ASSET_ID::WATER];
-	// Set clock
+	glEnable(GL_STENCIL_TEST);
 
+	const GLuint water_program = effects[(GLuint)EFFECT_ASSET_ID::WATER];
+	// Bind our texture in Texture Unit 0
+	glActiveTexture(GL_TEXTURE0);
+
+	glBindTexture(GL_TEXTURE_2D, off_screen_render_buffer_color);
+	gl_has_errors();
+
+	GLuint dimming_uloc = glGetUniformLocation(water_program, "dimming");
+	GLint in_position_loc = glGetAttribLocation(water_program, "in_position");
 	GLuint time_uloc = glGetUniformLocation(water_program, "time");
 	GLuint pos_uloc = glGetUniformLocation(water_program, "shockwave_position");
 
+	// send time and shockwave first
 	if (registry.shockwaveSource.size() > 0) {
 		ShockwaveSource& sws = registry.shockwaveSource.components[0];
 		vec2 pos = registry.motions.get(registry.players.entities[0]).position;
@@ -377,24 +380,49 @@ void RenderSystem::drawToScreen()
 		glUniform2f(pos_uloc, 0.f, 0.f);
 	}
 
+	// visibility polygon
+	if (registry.lightSources.size() > 0) {
+		LightSource& ls = registry.lightSources.components[0];
+		glBindBuffer(GL_ARRAY_BUFFER, vertices_buffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vec3) * ls.vertices.size(), ls.vertices.data(), GL_STREAM_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * ls.indices.size(), ls.indices.data(), GL_STREAM_DRAW);
+		gl_has_errors();
+
+		glEnableVertexAttribArray(in_position_loc);
+		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
+
+		glUniform1f(dimming_uloc, 1.f);
+
+		glStencilFunc(GL_ALWAYS, 1, 0xff);
+		glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
+		glDrawElements(GL_TRIANGLES, ls.indices.size(), GL_UNSIGNED_INT, nullptr);
+	}
+
+	// Draw the screen texture on the quad geometry
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffers[(GLuint)GEOMETRY_BUFFER_ID::SCREEN_TRIANGLE]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffers[(GLuint)GEOMETRY_BUFFER_ID::SCREEN_TRIANGLE]); 
+	// Note, GL_ELEMENT_ARRAY_BUFFER associates
+	// indices to the bound GL_ARRAY_BUFFER
 	gl_has_errors();
+
 	// Set the vertex position and vertex texture coordinates (both stored in the
 	// same VBO)
-	GLint in_position_loc = glGetAttribLocation(water_program, "in_position");
 	glEnableVertexAttribArray(in_position_loc);
 	glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void *)0);
 	gl_has_errors();
 
-	// Bind our texture in Texture Unit 0
-	glActiveTexture(GL_TEXTURE0);
+	glUniform1f(dimming_uloc, 0.5f);
 
-	glBindTexture(GL_TEXTURE_2D, off_screen_render_buffer_color);
 	gl_has_errors();
+
 	// Draw
+	glStencilFunc(GL_NOTEQUAL, 1, 0xff);
 	glDrawElements(
 		GL_TRIANGLES, 3, GL_UNSIGNED_SHORT,
 		nullptr); // one triangle = 3 vertices; nullptr indicates that there is
 				  // no offset from the bound index buffer
+	glDisable(GL_STENCIL_TEST);
 	gl_has_errors();
 }
 

@@ -2,6 +2,112 @@
 #include "physics_system.hpp"
 #include "world_init.hpp"
 
+std::vector<vec3> compute_light_polygon(vec2& pos, std::vector<std::vector<vec2>>& wall_vertices) {
+	float half_width = (float)window_width_px / 2.f;
+	float half_height = (float)window_height_px / 2.f;
+	float radius = half_width + half_height;
+	
+	// screen corners
+	std::vector<vec2> corners = {
+		vec2(-half_width, -half_height),
+		vec2(half_width, -half_height),
+		vec2(half_width, half_height),
+		vec2(-half_width, half_height)
+	};
+
+	// screen corner angles
+	std::vector<float> angles = {
+		atan2(corners[0].y, corners[0].x),
+		atan2(corners[1].y, corners[1].x),
+		atan2(corners[2].y, corners[2].x),
+		atan2(corners[3].y, corners[3].x)
+	};
+	// screen border
+	std::vector<vec4> segments = {
+		vec4(corners[0], corners[1]),
+		vec4(corners[1], corners[2]),
+		vec4(corners[2], corners[3]),
+		vec4(corners[3], corners[0])
+	};
+
+	std::vector<float> bb = get_bounding_box(corners);
+
+	// find all wall edges that might collide with ray
+	for (std::vector<vec2> wv : wall_vertices) {
+		for (int i = 0; i < wv.size(); i++) {
+			vec2 v1 = wv[i] - pos;
+			vec2 v2 = wv[(i + 1) % wv.size()] - pos;
+			std::vector<vec2> line_vertices = {v1, v2};
+			std::vector<float> wbb = get_bounding_box(line_vertices);
+			if (aabb_collides(bb, wbb)) {
+				segments.push_back(vec4(v1, v2));
+				angles.push_back(atan2(clamp(v1.y, -half_height, half_height), clamp(v1.x, -half_width, half_width)));
+				angles.push_back(atan2(clamp(v2.y, -half_height, half_height), clamp(v2.x, -half_width, half_width)));
+			}
+		}
+	}
+
+	std::sort(angles.begin(), angles.end());
+	angles.erase(std::unique(angles.begin(), angles.end()), angles.end());
+
+	std::vector<vec3> light_polygon;
+
+	vec2 l1v1 = vec2(0, 0);
+	for (float angle : angles) {
+		for (int j = -1; j < 2; j+=2) {
+			// cast 2 rays for each angle
+			float new_angle = angle + (float)j * 0.00001;
+			vec2 d1 = vec2(cos(new_angle), sin(new_angle)) * radius;
+			vec2 l1v2 = l1v1 + d1;
+
+			float smallest_t = 1.f;
+			for (vec4 s : segments) {
+				vec2 l2v1 = vec2(s.x, s.y);
+				vec2 l2v2 = vec2(s.z, s.w);
+
+				vec2 d2 = l2v2 - l2v1;
+
+				float det = d1.x * d2.y - d2.x * d1.y;
+
+				if (det == 0.f)
+				{
+					continue;
+				}
+
+				vec2 k = l1v1 - l2v1;
+
+				float t1 = (d2.x * k.y - d2.y * k.x) / det;
+				float t2 = (d1.x * k.y - d1.y * k.x) / det;
+
+				// if intersects
+				if (t1 > 0.f && t1 < 1.f && t2 > 0.f && t2 < 1.f)
+				{
+					smallest_t = min(t1, smallest_t);
+				}
+			}
+
+			// store the closest colliding position the ray hits
+			light_polygon.push_back(vec3(d1.x * smallest_t / half_width, -d1.y * smallest_t / half_height, 0.0f));
+		}
+	}
+	// center point
+	light_polygon.push_back(vec3(0.f, 0.f, 0.f));
+	return light_polygon;
+}
+
+// size: number of vertices of the light polygon
+// the last one is the center
+std::vector<unsigned int> compute_light_polygon_indices(int size) {
+	assert(size > 8);
+	std::vector<unsigned int> indices;
+	for (unsigned int i = 0; i < size - 1; i++) {
+		indices.push_back(size - 1);
+		indices.push_back(i);
+		indices.push_back((i + 1) % (unsigned int)(size - 1));
+	}
+	return indices;
+}
+
 // get the world coordiante of collider vertices
 std::vector<vec2> get_vertices_world_coordinate(Entity entity) {
 	Motion& motion = registry.motions.get(entity);
@@ -38,13 +144,13 @@ std::vector<float> get_bounding_box(std::vector<vec2>& vertices)
 	return bb;
 }
 
-bool aabb_collides(std::vector<float> bb1, std::vector<float> bb2)
+bool aabb_collides(std::vector<float>& bb1, std::vector<float>& bb2)
 {
 	return bb1[0] < bb2[2] && bb1[2] > bb2[0] && bb1[1] < bb2[3] && bb1[3] > bb2[1];
 }
 
 // e1 should be the point and e2 should be the convex polygon
-bool point_convex_polygon_collides(vec2 point, std::vector<vec2> vertices) {
+bool point_convex_polygon_collides(vec2 point, std::vector<vec2>& vertices) {
 	vec2 dir1 = point - vertices[0];
 	vec2 dir2 = vertices[1] - vertices[0];
 
@@ -232,6 +338,15 @@ void PhysicsSystem::step(float elapsed_ms)
 			pos.x -= offset.x;
 		}
 	}
+
+	while (registry.lightSources.size() > 0) {
+		registry.remove_all_components_of(registry.lightSources.entities[0]);
+	}
+
+	vec2 player_pos = registry.motions.get(registry.players.entities[0]).position;
+	std::vector<vec3> light_polygon = compute_light_polygon(player_pos, wall_vertices);
+	std::vector<unsigned int> light_polygon_indices = compute_light_polygon_indices(light_polygon.size());
+	createLightSource(player_pos, light_polygon, light_polygon_indices);
 
 	// debugging of bounding boxes
 	if (debugging.in_debug_mode)
