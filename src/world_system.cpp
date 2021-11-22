@@ -523,6 +523,8 @@ void WorldSystem::restart_game()
 	is_planting=false;
 	bomb_exploded=false;
 
+	Mix_Volume(-1,MIX_MAX_VOLUME/20);
+
 	// Remove all entities that we created
 	// All that have a motion, we could also iterate over all fish, turtles, ... but that would be more cumbersome
 	while (registry.motions.entities.size() > 0)
