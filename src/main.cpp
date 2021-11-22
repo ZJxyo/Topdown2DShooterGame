@@ -13,7 +13,7 @@
 #include "HelpMenu.h"
 
 using Clock = std::chrono::high_resolution_clock;
-const vec2 INTRO_LOCATION = {1000, 1000};
+const vec2 INTRO_LOCATION = {1000, 4800};
 
 
 // Entry point
