@@ -13,8 +13,8 @@
 #include "HelpMenu.h"
 
 // Game configuration
-const size_t MAX_TURTLES = 0;
-const size_t TURTLE_DELAY_MS = 2000 * 3;
+const size_t MAX_TURTLES = 2;
+const size_t TURTLE_DELAY_MS = 4000 * 3;
 const size_t ANIMATION_DELAY_MS = 100;
 const size_t BULLET_TIMER_MS = 100;
 const size_t BOMB_TIMER_MS = 40000.f;
@@ -255,9 +255,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		// Setting random initial position and constant velocity
 
 		Motion &motion = registry.motions.get(entity);
-		motion.position =
-			vec2(window_width_px - 200.f,
-				 50.f + uniform_dist(rng) * (window_height_px - 100.f));
+        motion.position =
+                vec2(1200.f -200.f,
+                     50.f + uniform_dist(rng) * (800.f - 100.f));
+//		motion.position =
+//			vec2(window_width_px - 200.f,
+//				 50.f + uniform_dist(rng) * (window_height_px - 100.f));
 
 		motion.velocity = vec2(10.f, 10.f);
 	}

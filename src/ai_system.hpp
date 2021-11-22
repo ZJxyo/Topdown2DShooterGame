@@ -308,15 +308,11 @@ private:
             AImotion.angle = 3.14 - atan2(playerY, playerX);
         }
 
-        if (vel.x != 0 || vel.y != 0) {
-            float LO = -0.5;
-            float HI = 0.5;
-            float r3 = LO + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (HI - LO)));
-            createBullet(renderer, AImotion.position, AImotion.angle + 1.5708 + r3);
-        }
-        else {
-            createBullet(renderer, AImotion.position, AImotion.angle + 1.5708);
-        }
+        //here to change AI bullet
+        float LO = -0.5;
+        float HI = 0.5;
+        float r3 = LO + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (HI - LO)));
+        createBullet(renderer, AImotion.position, AImotion.angle + 1.5708 + r3);
 
         return BTState::Failure; // return failure if shoot five time, success otherwirse. // naive one
     }
