@@ -28,7 +28,9 @@ vec2 oldPosition;
 // Create the fish world
 WorldSystem::WorldSystem()
 	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f), tap(false), can_plant(false),
-	plant_timer(PLANT_TIMER_MS), explode_timer(BOMB_TIMER_MS), bomb_planted(false), is_planting(false), bomb_exploded(false),footsteps_timer(FOOTSTEPS_SOUND_TIMER_MS)
+	plant_timer(PLANT_TIMER_MS), explode_timer(BOMB_TIMER_MS), bomb_planted(false), is_planting(false),
+	 bomb_exploded(false),footsteps_timer(FOOTSTEPS_SOUND_TIMER_MS), buildmode(false), buildcoord({0,0}),
+	  mousecoord({0,0}), building(false)
 
 {
 	// Seeding rng with random device
@@ -364,7 +366,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	if (fireRate.fire_rate < 0)
 	{
 		fireRate.fire_rate = BULLET_TIMER_MS;
-		if (mouse_down || tap) {
+		if ((mouse_down || tap ) && !buildmode) {
 			Player& player = registry.players.get(player_salmon);
 			Motion& motion = registry.motions.get(player_salmon);
 			if (tap)
@@ -387,6 +389,26 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			}
 		}
 	}
+
+	if (buildmode) {
+		vec2 pos = registry.motions.get(player_salmon).position;
+		int w, h;
+		glfwGetWindowSize(window, &w, &h);
+		if (mouse_down && !building){
+			mousecoord.x -= w/2;
+			mousecoord.y -= h/2;
+			mousecoord.x = mousecoord.x * 0.9;
+			mousecoord.y = mousecoord.y * 0.9;
+			buildcoord = pos + mousecoord;
+			building = true;
+		}
+		if (building && !mouse_down) {
+			building = false;
+			buildmode = false;
+			float angle = atan2(pos.x + mousecoord.x - (w/2) - buildcoord.x, -(pos.y + mousecoord.y - (h/2)- buildcoord.y));
+			createWall(renderer, buildcoord, angle,{100,300});
+		}
+	} 
 	
 
 	Motion &motion = registry.motions.get(player_salmon);
@@ -708,6 +730,14 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	}
 	
 	
+	if (key == GLFW_KEY_Q)
+	{
+		if (action == GLFW_PRESS)
+		{
+			cout << buildmode;
+			buildmode = !buildmode;
+		}
+	}
 
 	// Player movment WASD 
 
@@ -795,18 +825,32 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 	float angle = atan2(mouse_position.y - h / 2.f, mouse_position.x - w / 2.f);
 
 	motion.angle = angle;
+	mousecoord = mouse_position;
 }
 
 void WorldSystem::on_mouse_click(int button, int action, int mods)
 {
-	if (action == GLFW_PRESS)
-	{
-		mouse_down = true;
-		tap = true;
-	}
-	else if (action == GLFW_RELEASE)
-	{
-		mouse_down = false;
+	if (buildmode){
+		if (action == GLFW_PRESS)
+		{
+			mouse_down = true;
+		}
+		else if (action == GLFW_RELEASE)
+		{
+			mouse_down = false;
+		}
+
+	}else {
+		if (action == GLFW_PRESS)
+		{
+			mouse_down = true;
+			tap = true;
+		}
+		else if (action == GLFW_RELEASE)
+		{
+			mouse_down = false;
+		}
+
 	}
 }
 

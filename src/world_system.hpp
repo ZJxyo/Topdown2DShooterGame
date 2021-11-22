@@ -78,6 +78,11 @@ private:
 	bool is_planting;
 	bool bomb_exploded;
 	float footsteps_timer;
+	bool buildmode;
+	bool building;
+	vec2 buildcoord;
+	vec2 mousecoord;
+	
 
 	// music references
 	Mix_Music *background_music;
