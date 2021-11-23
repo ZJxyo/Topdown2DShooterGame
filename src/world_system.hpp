@@ -78,6 +78,7 @@ private:
 	bool is_planting;
 	bool bomb_exploded;
 	float footsteps_timer;
+	
 
 	// music references
 	Mix_Music *background_music;
