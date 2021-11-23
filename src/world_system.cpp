@@ -537,7 +537,7 @@ void WorldSystem::restart_game()
 	createGround(renderer);
 
 	// Create a new salmon
-	player_salmon = createSalmon(renderer, {1000, 1000});
+	player_salmon = createSalmon(renderer, {1000, 4900});
 	registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
 
 	SetupMap(renderer);
