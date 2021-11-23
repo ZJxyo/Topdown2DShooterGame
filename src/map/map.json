@@ -1,4 +1,24 @@
 {
+    "plant_spots": [{
+        "position":{
+            "x": 900,
+            "y": 300
+        },
+        "scale": {
+            "x": 700,
+            "y": 700
+        }
+    },
+    {
+        "position":{
+            "x": 3900,
+            "y": 200
+        },
+        "scale": {
+            "x": 900,
+            "y": 500
+        }
+    }],
     "walls":[
         {
             "position":{

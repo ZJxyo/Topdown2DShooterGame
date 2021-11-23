@@ -8,6 +8,7 @@
 
 using namespace std;
 using namespace nlohmann;
+using MyArray = std::array<std::array<int, 50>, 50>;
 
 Entity createSalmon(RenderSystem *renderer, vec2 pos)
 {
@@ -22,23 +23,28 @@ Entity createSalmon(RenderSystem *renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 
-	motion.velocity = { 0.f, 0.f };
-	motion.scale = {150,100};
-
-	
-
+	motion.velocity = {0.f, 0.f};
+	motion.scale = {150, 100};
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.players.emplace(entity);
-	registry.healths.emplace(entity, 100);
-	registry.colliders.emplace(entity);
+	Health &health = registry.healths.emplace(entity);
+	health.health = 1000;
+	registry.circleColliders.emplace(entity, 50);
 	registry.animates.emplace(entity);
 	registry.fireRates.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
 		{TEXTURE_ASSET_ID::PLAYER,
-		 EFFECT_ASSET_ID::TEXTURED,
+		 EFFECT_ASSET_ID::ANIMATE,
 		 GEOMETRY_BUFFER_ID::SPRITE});
+
+	registry.renderRequests2.insert(
+		entity,
+		{TEXTURE_ASSET_ID::FEET,
+		 EFFECT_ASSET_ID::ANIMATE,
+		 GEOMETRY_BUFFER_ID::SPRITE});
+
 	return entity;
 }
 
@@ -56,42 +62,44 @@ Entity createWall(RenderSystem *renderer, vec2 pos, float angle, vec2 scale)
 	motion.angle = angle;
 	motion.scale = scale;
 
-	registry.colliders.emplace(entity);
+	registry.polygonColliders.emplace(entity);
 	registry.walls.emplace(entity);
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.renderRequests.insert(
-		entity,
-		{TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
-		 EFFECT_ASSET_ID::PEBBLE,
-		 GEOMETRY_BUFFER_ID::RECTANGLE});
+			entity,
+			{TEXTURE_ASSET_ID::WALL,
+			 EFFECT_ASSET_ID::TEXTURED,
+			 GEOMETRY_BUFFER_ID::SPRITE});
 
 	return entity;
 }
 
-Entity createFish(RenderSystem *renderer, vec2 position)
+Entity createStoryBox(RenderSystem *renderer, vec2 position)
 {
 	// Reserve en entity
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
-	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::RECTANGLE);
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	// Initialize the position, scale, and physics components
 	auto &motion = registry.motions.emplace(entity);
 	motion.angle = 0.f;
-	motion.velocity = {-50, 0};
+	motion.velocity = {0, 0};
 	motion.position = position;
 
 	// Setting initial values, scale is negative to make it face the opposite way
 	motion.scale = vec2({-FISH_BB_WIDTH, FISH_BB_HEIGHT});
 
-	// Create an (empty) Fish component to be able to refer to all fish
-	registry.softShells.emplace(entity);
+//	registry.softShells.emplace(entity);
+//    registry.polygonColliders.emplace(entity);
+//    registry.walls.emplace(entity);
+    registry.storyBox.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{TEXTURE_ASSET_ID::FISH,
+		{TEXTURE_ASSET_ID::STORY_BOX,
 		 EFFECT_ASSET_ID::TEXTURED,
 		 GEOMETRY_BUFFER_ID::SPRITE});
 
@@ -105,7 +113,7 @@ Entity createTurtle(RenderSystem *renderer, vec2 position)
 	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
 	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
-	registry.colliders.emplace(entity);
+	registry.circleColliders.emplace(entity, 50);
 
 	// Initialize the motion
 	auto &motion = registry.motions.emplace(entity);
@@ -114,15 +122,22 @@ Entity createTurtle(RenderSystem *renderer, vec2 position)
 	motion.position = position;
 
 	// Setting initial values, scale is negative to make it face the opposite way
-	motion.scale = vec2({120, 120});
+	motion.scale = vec2({100, 100});
 
 	// Create and (empty) Turtle component to be able to refer to all turtles
-	registry.hardShells.emplace(entity);
+	registry.enemies.emplace(entity);
 	registry.animates.emplace(entity);
-	registry.healths.emplace(entity, 100);
+	Health &health = registry.healths.emplace(entity);
+	health.health = 100;
 	registry.renderRequests.insert(
 		entity,
 		{TEXTURE_ASSET_ID::PLAYER,
+		 EFFECT_ASSET_ID::TURTLE,
+		 GEOMETRY_BUFFER_ID::SPRITE});
+
+	registry.renderRequests2.insert(
+		entity,
+		{TEXTURE_ASSET_ID::FEET,
 		 EFFECT_ASSET_ID::TURTLE,
 		 GEOMETRY_BUFFER_ID::SPRITE});
 
@@ -142,9 +157,9 @@ Entity createLine(vec2 position, float angle, vec2 scale)
 
 	// Create motion
 
-	Motion& motion = registry.motions.emplace(entity);
+	Motion &motion = registry.motions.emplace(entity);
 	motion.angle = angle;
-	motion.velocity = { 0, 0 };
+	motion.velocity = {0, 0};
 
 	motion.position = position;
 	motion.scale = scale;
@@ -174,12 +189,89 @@ Entity createPebble(vec2 pos, vec2 size)
 
 	return entity;
 }
+
+Entity createBomb(RenderSystem *renderer, vec2 pos){
+
+	Entity bomb = Entity();
+	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(bomb, &mesh);
+	Motion &m = registry.motions.emplace(bomb);
+	m.position = pos;
+	m.scale = {50.f,80.f};
+	m.velocity = {0.f,0.f};
+	m.angle = 0.f;
+	registry.renderRequests.insert(
+			bomb,
+			{TEXTURE_ASSET_ID::BOMB,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	return bomb;
+}
+
+
+
+Entity createEndScreen(RenderSystem *renderer, vec2 pos){
+
+	Entity endscreen = Entity();
+	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(endscreen, &mesh);
+	Motion &m = registry.motions.emplace(endscreen);
+	m.position = pos;
+	m.scale = {600.f,300.f};
+	m.velocity = {0.f,0.f};
+	m.angle = 0.f;
+	registry.renderRequests.insert(
+			endscreen,
+			{TEXTURE_ASSET_ID::WIN,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	return endscreen;
+}
 struct wall
 {
 	vec2 position;
 	float angle;
 	vec2 scale;
 };
+
+MyArray createMatrix() {// matrix 2d array
+	
+	MyArray T;
+	Fill(T);
+	
+
+	//load from map.json
+	string src = PROJECT_SOURCE_DIR;
+	src += "src/map/map.json";
+	ifstream ifs(src);
+	json j;
+	ifs >> j;
+
+	for (json w : j["walls"]) {
+		int value_x = int(w["position"]["x"]) / 100;
+		int value_y = int(w["position"]["y"]) / 100;
+		T[value_y][value_x] = 1;
+
+		int scale_x = (((int(w["scale"]["x"]))/100) - 1)/2;
+		int scale_y = (((int(w["scale"]["y"]))/100) - 1)/2;
+		for (int i = 0; i <= scale_x; i++) {
+			for (int j = 0; j<= scale_y; j++ ) {
+					T[value_y + j][value_x + i] = 1;
+					T[value_y + j][value_x - i] = 1;
+					T[value_y - j][value_x + i] = 1;
+					T[value_y - j][value_x - i] = 1;
+			}
+			
+		}
+		// for (int i = 0;i <= scale_y; i++) {
+		// 	T[value_y + i][value_x] = 1;
+		// 	T[value_y - i][value_x] = 1;
+		// }
+	}
+
+//	Print(T);
+    return T;
+}
 
 int SetupMap(RenderSystem *renderer)
 {
@@ -189,6 +281,26 @@ int SetupMap(RenderSystem *renderer)
 	json j;
 	ifs >> j;
 
+	for (json w : j["plant_spots"]) {
+		auto entity = Entity();
+
+		Motion &motion = registry.motions.emplace(entity);
+		registry.plantAreas.emplace(entity);
+
+		int pre_value1 = int(w["position"]["x"]);
+		int pre_value2 = int(w["position"]["y"]);
+		int value1 = pre_value1 + 50;
+		int value2 = pre_value2 + 50;
+
+		motion.position = vec2(value1, value2);
+		motion.scale = vec2(w["scale"]["x"], w["scale"]["y"]);
+		registry.floorRenderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			 EFFECT_ASSET_ID::PLANTSPOT,
+			 GEOMETRY_BUFFER_ID::RECTANGLE});
+	}
+	
 	for (json w : j["walls"])
 	{
 		auto entity = Entity();
@@ -199,15 +311,24 @@ int SetupMap(RenderSystem *renderer)
 
 		// Setting initial motion values
 		Motion &motion = registry.motions.emplace(entity);
-		int value1 = int(w["position"]["x"]) + 50;
-		int value2 = int(w["position"]["y"]) + 50;
+		int pre_value1 = int(w["position"]["x"]);
+		int pre_value2 = int(w["position"]["y"]);
+		int value1 = pre_value1 + 50;
+		int value2 = pre_value2 + 50;
 		motion.position = vec2(value1, value2);
 		motion.angle = w["angle"];
 		motion.scale = vec2(w["scale"]["x"], w["scale"]["y"]);
 
-		registry.colliders.emplace(entity);
+		registry.polygonColliders.emplace(entity);
 		registry.walls.emplace(entity);
 
+		
+		
+		
+
+		
+
+		
 		// Create and (empty) Salmon component to be able to refer to all turtles
 		registry.renderRequests.insert(
 			entity,
@@ -217,6 +338,27 @@ int SetupMap(RenderSystem *renderer)
 	}
 	return 0;
 }
+
+
+
+void Fill(MyArray &T){
+    for(auto &row : T){
+        for(auto &el : row){
+            el = 0;
+        }
+    }
+}
+
+void Print(const MyArray &T){
+    for(auto &row : T){
+        for(auto &el : row){
+            cout<<el<<" ";
+        }
+        cout << endl;
+    }
+}
+
+
 
 int createGround(RenderSystem *renderer)
 {
@@ -241,7 +383,7 @@ int createGround(RenderSystem *renderer)
 
 			// Create and (empty) Salmon component to be able to refer to all turtles
 
-			registry.renderRequests.insert(
+			registry.floorRenderRequests.insert(
 				entity,
 				{TEXTURE_ASSET_ID::GROUND_WOOD,
 				 EFFECT_ASSET_ID::TEXTURED,
@@ -263,24 +405,38 @@ Entity createBullet(RenderSystem *renderer, vec2 pos, float angle)
 	// Setting initial motion values
 	Motion &motion = registry.motions.emplace(entity);
 	motion.position = pos;
-	motion.position.x = motion.position.x + 50*sin(angle) + 35*cos(angle);
-	motion.position.y = motion.position.y + 50*-cos(angle) + 35*sin(angle);
+	motion.position.x = motion.position.x + 50 * sin(angle) + 35 * cos(angle);
+	motion.position.y = motion.position.y + 50 * -cos(angle) + 35 * sin(angle);
 	motion.angle = angle;
-	motion.scale = {30,30};
+	motion.scale = {30, 30};
 	int speed = registry.bullets.emplace(entity).speed;
 	float y_speed = speed * -cos(angle);
 	float x_speed = speed * sin(angle);
-		
+
 	motion.velocity = {x_speed, y_speed};
 
-	registry.colliders.emplace(entity).vertices = {{0.f, 0.f, 1.f}};
+	registry.pointColliders.emplace(entity);
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
-	registry.renderRequests.insert(
+	registry.bulletsRenderRequests.insert(
 		entity,
 		{TEXTURE_ASSET_ID::BULLET, // TEXTURE_COUNT indicates that no txture is needed
-		 EFFECT_ASSET_ID::TEXTURED,
+		 EFFECT_ASSET_ID::INSTANCES,
 		 GEOMETRY_BUFFER_ID::SPRITE});
+
+	return entity;
+}
+
+Entity createShockwave(vec2 pos) {
+	Entity entity = Entity();
+	registry.shockwaveSource.emplace(entity, pos);
+	return entity;
+}
+
+Entity createLightSource(vec2 pos, std::vector<vec3>& vertices, std::vector<unsigned int>& indices) {
+	
+	Entity entity = Entity();
+	registry.lightSources.emplace(entity, pos, vertices, indices);
 
 	return entity;
 }

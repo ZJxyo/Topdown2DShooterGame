@@ -52,6 +52,11 @@ bool RenderSystem::init(int width, int height, GLFWwindow* window_arg)
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
+
+	glGenBuffers(1, &transform_buffer);
+	glGenBuffers(1, &vertices_buffer);
+	glGenBuffers(1, &indices_buffer);
+
 	gl_has_errors();
 
 	initScreenTexture();
