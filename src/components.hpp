@@ -92,8 +92,7 @@ struct Mesh
 
 struct Health
 {
-	unsigned int health;
-	Health(unsigned int health) : health(health) {}
+	int health;
 };
 
 // Collider shapes for collision detection, default box collider

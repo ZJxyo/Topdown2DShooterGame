@@ -28,7 +28,8 @@ Entity createSalmon(RenderSystem *renderer, vec2 pos)
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.players.emplace(entity);
-	registry.healths.emplace(entity, 100);
+	Health &health = registry.healths.emplace(entity);
+	health.health = 1000;
 	registry.circleColliders.emplace(entity, 50);
 	registry.animates.emplace(entity);
 	registry.fireRates.emplace(entity);
@@ -126,7 +127,8 @@ Entity createTurtle(RenderSystem *renderer, vec2 position)
 	// Create and (empty) Turtle component to be able to refer to all turtles
 	registry.enemies.emplace(entity);
 	registry.animates.emplace(entity);
-	registry.healths.emplace(entity, 100);
+	Health &health = registry.healths.emplace(entity);
+	health.health = 100;
 	registry.renderRequests.insert(
 		entity,
 		{TEXTURE_ASSET_ID::PLAYER,

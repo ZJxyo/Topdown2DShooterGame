@@ -204,6 +204,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		return true;
 	}
 
+	
+
 	//update animation
 	Player p = registry.players.get(player_salmon);
 	auto &a_entities = registry.animates.entities;
@@ -482,6 +484,22 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		createEndScreen(renderer,motion.position);
 	}
 
+
+	// checking HP for player
+	Health &health = registry.healths.get(player_salmon);
+	if (health.health < 0) {
+		restart_game();
+	}
+
+	// checking HP for AI turtle
+	for (Entity entity : registry.enemies.entities) {
+		Health &health = registry.healths.get(entity);
+		if (health.health < 0) {
+			registry.remove_all_components_of(entity);
+		}
+	}
+	
+	
 	
 	
 	// Processing the salmon state
@@ -559,7 +577,7 @@ void WorldSystem::restart_game()
 	createGround(renderer);
 
 	// Create a new salmon
-	player_salmon = createSalmon(renderer, {1000, 1000});
+	player_salmon = createSalmon(renderer, {1000, 4900});
 	registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
 
 	SetupMap(renderer);
@@ -857,7 +875,8 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 // e1 should be the bullet
 void WorldSystem::handle_bullet_hit(Entity bullet, Entity entity) {
 	if (registry.healths.has(entity)) {
-		registry.healths.get(entity).health -= 1;
+		Health& health = registry.healths.get(entity);
+		health.health -= 20;
 	}
 
 	assert(registry.motions.has(bullet));
