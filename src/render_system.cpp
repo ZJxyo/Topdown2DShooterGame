@@ -396,6 +396,7 @@ void RenderSystem::drawToScreen()
 		glStencilFunc(GL_ALWAYS, 1, 0xff);
 		glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
 		glDrawElements(GL_TRIANGLES, ls.indices.size(), GL_UNSIGNED_INT, nullptr);
+		gl_has_errors();
 	}
 
 	// Draw the screen texture on the quad geometry
