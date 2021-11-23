@@ -67,10 +67,10 @@ Entity createWall(RenderSystem *renderer, vec2 pos, float angle, vec2 scale)
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.renderRequests.insert(
-		entity,
-		{TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
-		 EFFECT_ASSET_ID::PEBBLE,
-		 GEOMETRY_BUFFER_ID::RECTANGLE});
+			entity,
+			{TEXTURE_ASSET_ID::WALL,
+			 EFFECT_ASSET_ID::TEXTURED,
+			 GEOMETRY_BUFFER_ID::SPRITE});
 
 	return entity;
 }
