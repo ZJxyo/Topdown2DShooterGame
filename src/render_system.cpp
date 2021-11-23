@@ -334,9 +334,11 @@ void RenderSystem::drawParticles(ParticleSource ps, mat3 projection) {
 // water
 void RenderSystem::drawToScreen()
 {
+	const GLuint water_program = effects[(GLuint)EFFECT_ASSET_ID::WATER];
+
 	// Setting shaders
 	// get the water texture, sprite mesh, and program
-	glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::WATER]);
+	glUseProgram(water_program);
 	gl_has_errors();
 	// Clearing backbuffer
 	int w, h;
@@ -356,17 +358,16 @@ void RenderSystem::drawToScreen()
 	gl_has_errors();
 	glEnable(GL_STENCIL_TEST);
 
-	const GLuint water_program = effects[(GLuint)EFFECT_ASSET_ID::WATER];
 	// Bind our texture in Texture Unit 0
 	glActiveTexture(GL_TEXTURE0);
 
 	glBindTexture(GL_TEXTURE_2D, off_screen_render_buffer_color);
 	gl_has_errors();
 
-	GLuint dimming_uloc = glGetUniformLocation(water_program, "dimming");
 	GLint in_position_loc = glGetAttribLocation(water_program, "in_position");
 	GLuint time_uloc = glGetUniformLocation(water_program, "time");
 	GLuint pos_uloc = glGetUniformLocation(water_program, "shockwave_position");
+	GLuint dimming_uloc = glGetUniformLocation(water_program, "dimming");
 
 	// send time and shockwave first
 	if (registry.shockwaveSource.size() > 0) {
@@ -397,6 +398,7 @@ void RenderSystem::drawToScreen()
 		glStencilFunc(GL_ALWAYS, 1, 0xff);
 		glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
 		glDrawElements(GL_TRIANGLES, ls.indices.size(), GL_UNSIGNED_INT, nullptr);
+		gl_has_errors();
 	}
 
 	// Draw the screen texture on the quad geometry
