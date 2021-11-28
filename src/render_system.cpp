@@ -334,9 +334,11 @@ void RenderSystem::drawParticles(ParticleSource ps, mat3 projection) {
 // water
 void RenderSystem::drawToScreen()
 {
+	const GLuint water_program = effects[(GLuint)EFFECT_ASSET_ID::WATER];
+
 	// Setting shaders
 	// get the water texture, sprite mesh, and program
-	glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::WATER]);
+	glUseProgram(water_program);
 	gl_has_errors();
 	// Clearing backbuffer
 	int w, h;
@@ -356,28 +358,25 @@ void RenderSystem::drawToScreen()
 	gl_has_errors();
 	glEnable(GL_STENCIL_TEST);
 
-	const GLuint water_program = effects[(GLuint)EFFECT_ASSET_ID::WATER];
 	// Bind our texture in Texture Unit 0
 	glActiveTexture(GL_TEXTURE0);
 
 	glBindTexture(GL_TEXTURE_2D, off_screen_render_buffer_color);
 	gl_has_errors();
 
-	GLuint dimming_uloc = glGetUniformLocation(water_program, "dimming");
-	GLint in_position_loc = glGetAttribLocation(water_program, "in_position");
 	GLuint time_uloc = glGetUniformLocation(water_program, "time");
-	GLuint pos_uloc = glGetUniformLocation(water_program, "shockwave_position");
+	GLuint shockwave_pos_uloc = glGetUniformLocation(water_program, "shockwave_pos");
+	GLuint darken_factor_uloc = glGetUniformLocation(water_program, "darken_factor");
 
 	// send time and shockwave first
 	if (registry.shockwaveSource.size() > 0) {
 		ShockwaveSource& sws = registry.shockwaveSource.components[0];
 		vec2 pos = registry.motions.get(registry.players.entities[0]).position;
 		glUniform1f(time_uloc, sws.time_elapsed);
-		glUniform2f(pos_uloc, (sws.pos.x - pos.x) / window_width_px + 0.5f, -(sws.pos.y - pos.y) / window_height_px + 0.5f);
+		glUniform2f(shockwave_pos_uloc, (sws.pos.x - pos.x) / window_width_px + 0.5f, -(sws.pos.y - pos.y) / window_height_px + 0.5f);
 	}
 	else {
-		glUniform1f(time_uloc, 100.f);
-		glUniform2f(pos_uloc, 0.f, 0.f);
+		glUniform1f(time_uloc, -1.f);
 	}
 
 	// visibility polygon
@@ -389,10 +388,10 @@ void RenderSystem::drawToScreen()
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * ls.indices.size(), ls.indices.data(), GL_STREAM_DRAW);
 		gl_has_errors();
 
-		glEnableVertexAttribArray(in_position_loc);
-		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
 
-		glUniform1f(dimming_uloc, 1.f);
+		glUniform1f(darken_factor_uloc, 1.f);
 
 		glStencilFunc(GL_ALWAYS, 1, 0xff);
 		glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
@@ -408,11 +407,11 @@ void RenderSystem::drawToScreen()
 
 	// Set the vertex position and vertex texture coordinates (both stored in the
 	// same VBO)
-	glEnableVertexAttribArray(in_position_loc);
-	glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void *)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void *)0);
 	gl_has_errors();
 
-	glUniform1f(dimming_uloc, 0.5f);
+	glUniform1f(darken_factor_uloc, 0.5f);
 
 	gl_has_errors();
 
