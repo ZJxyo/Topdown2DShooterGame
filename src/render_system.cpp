@@ -11,16 +11,12 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	// Transformation code, see Rendering and Transformation in the template
 	// specification for more info Incrementally updates transformation matrix,
 	// thus ORDER IS IMPORTANT
+	Entity player = registry.players.entities[0];
+	vec2 pos = registry.motions.get(player).position;
+
 	Transform transform;
+	transform.translate(vec2(window_width_px / 2 - pos.x, window_height_px / 2 - pos.y)); // translate camera to player
 	transform.translate(motion.position);
-
-	Entity e = registry.players.entities[0];
-	vec2 pos = registry.motions.get(e).position;
-
-	pos = {-pos.x + (window_width_px / 2), -pos.y + (window_height_px / 2)};
-
-	transform.translate(pos); // translate camera to player
-
 	transform.rotate(motion.angle);
 	transform.scale(motion.scale);
 	transform.scale(scaling);
@@ -411,7 +407,7 @@ void RenderSystem::drawToScreen()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void *)0);
 	gl_has_errors();
 
-	glUniform1f(darken_factor_uloc, 0.5f);
+	glUniform1f(darken_factor_uloc, 0.6f);
 
 	gl_has_errors();
 
