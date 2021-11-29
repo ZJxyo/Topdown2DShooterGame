@@ -29,7 +29,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 	const GLuint used_effect_enum = (GLuint)render_request.used_effect;
 	assert(used_effect_enum != (GLuint)EFFECT_ASSET_ID::EFFECT_COUNT);
-	const GLuint program = (GLuint)effects[used_effect_enum];
+	const GLuint program = effects[used_effect_enum];
 
 	// Setting shaders
 	glUseProgram(program);
@@ -150,9 +150,9 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	GLint currProgram;
 	glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
 	// Setting uniform values to the currently bound program
-	GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
+	GLint transform_loc = glGetUniformLocation(currProgram, "transform");
 	glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float *)&transform.mat);
-	GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
+	GLint projection_loc = glGetUniformLocation(currProgram, "projection");
 	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float *)&projection);
 
 	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED && render_request.used_texture == TEXTURE_ASSET_ID::GROUND_WOOD)
@@ -200,7 +200,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 void RenderSystem::drawTexturedInstances(std::vector<Entity>& entities,
 	const mat3& projection, RenderRequest& request) {
 
-	const GLuint program = (GLuint)effects[(GLuint)request.used_effect];
+	const GLuint program = effects[(GLuint)request.used_effect];
 	glUseProgram(program);
 	gl_has_errors();
 
@@ -271,7 +271,7 @@ void RenderSystem::drawTexturedInstances(std::vector<Entity>& entities,
 }
 
 void RenderSystem::drawParticles(ParticleSource ps, mat3 projection) {
-	const GLuint program = (GLuint)effects[(GLuint)EFFECT_ASSET_ID::PARTICLE];
+	const GLuint program = effects[(GLuint)EFFECT_ASSET_ID::PARTICLE];
 	glUseProgram(program);
 	gl_has_errors();
 
@@ -364,9 +364,9 @@ void RenderSystem::drawToScreen()
 	glBindTexture(GL_TEXTURE_2D, off_screen_render_buffer_color);
 	gl_has_errors();
 
-	GLuint time_uloc = glGetUniformLocation(water_program, "time");
-	GLuint shockwave_pos_uloc = glGetUniformLocation(water_program, "shockwave_pos");
-	GLuint darken_factor_uloc = glGetUniformLocation(water_program, "darken_factor");
+	GLint time_uloc = glGetUniformLocation(water_program, "time");
+	GLint shockwave_pos_uloc = glGetUniformLocation(water_program, "shockwave_pos");
+	GLint darken_factor_uloc = glGetUniformLocation(water_program, "darken_factor");
 
 	// send time and shockwave first
 	if (registry.shockwaveSource.size() > 0) {
