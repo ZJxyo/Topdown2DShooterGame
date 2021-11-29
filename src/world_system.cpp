@@ -23,7 +23,7 @@ const size_t PLANT_TIMER_MS = 2000.0f;
 int toggle[4] = {-1, -1, -1, -1};
 Entity stories[4];
 Entity boxes[4];
-vec2 oldPosition;
+vec2 oldPosition = {1000, 1000};
 
 // Create the fish world
 WorldSystem::WorldSystem()
@@ -282,7 +282,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
     && abs(registry.motions.get(player_salmon).position.y - BOX1_LOCATION.y) < 50) {
 
         if(toggle[0] == -1) {
-            oldPosition = registry.motions.get(entity).position;
+//            oldPosition = registry.motions.get(entity).position;
             stories[0] = helpMenu.createStroy1(renderer, window, { BOX1_LOCATION.x,BOX1_LOCATION.y });
             registry.motions.get(entity).position = {2000, 2000};
             registry.motions.get(entity).velocity = {0,0};
@@ -303,7 +303,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
        && abs(registry.motions.get(player_salmon).position.y - BOX2_LOCATION.y) < 50) {
 
         if(toggle[1] == -1) {
-            oldPosition = registry.motions.get(entity).position;
+//            oldPosition = registry.motions.get(entity).position;
             stories[1] = helpMenu.createStroy2(renderer, window, { BOX2_LOCATION.x,BOX2_LOCATION.y });
             registry.motions.get(entity).position = {2000, 2000};
             registry.motions.get(entity).velocity = {0,0};
@@ -324,7 +324,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
        && abs(registry.motions.get(player_salmon).position.y - BOX3_LOCATION.y) < 50) {
 
         if(toggle[2] == -1) {
-            oldPosition = registry.motions.get(entity).position;
+//            oldPosition = registry.motions.get(entity).position;
             stories[2] = helpMenu.createStroy3(renderer, window, { BOX3_LOCATION.x,BOX3_LOCATION.y });
             registry.motions.get(entity).position = {2000, 2000};
             registry.motions.get(entity).velocity = {0,0};
@@ -345,7 +345,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
        && abs(registry.motions.get(player_salmon).position.y - BOX4_LOCATION.y) < 50) {
 
         if(toggle[3] == -1) {
-            oldPosition = registry.motions.get(entity).position;
+//            oldPosition = registry.motions.get(entity).position;
             stories[3] = helpMenu.createStroy4(renderer, window, { BOX4_LOCATION.x,BOX4_LOCATION.y });
             registry.motions.get(entity).position = {2000, 2000};
             registry.motions.get(entity).velocity = {0,0};
