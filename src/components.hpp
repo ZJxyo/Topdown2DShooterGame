@@ -17,6 +17,8 @@ struct Bullet
 // Turtles and pebbles have a hard shell
 struct Enemy
 {
+	bool is_visible = true;
+	bool is_activated = false;
 };
 
 // Fish and Salmon have a soft shell
