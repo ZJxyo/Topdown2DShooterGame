@@ -245,8 +245,17 @@ void PhysicsSystem::step(float elapsed_ms)
 			break;
 		}
 
-		for (std::vector<float> bb : wall_bb) {
+		for (int j = 0; j < wall_bb.size(); j++) {
+			std::vector<float> bb = wall_bb[j];
 			if (aabb_collides(bullet_bb[i], bb)) {
+				Entity &p = registry.walls.entities[j];
+				if(registry.destroyable.has(p)){
+					Health &h = registry.healths.get(p);
+					h.health -= 10;
+					if (h.health <= 0){
+						registry.remove_all_components_of(p);
+					}
+				}
 				registry.remove_all_components_of(registry.bullets.entities[i]);
 				bullet_vertices[i] = bullet_vertices.back();
 				bullet_vertices.pop_back();

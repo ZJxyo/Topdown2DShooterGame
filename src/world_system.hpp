@@ -80,6 +80,7 @@ private:
 	float footsteps_timer;
 	bool buildmode;
 	bool building;
+	int maxWall;
 	vec2 buildcoord;
 	vec2 mousecoord;
 	

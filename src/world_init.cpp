@@ -64,6 +64,9 @@ Entity createWall(RenderSystem *renderer, vec2 pos, float angle, vec2 scale)
 
 	registry.polygonColliders.emplace(entity);
 	registry.walls.emplace(entity);
+	registry.destroyable.emplace(entity);
+	Health &h = registry.healths.emplace(entity);
+	h.health = 50;
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.renderRequests.insert(
