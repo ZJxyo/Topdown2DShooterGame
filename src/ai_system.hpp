@@ -19,6 +19,8 @@ using namespace std;
 #define ROW 50
 #define COL 50
 
+const size_t BULLET_TIMER_AI_MS = 100;
+
 class AISystem
 {
 public:
@@ -286,13 +288,15 @@ private:
 
 class ShootNBullets : public BTNode {
 public:
-    ShootNBullets(Entity other, RenderSystem* renderer) {
+    ShootNBullets(Entity other, RenderSystem* renderer, float elapsed_ms) {
         player = other;
         this->renderer = renderer;
+        this->elapsed_ms = elapsed_ms;
     }
 private:
     Entity player;
     RenderSystem* renderer;
+    float elapsed_ms;
     void init(Entity e) override {}
     BTState process(Entity e) override {
         auto& vel = registry.motions.get(e).velocity;
@@ -312,7 +316,12 @@ private:
         float LO = -0.5;
         float HI = 0.5;
         float r3 = LO + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (HI - LO)));
-        createBullet(renderer, AImotion.position, AImotion.angle + 1.5708 + r3);
+        FireRate &fr = registry.fireRates.get(e);
+        fr.fire_rate -= elapsed_ms;
+        if (fr.fire_rate < 0){
+            fr.fire_rate = BULLET_TIMER_AI_MS;
+            createBullet(renderer, AImotion.position, AImotion.angle + 1.5708 + r3);
+        }
 
         return BTState::Failure; // return failure if shoot five time, success otherwirse. // naive one
     }
