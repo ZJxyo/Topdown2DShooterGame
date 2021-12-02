@@ -130,6 +130,7 @@ Entity createTurtle(RenderSystem *renderer, vec2 position)
 	// Create and (empty) Turtle component to be able to refer to all turtles
 	registry.enemies.emplace(entity);
 	registry.animates.emplace(entity);
+	registry.fireRates.emplace(entity);
 	Health &health = registry.healths.emplace(entity);
 	health.health = 100;
 	registry.renderRequests.insert(
