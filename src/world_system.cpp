@@ -30,7 +30,7 @@ WorldSystem::WorldSystem()
 	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f), tap(false), can_plant(false),
 	plant_timer(PLANT_TIMER_MS), explode_timer(BOMB_TIMER_MS), bomb_planted(false), is_planting(false),
 	 bomb_exploded(false),footsteps_timer(FOOTSTEPS_SOUND_TIMER_MS), buildmode(false), buildcoord({0,0}),
-	  mousecoord({0,0}), building(false)
+	  mousecoord({0,0}), building(false), maxWall(10)
 
 {
 	// Seeding rng with random device
@@ -271,7 +271,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	// AIvy
 	Chase chase(player_salmon);
-	ShootNBullets shoot(player_salmon, renderer);
+	ShootNBullets shoot(player_salmon, renderer, elapsed_ms_since_last_update);
 	Build build(player_salmon);
 	BTIfCondition btIfCondition(&chase, &shoot, &build);
 	btIfCondition.init(entity);
@@ -412,6 +412,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			buildmode = false;
 			float angle = atan2(pos.x + mousecoord.x - (w/2) - buildcoord.x, -(pos.y + mousecoord.y - (h/2)- buildcoord.y));
 			createWall(renderer, buildcoord, angle,{100,300});
+			maxWall -= 1;
 		}
 	} 
 	
@@ -755,8 +756,10 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	{
 		if (action == GLFW_PRESS)
 		{
-			cout << buildmode;
-			buildmode = !buildmode;
+			if (maxWall > 0){
+				cout << buildmode;
+				buildmode = !buildmode;
+			}
 		}
 	}
 

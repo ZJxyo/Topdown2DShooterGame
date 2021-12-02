@@ -2,6 +2,36 @@
 #include "physics_system.hpp"
 #include "world_init.hpp"
 
+void update_visibility_status(std::vector<vec2> contact_points, std::vector<float> new_angles) {
+	Entity player = registry.players.entities[0];
+	vec2 player_position = registry.motions.get(player).position;
+	for (int i = 0; i < registry.enemies.size(); i++) {
+		Entity enemy = registry.enemies.entities[i];
+		vec2 enemy_position = registry.motions.get(enemy).position;
+		// relative position from the player
+		vec2 relative_pos = enemy_position - player_position;
+		// angle in radians
+		float angle = atan2(relative_pos.y, relative_pos.x);
+		for (int j = 0; j < new_angles.size(); j++) {
+			// first new angle that is larger than angle 
+			if (angle < new_angles[j]|| angle > new_angles[new_angles.size() - 1]) {
+				// vector from j vertex to j - 1 vertex
+				vec2 dir1;
+				if (j - 1 < 0) {
+					dir1 = contact_points[(int)new_angles.size() - 1] - contact_points[j];
+				}
+				else {
+					dir1 = contact_points[j - 1] - contact_points[j];
+				}
+				// vector from j vertex to enemy relative position
+				vec2 dir2 = relative_pos - contact_points[j];
+				registry.enemies.components[i].is_visible = dir1.x * dir2.y - dir2.x * dir1.y <= 0;
+				break;
+			}
+		}
+	}
+}
+
 std::vector<vec3> compute_light_polygon(vec2& pos, std::vector<std::vector<vec2>>& wall_vertices) {
 	float half_width = (float)window_width_px / 2.f;
 	float half_height = (float)window_height_px / 2.f;
@@ -50,6 +80,8 @@ std::vector<vec3> compute_light_polygon(vec2& pos, std::vector<std::vector<vec2>
 	std::sort(angles.begin(), angles.end());
 	angles.erase(std::unique(angles.begin(), angles.end()), angles.end());
 
+	std::vector<vec2> contact_points;
+	std::vector<float> new_angles;
 	std::vector<vec3> light_polygon;
 
 	vec2 l1v1 = vec2(0, 0);
@@ -87,9 +119,15 @@ std::vector<vec3> compute_light_polygon(vec2& pos, std::vector<std::vector<vec2>
 			}
 
 			// store the closest colliding position the ray hits
-			light_polygon.push_back(vec3(d1.x * smallest_t / half_width, -d1.y * smallest_t / half_height, 0.0f));
+			vec2 contact_point = d1 * smallest_t;
+			contact_points.push_back(contact_point);
+			new_angles.push_back(new_angle);
+			light_polygon.push_back(vec3(contact_point.x / half_width, -contact_point.y / half_height, 0.0f));
 		}
 	}
+
+	update_visibility_status(contact_points, new_angles);
+
 	// center point
 	light_polygon.push_back(vec3(0.f, 0.f, 0.f));
 	return light_polygon;
@@ -245,8 +283,17 @@ void PhysicsSystem::step(float elapsed_ms)
 			break;
 		}
 
-		for (std::vector<float> bb : wall_bb) {
+		for (int j = 0; j < wall_bb.size(); j++) {
+			std::vector<float> bb = wall_bb[j];
 			if (aabb_collides(bullet_bb[i], bb)) {
+				Entity &p = registry.walls.entities[j];
+				if(registry.destroyable.has(p)){
+					Health &h = registry.healths.get(p);
+					h.health -= 10;
+					if (h.health <= 0){
+						registry.remove_all_components_of(p);
+					}
+				}
 				registry.remove_all_components_of(registry.bullets.entities[i]);
 				bullet_vertices[i] = bullet_vertices.back();
 				bullet_vertices.pop_back();

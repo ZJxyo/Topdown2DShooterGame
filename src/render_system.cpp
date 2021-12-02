@@ -7,6 +7,10 @@
 void RenderSystem::drawTexturedMesh(Entity entity,
 									const mat3 &projection, RenderRequest &render_request, vec2 scaling = {1, 1})
 {
+	if (registry.enemies.has(entity)) {
+		if (!(registry.enemies.get(entity).is_visible))
+			return;
+	}
 	Motion &motion = registry.motions.get(entity);
 	// Transformation code, see Rendering and Transformation in the template
 	// specification for more info Incrementally updates transformation matrix,
