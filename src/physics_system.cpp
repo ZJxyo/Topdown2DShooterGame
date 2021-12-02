@@ -334,23 +334,39 @@ void PhysicsSystem::step(float elapsed_ms)
 		bool restore_xOry = false;
 		bool restore_xAndy = false;
 		std::vector<float> bb = { pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius };
-		std::vector<float> bb_x = { bb[0] - offset.x, bb[1], bb[2] - offset.x, bb[3] };
-		std::vector<float> bb_y = { bb[0], bb[1] - offset.y, bb[2], bb[3] - offset.y };
+		std::vector<float> bb_restored_x = { bb[0] - offset.x, bb[1], bb[2] - offset.x, bb[3] };
+		std::vector<float> bb_restored_y = { bb[0], bb[1] - offset.y, bb[2], bb[3] - offset.y };
 		for (int j = registry.walls.entities.size() - 1; j >= 0; j--) {
 			if (aabb_collides(bb, wall_bb[j])) {
+				// when vel.x = 0 or vel.x = 0, restore x and y is equivalent to restore one of x and y
+				if (offset.x == 0.f || offset.y == 0.f) {
+					restore_xAndy = true;
+					break;
+				}
+
 				// is colliding after restoring x
-				bool rx = aabb_collides(bb_x, wall_bb[j]);
+				bool rx = aabb_collides(bb_restored_x, wall_bb[j]);
 				// is colliding after restoring y
-				bool ry = aabb_collides(bb_y, wall_bb[j]);
+				bool ry = aabb_collides(bb_restored_y, wall_bb[j]);
 				
 				if (rx && ry) {
 					restore_xAndy = true;
 					break;
 				}
 				else if (rx) {
+					if (restore_x) {
+						restore_xAndy = true;
+						break;
+					}
+					bb = bb_restored_y;
 					restore_y = true;
 				}
 				else if (ry) {
+					if (restore_y) {
+						restore_xAndy = true;
+						break;
+					}
+					bb = bb_restored_x;
 					restore_x = true;
 				}
 				else {
@@ -359,7 +375,14 @@ void PhysicsSystem::step(float elapsed_ms)
 			}
 		}
 
+		if (restore_xAndy) {
+			pos -= offset;
+			continue;
+		}
+
+		// x is out of boundry
 		bool x_out = bb[0] < 0 || bb[2] > 5000;
+		// y is out of boundry
 		bool y_out = bb[1] < 0 || bb[3] > 5000;
 
 		if (x_out && y_out) {
