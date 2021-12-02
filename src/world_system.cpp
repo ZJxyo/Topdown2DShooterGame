@@ -567,6 +567,7 @@ void WorldSystem::restart_game()
 	is_planting=false;
 	bomb_exploded=false;
 
+	Mix_Pause(-1);
 	Mix_Volume(-1,MIX_MAX_VOLUME/20);
 
 	// Remove all entities that we created
