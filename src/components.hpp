@@ -165,7 +165,7 @@ struct LightSource {
 struct ShockwaveSource {
 	vec2 pos = vec2(0.f, 0.f);
 	float time_elapsed = 0.f;
-	ShockwaveSource(vec2 pos) : pos(pos), time_elapsed(time_elapsed) {}
+	ShockwaveSource(vec2 pos) : pos(pos) {}
 };
 
 struct StoryBox {
