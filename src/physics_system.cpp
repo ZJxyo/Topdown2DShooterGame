@@ -155,7 +155,7 @@ std::vector<vec2> get_vertices_world_coordinate(Entity entity) {
 	transform.rotate(motion.angle);
 	transform.scale(motion.scale);
 
-	std::vector<vec3> collider_vertices = registry.polygonColliders.get(entity).vertices;
+	std::vector<vec3> collider_vertices = registry.wallColliders.get(entity).vertices;
 	std::vector<vec2> vertices;
 	for (vec3& vertex : collider_vertices)
 	{
@@ -306,9 +306,9 @@ void PhysicsSystem::step(float elapsed_ms)
 
 	// bullet vs player/enemies
 	for (int i = registry.bullets.entities.size() - 1; i >= 0; i--) {
-		for (int j = registry.circleColliders.entities.size() - 1; j >= 0; j--) {
-			Entity p = registry.circleColliders.entities[j];
-			if (length(bullet_vertices[i] - registry.motions.get(p).position) < registry.circleColliders.components[j].radius) {
+		for (int j = registry.avatarColliders.entities.size() - 1; j >= 0; j--) {
+			Entity p = registry.avatarColliders.entities[j];
+			if (length(bullet_vertices[i] - registry.motions.get(p).position) < registry.avatarColliders.components[j].radius) {
 				for (auto callback : bullet_hit_callbacks) {
 					callback(registry.bullets.entities[i], p);
 				}
@@ -323,12 +323,12 @@ void PhysicsSystem::step(float elapsed_ms)
 	}
 
 	// player/enemies vs walls
-	for (int i = registry.circleColliders.entities.size() - 1; i >= 0; i--) {
-		Entity p = registry.circleColliders.entities[i];
+	for (int i = registry.avatarColliders.entities.size() - 1; i >= 0; i--) {
+		Entity p = registry.avatarColliders.entities[i];
 		Motion& p_motion = registry.motions.get(p);
 		vec2& pos = p_motion.position;
 		vec2 offset = p_motion.velocity * elapsed_ms / 1000.f;
-		float radius = registry.circleColliders.components[i].radius;
+		float radius = registry.avatarColliders.components[i].radius;
 		bool restore_x = false;
 		bool restore_y = false;
 		bool restore_xOry = false;
@@ -431,7 +431,7 @@ void PhysicsSystem::step(float elapsed_ms)
 			Entity line1 = createLine(motion.position, motion.angle, vec2{ 50.f, 3.f});
 			Entity line2 = createLine(motion.position, motion.angle, vec2{ 3.f, 50.f });
 
-			if (registry.polygonColliders.has(entity)) {
+			if (registry.wallColliders.has(entity)) {
 				std::vector<vec2> vertices = get_vertices_world_coordinate(entity);
 
 				for (int i = 0; i < vertices.size(); i++) {

@@ -172,6 +172,11 @@ struct StoryBox {
     bool isOpened = false;
 };
 
+// vertices 0123 forms a convex polygon, 2345 is the next polygon
+struct NonConvexCollider {
+	std::vector<vec2> vertices;
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture

@@ -27,9 +27,9 @@ public:
 	ComponentContainer<DebugComponent> debugComponents;
 	ComponentContainer<vec3> colors;
 	ComponentContainer<Health> healths;
-	ComponentContainer<PolygonCollider> polygonColliders;
-	ComponentContainer<CircleCollider> circleColliders;
-	ComponentContainer<PointCollider> pointColliders;
+	ComponentContainer<PolygonCollider> wallColliders;
+	ComponentContainer<CircleCollider> avatarColliders;
+	ComponentContainer<PointCollider> bulletColliders;
 	ComponentContainer<Wall> walls;
 	ComponentContainer<Bullet> bullets;
 	ComponentContainer<Animate> animates;
@@ -40,6 +40,7 @@ public:
 	ComponentContainer<ShockwaveSource> shockwaveSource;
 	ComponentContainer<StoryBox> storyBox;
 	ComponentContainer<Wall> destroyable;
+	ComponentContainer<NonConvexCollider> nonConvexWallColliders;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -61,9 +62,9 @@ public:
 		registry_list.push_back(&debugComponents);
 		registry_list.push_back(&colors);
 		registry_list.push_back(&healths);
-		registry_list.push_back(&polygonColliders);
-		registry_list.push_back(&circleColliders);
-		registry_list.push_back(&pointColliders);
+		registry_list.push_back(&wallColliders);
+		registry_list.push_back(&avatarColliders);
+		registry_list.push_back(&bulletColliders);
 		registry_list.push_back(&walls);
 		registry_list.push_back(&bullets);
 		registry_list.push_back(&animates);
@@ -74,6 +75,7 @@ public:
 		registry_list.push_back(&shockwaveSource);
 		registry_list.push_back(&storyBox);
 		registry_list.push_back(&destroyable);
+		registry_list.push_back(&nonConvexWallColliders);
 	}
 
 	void clear_all_components()

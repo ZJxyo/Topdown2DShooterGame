@@ -30,7 +30,7 @@ Entity createSalmon(RenderSystem *renderer, vec2 pos)
 	registry.players.emplace(entity);
 	Health &health = registry.healths.emplace(entity);
 	health.health = 1000;
-	registry.circleColliders.emplace(entity, 50);
+	registry.avatarColliders.emplace(entity, 50);
 	registry.animates.emplace(entity);
 	registry.fireRates.emplace(entity);
 	registry.renderRequests.insert(
@@ -62,7 +62,7 @@ Entity createWall(RenderSystem *renderer, vec2 pos, float angle, vec2 scale)
 	motion.angle = angle;
 	motion.scale = scale;
 
-	registry.polygonColliders.emplace(entity);
+	registry.wallColliders.emplace(entity);
 	registry.walls.emplace(entity);
 	registry.destroyable.emplace(entity);
 	Health &h = registry.healths.emplace(entity);
@@ -116,7 +116,7 @@ Entity createTurtle(RenderSystem *renderer, vec2 position)
 	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
 	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
-	registry.circleColliders.emplace(entity, 50);
+	registry.avatarColliders.emplace(entity, 50);
 
 	// Initialize the motion
 	auto &motion = registry.motions.emplace(entity);
@@ -323,7 +323,7 @@ int SetupMap(RenderSystem *renderer)
 		motion.angle = w["angle"];
 		motion.scale = vec2(w["scale"]["x"], w["scale"]["y"]);
 
-		registry.polygonColliders.emplace(entity);
+		registry.wallColliders.emplace(entity);
 		registry.walls.emplace(entity);
 
 		
@@ -419,7 +419,7 @@ Entity createBullet(RenderSystem *renderer, vec2 pos, float angle)
 
 	motion.velocity = {x_speed, y_speed};
 
-	registry.pointColliders.emplace(entity);
+	registry.bulletColliders.emplace(entity);
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.bulletsRenderRequests.insert(
