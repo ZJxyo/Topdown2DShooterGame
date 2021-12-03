@@ -81,6 +81,7 @@ private:
 	bool buildmode;
 	bool building;
 	int maxWall;
+	bool attack_mode;
 	vec2 buildcoord;
 	vec2 mousecoord;
 	
