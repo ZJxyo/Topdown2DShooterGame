@@ -330,6 +330,39 @@ void RenderSystem::drawParticles(ParticleSource ps, mat3 projection) {
 	gl_has_errors();
 }
 
+void RenderSystem::drawCustomMesh(Entity entity, mat3& projection, RenderRequest& render_request) {
+	const GLuint program = effects[(GLuint)render_request.used_effect];
+	glUseProgram(program);
+	gl_has_errors();
+
+	CustomMesh& cm = registry.customMeshes.get(entity);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vertices_buffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vec3) * cm.vertices.size(), cm.vertices.data(), GL_STREAM_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * cm.indices.size(), cm.indices.data(), GL_STREAM_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), 0);
+	glEnableVertexAttribArray(0);
+
+	GLint color_uloc = glGetUniformLocation(program, "color");
+	glUniform3fv(color_uloc, 1, (float*)&cm.color);
+
+	GLint projection_loc = glGetUniformLocation(program, "projection");
+	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projection);
+
+	vec2 player_postion = registry.motions.get(registry.players.entities[0]).position;
+	vec2 offset = vec2(window_width_px / 2.f - player_postion.x, window_height_px / 2.f - player_postion.y);
+	Transform transform;
+	transform.translate(offset);
+
+	GLint transform_loc = glGetUniformLocation(program, "transform");
+	glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
+
+	glDrawElements(GL_TRIANGLES, cm.indices.size(), GL_UNSIGNED_INT, nullptr);
+}
+
 // draw the intermediate texture to the screen, with some distortion to simulate
 // water
 void RenderSystem::drawToScreen()
@@ -381,7 +414,7 @@ void RenderSystem::drawToScreen()
 
 	// visibility polygon
 	if (registry.lightSources.size() > 0) {
-		LightSource& ls = registry.lightSources.components[0];
+		CustomMesh& ls = registry.lightSources.components[0];
 		glBindBuffer(GL_ARRAY_BUFFER, vertices_buffer);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vec3) * ls.vertices.size(), ls.vertices.data(), GL_STREAM_DRAW);
@@ -472,13 +505,17 @@ void RenderSystem::draw()
 		drawTexturedMesh(entity, projection_2D, render_request2, {0.7, 0.7});
 	}
 
-	for (Entity entity : registry.renderRequests.entities)
+	for (int i = 0; i < registry.renderRequests.size(); i++)
 	{
-		if (!registry.motions.has(entity))
+		Entity e = registry.renderRequests.entities[i];
+		if (!registry.motions.has(e))
 			continue;
 
-		RenderRequest &render_request = registry.renderRequests.get(entity);
-		drawTexturedMesh(entity, projection_2D, render_request);
+		drawTexturedMesh(e, projection_2D, registry.renderRequests.components[i]);
+	}
+
+	for (int i = 0; i < registry.customMeshRenderRequests.size(); i++) {
+		drawCustomMesh(registry.customMeshRenderRequests.entities[i], projection_2D, registry.customMeshRenderRequests.components[i]);
 	}
 
 	if (registry.bulletsRenderRequests.entities.size() > 0) {

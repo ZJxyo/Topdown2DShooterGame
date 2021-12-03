@@ -36,11 +36,13 @@ public:
 	ComponentContainer<FireRate> fireRates;
 	ComponentContainer<PlantArea> plantAreas;
 	ComponentContainer<ParticleSource> particleSources;
-	ComponentContainer<LightSource> lightSources;
+	ComponentContainer<CustomMesh> lightSources;
 	ComponentContainer<ShockwaveSource> shockwaveSource;
 	ComponentContainer<StoryBox> storyBox;
 	ComponentContainer<Wall> destroyable;
 	ComponentContainer<NonConvexCollider> nonConvexWallColliders;
+	ComponentContainer<CustomMesh> customMeshes;
+	ComponentContainer<RenderRequest> customMeshRenderRequests;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -76,6 +78,8 @@ public:
 		registry_list.push_back(&storyBox);
 		registry_list.push_back(&destroyable);
 		registry_list.push_back(&nonConvexWallColliders);
+		registry_list.push_back(&customMeshes);
+		registry_list.push_back(&customMeshRenderRequests);
 	}
 
 	void clear_all_components()

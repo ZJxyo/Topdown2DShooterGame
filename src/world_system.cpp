@@ -371,7 +371,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	if (fireRate.fire_rate < 0)
 	{
 		fireRate.fire_rate = BULLET_TIMER_MS;
-		if ((mouse_down || tap ) && !buildmode) {
+		if ((left_mouse_down || tap ) && !buildmode) {
 			Player& player = registry.players.get(player_salmon);
 			Motion& motion = registry.motions.get(player_salmon);
 			if (tap)
@@ -399,7 +399,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		vec2 pos = registry.motions.get(player_salmon).position;
 		int w, h;
 		glfwGetWindowSize(window, &w, &h);
-		if (mouse_down && !building){
+		if (left_mouse_down && !building){
 			mousecoord.x -= w/2;
 			mousecoord.y -= h/2;
 			mousecoord.x = mousecoord.x * 0.9;
@@ -407,7 +407,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			buildcoord = pos + mousecoord;
 			building = true;
 		}
-		if (building && !mouse_down) {
+		if (building && !left_mouse_down) {
 			building = false;
 			buildmode = false;
 			float angle = atan2(pos.x + mousecoord.x - (w/2) - buildcoord.x, -(pos.y + mousecoord.y - (h/2)- buildcoord.y));
@@ -548,6 +548,18 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		}
 	}
 
+	// if wall is done drawing or exceeds limit
+	if (wall_hinges.size() > 5 || right_mouse_down == false) {
+		if (wall_hinges.size() < 2) {
+			wall_hinges.clear();
+		}
+		else {
+			// build a wall
+			createNonConvexWall(30.f, wall_hinges);
+			wall_hinges.clear();
+		}
+	}
+
 	return true;
 }
 
@@ -560,7 +572,7 @@ void WorldSystem::restart_game()
 
 	// Reset the game speed
 	current_speed = 1.f;
-	mouse_down = false;
+	left_mouse_down = false;
 	plant_timer=PLANT_TIMER_MS;
 	explode_timer=BOMB_TIMER_MS;
 	bomb_planted=false;
@@ -845,36 +857,58 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 
 	int w, h;
 	glfwGetWindowSize(window, &w, &h);
+	vec2 relative_position = vec2(mouse_position.x - w / 2.f, mouse_position.y - h / 2.f);
 
-	float angle = atan2(mouse_position.y - h / 2.f, mouse_position.x - w / 2.f);
+	float angle = atan2(relative_position.y, relative_position.x);
 
 	motion.angle = angle;
 	mousecoord = mouse_position;
+
+	if (right_mouse_down && registry.nonConvexWallColliders.size() == 0) {
+		vec2 mouse_world_coord = vec2(relative_position.x / (w / 2.f) * (window_width_px / 2.f)
+			, relative_position.y / (h / 2.f) * (window_height_px / 2.f)) + motion.position;
+		if (wall_hinges.size() == 0 || length(mouse_world_coord - wall_hinges.back()) > 100.f) {
+			wall_hinges.push_back(mouse_world_coord);
+		}
+	}
 }
 
 void WorldSystem::on_mouse_click(int button, int action, int mods)
 {
 	if (buildmode){
-		if (action == GLFW_PRESS)
-		{
-			mouse_down = true;
+		if (button == GLFW_MOUSE_BUTTON_1) {
+			if (action == GLFW_PRESS)
+			{
+				left_mouse_down = true;
+			}
+			else if (action == GLFW_RELEASE)
+			{
+				left_mouse_down = false;
+			}
 		}
-		else if (action == GLFW_RELEASE)
-		{
-			mouse_down = false;
-		}
-
 	}else {
+		if (button == GLFW_MOUSE_BUTTON_1) {
+			if (action == GLFW_PRESS)
+			{
+				left_mouse_down = true;
+				tap = true;
+			}
+			else if (action == GLFW_RELEASE)
+			{
+				left_mouse_down = false;
+			}
+		}
+	}
+
+	if (button == GLFW_MOUSE_BUTTON_2) {
 		if (action == GLFW_PRESS)
 		{
-			mouse_down = true;
-			tap = true;
+			right_mouse_down = true;
 		}
 		else if (action == GLFW_RELEASE)
 		{
-			mouse_down = false;
+			right_mouse_down = false;
 		}
-
 	}
 }
 

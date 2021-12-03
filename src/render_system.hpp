@@ -103,6 +103,7 @@ private:
 	void drawTexturedMesh(Entity entity, const mat3 &projection, RenderRequest &render_request, vec2 scaling);
 	void drawTexturedInstances(std::vector<Entity>& entities, const mat3& projection, RenderRequest& request);
 	void drawParticles(ParticleSource ps, mat3 projection_2d);
+	void drawCustomMesh(Entity entity, mat3& projection, RenderRequest& render_request);
 	void drawToScreen();
 
 	// Window handle

@@ -69,7 +69,7 @@ private:
 	float next_fish_spawn;
 	float next_animation;
 	Entity player_salmon;
-	bool mouse_down;
+	bool left_mouse_down;
 	bool tap;
 	bool can_plant;
 	bool bomb_planted;
@@ -83,6 +83,10 @@ private:
 	int maxWall;
 	vec2 buildcoord;
 	vec2 mousecoord;
+
+	// non convex walls
+	bool right_mouse_down = false;
+	std::vector<vec2> wall_hinges;
 	
 
 	// music references
