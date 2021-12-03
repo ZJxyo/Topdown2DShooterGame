@@ -33,16 +33,16 @@ void update_visibility_status(std::vector<vec2> contact_points, std::vector<floa
 }
 
 std::vector<vec3> compute_light_polygon(vec2& pos, std::vector<std::vector<vec2>>& wall_vertices) {
-	float half_width = (float)window_width_px / 2.f;
-	float half_height = (float)window_height_px / 2.f;
-	float radius = half_width + half_height;
+	float half_width_with_offset = (float)window_width_px / 2.f + 50.f;
+	float half_height_with_offset = (float)window_height_px / 2.f + 50.f;
+	float radius = half_width_with_offset + half_height_with_offset;
 	
 	// screen corners
 	std::vector<vec2> corners = {
-		vec2(-half_width, -half_height),
-		vec2(half_width, -half_height),
-		vec2(half_width, half_height),
-		vec2(-half_width, half_height)
+		vec2(-half_width_with_offset, -half_height_with_offset),
+		vec2(half_width_with_offset, -half_height_with_offset),
+		vec2(half_width_with_offset, half_height_with_offset),
+		vec2(-half_width_with_offset, half_height_with_offset)
 	};
 
 	// screen corner angles
@@ -71,8 +71,8 @@ std::vector<vec3> compute_light_polygon(vec2& pos, std::vector<std::vector<vec2>
 			std::vector<float> wbb = get_bounding_box(line_vertices);
 			if (aabb_collides(bb, wbb)) {
 				segments.push_back(vec4(v1, v2));
-				angles.push_back(atan2(clamp(v1.y, -half_height, half_height), clamp(v1.x, -half_width, half_width)));
-				angles.push_back(atan2(clamp(v2.y, -half_height, half_height), clamp(v2.x, -half_width, half_width)));
+				angles.push_back(atan2(clamp(v1.y, -half_height_with_offset, half_height_with_offset), clamp(v1.x, -half_width_with_offset, half_width_with_offset)));
+				angles.push_back(atan2(clamp(v2.y, -half_height_with_offset, half_height_with_offset), clamp(v2.x, -half_width_with_offset, half_width_with_offset)));
 			}
 		}
 	}
@@ -122,7 +122,7 @@ std::vector<vec3> compute_light_polygon(vec2& pos, std::vector<std::vector<vec2>
 			vec2 contact_point = d1 * smallest_t;
 			contact_points.push_back(contact_point);
 			new_angles.push_back(new_angle);
-			light_polygon.push_back(vec3(contact_point.x / half_width, -contact_point.y / half_height, 0.0f));
+			light_polygon.push_back(vec3(contact_point.x * 2.f / (float)window_width_px, -contact_point.y * 2.f / (float)window_height_px, 0.0f));
 		}
 	}
 
@@ -334,23 +334,39 @@ void PhysicsSystem::step(float elapsed_ms)
 		bool restore_xOry = false;
 		bool restore_xAndy = false;
 		std::vector<float> bb = { pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius };
-		std::vector<float> bb_x = { bb[0] - offset.x, bb[1], bb[2] - offset.x, bb[3] };
-		std::vector<float> bb_y = { bb[0], bb[1] - offset.y, bb[2], bb[3] - offset.y };
+		std::vector<float> bb_restored_x = { bb[0] - offset.x, bb[1], bb[2] - offset.x, bb[3] };
+		std::vector<float> bb_restored_y = { bb[0], bb[1] - offset.y, bb[2], bb[3] - offset.y };
 		for (int j = registry.walls.entities.size() - 1; j >= 0; j--) {
 			if (aabb_collides(bb, wall_bb[j])) {
+				// when vel.x = 0 or vel.x = 0, restore x and y is equivalent to restore one of x and y
+				if (offset.x == 0.f || offset.y == 0.f) {
+					restore_xAndy = true;
+					break;
+				}
+
 				// is colliding after restoring x
-				bool rx = aabb_collides(bb_x, wall_bb[j]);
+				bool rx = aabb_collides(bb_restored_x, wall_bb[j]);
 				// is colliding after restoring y
-				bool ry = aabb_collides(bb_y, wall_bb[j]);
+				bool ry = aabb_collides(bb_restored_y, wall_bb[j]);
 				
 				if (rx && ry) {
 					restore_xAndy = true;
 					break;
 				}
 				else if (rx) {
+					if (restore_x) {
+						restore_xAndy = true;
+						break;
+					}
+					bb = bb_restored_y;
 					restore_y = true;
 				}
 				else if (ry) {
+					if (restore_y) {
+						restore_xAndy = true;
+						break;
+					}
+					bb = bb_restored_x;
 					restore_x = true;
 				}
 				else {
@@ -359,7 +375,14 @@ void PhysicsSystem::step(float elapsed_ms)
 			}
 		}
 
+		if (restore_xAndy) {
+			pos -= offset;
+			continue;
+		}
+
+		// x is out of boundry
 		bool x_out = bb[0] < 0 || bb[2] > 5000;
+		// y is out of boundry
 		bool y_out = bb[1] < 0 || bb[3] > 5000;
 
 		if (x_out && y_out) {
