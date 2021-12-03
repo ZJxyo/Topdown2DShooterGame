@@ -550,11 +550,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	// if wall is done drawing or exceeds limit
 	if (wall_hinges.size() > 5 || right_mouse_down == false) {
+		// at least 2 nodes
 		if (wall_hinges.size() < 2) {
 			wall_hinges.clear();
 		}
 		else {
-			// build a wall
 			createNonConvexWall(30.f, wall_hinges);
 			wall_hinges.clear();
 		}
