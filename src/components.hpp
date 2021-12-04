@@ -19,6 +19,8 @@ struct Enemy
 {
 	bool is_visible = true;
 	bool is_activated = false;
+	bool guard_mode = false;
+	vec2 pos = {0,0};
 };
 
 // Fish and Salmon have a soft shell

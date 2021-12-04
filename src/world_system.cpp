@@ -6,11 +6,15 @@
 #include <cassert>
 #include <sstream>
 
+#include <nlohmann/json.hpp>
+
 #include "physics_system.hpp"
 
 // AI111
 #include "ai_system.hpp"
 #include "HelpMenu.h"
+
+using namespace nlohmann;
 
 // Game configuration
 const size_t MAX_TURTLES = 5;
@@ -256,14 +260,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	Guard guard(player_salmon, renderer, elapsed_ms_since_last_update);
 
 	for(int i = 0; i < registry.enemies.entities.size(); i++ ){
-		if (i == 1 || i == 2){
-			vec2 pos; 
-			if (i == 1){
-				pos = {900,1200};
-			} else {
-				pos = {4500,500};
-			}
-			Move move(pos);
+		if (registry.enemies.components[i].guard_mode){
+			Move move(registry.enemies.components[i].pos);
 			BTIfCondition btIfCondition(NULL, &shoot, &build, &guard, &move);
 			Entity entity = registry.enemies.entities[i];
 			btIfCondition.process(entity);
@@ -432,10 +430,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	int player_x = motion.position.x ;
 	int player_y = motion.position.y ;
 
-
-
-
-
 	auto &pa_entities = registry.plantAreas.entities;
 	for (int i = 0; i < registry.plantAreas.components.size(); i++)
 	{
@@ -601,8 +595,18 @@ void WorldSystem::restart_game()
 	if (attack_mode){
 	for (int i = 0; i < MAX_TURTLES; i++){
 
+		string src = PROJECT_SOURCE_DIR;
+		src += "src/map/map.json";
+		ifstream ifs(src);
+		json j;
+		ifs >> j;
+
 		entity = createTurtle(renderer, {100.f * i + 2000.f, 100.f});
 		Motion &motion = registry.motions.get(entity);
+		Enemy &enemy = registry.enemies.get(entity);
+		if (i >=0 && i < 3){
+			enemy.pos = {1,2};
+		}
 
 	}
 		// Create a new salmon
