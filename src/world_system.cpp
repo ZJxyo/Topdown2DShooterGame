@@ -593,22 +593,32 @@ void WorldSystem::restart_game()
 	std::vector<unsigned int> indices = { 0, 1, 3, 1, 3, 2 };
 	createLightSource(vec2(0, 0), vertices, indices);
 	if (attack_mode){
-	for (int i = 0; i < MAX_TURTLES; i++){
+		std::set<int> guard_pos;
+		for (int i = 0; i < MAX_TURTLES; i++){
+			string src = PROJECT_SOURCE_DIR;
+			src += "src/map/map.json";
+			ifstream ifs(src);
+			json j;
+			ifs >> j;
 
-		string src = PROJECT_SOURCE_DIR;
-		src += "src/map/map.json";
-		ifstream ifs(src);
-		json j;
-		ifs >> j;
-
-		entity = createTurtle(renderer, {100.f * i + 2000.f, 100.f});
-		Motion &motion = registry.motions.get(entity);
-		Enemy &enemy = registry.enemies.get(entity);
-		if (i >=0 && i < 3){
-			enemy.pos = {1,2};
+			
+			entity = createTurtle(renderer, {100.f * i + 2000.f, 100.f});
+			Motion &motion = registry.motions.get(entity);
+			Enemy &enemy = registry.enemies.get(entity);
+			if (i >=0 && i < 4){
+				int r = rand() % j["AI_guard_pos"].size();
+				while (guard_pos.find(r) != guard_pos.end()){
+					r += 1;
+					if (r == j["AI_guard_pos"].size()){
+						r = 0;
+					}
+				} 
+				guard_pos.insert(r);
+				vec2 pos = {j["AI_guard_pos"][r]["x"], j["AI_guard_pos"][r]["y"]};
+				enemy.pos = pos;
+				enemy.guard_mode = true;
+			}
 		}
-
-	}
 		// Create a new salmon
 		player_salmon = createSalmon(renderer, {1000, 1000});
 		registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
