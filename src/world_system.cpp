@@ -371,7 +371,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	if (fireRate.fire_rate < 0)
 	{
 		fireRate.fire_rate = BULLET_TIMER_MS;
-		if ((mouse_down || tap ) && !buildmode) {
+		if ((left_mouse_down || tap ) && !buildmode) {
 			Player& player = registry.players.get(player_salmon);
 			Motion& motion = registry.motions.get(player_salmon);
 			if (tap)
@@ -399,7 +399,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		vec2 pos = registry.motions.get(player_salmon).position;
 		int w, h;
 		glfwGetWindowSize(window, &w, &h);
-		if (mouse_down && !building){
+		if (left_mouse_down && !building){
 			mousecoord.x -= w/2;
 			mousecoord.y -= h/2;
 			mousecoord.x = mousecoord.x * 0.9;
@@ -407,7 +407,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			buildcoord = pos + mousecoord;
 			building = true;
 		}
-		if (building && !mouse_down) {
+		if (building && !left_mouse_down) {
 			building = false;
 			buildmode = false;
 			float angle = atan2(pos.x + mousecoord.x - (w/2) - buildcoord.x, -(pos.y + mousecoord.y - (h/2)- buildcoord.y));
@@ -489,17 +489,29 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	}
 
 
-	// checking HP for player
-	Health &health = registry.healths.get(player_salmon);
-	if (health.health < 0) {
-		restart_game();
-	}
+	//// checking HP for player
+	//Health &health = registry.healths.get(player_salmon);
+	//if (health.health < 0) {
+	//	restart_game();
+	//}
 
-	// checking HP for AI turtle
-	for (Entity entity : registry.enemies.entities) {
-		Health &health = registry.healths.get(entity);
-		if (health.health < 0) {
-			registry.remove_all_components_of(entity);
+	//// checking HP for AI turtle
+	//for (Entity entity : registry.enemies.entities) {
+	//	Health &health = registry.healths.get(entity);
+	//	if (health.health < 0) {
+	//		registry.remove_all_components_of(entity);
+	//	}
+	//}
+
+	for (int i = registry.healths.size() - 1; i >= 0; i--) {
+		Entity e = registry.healths.entities[i];
+		if (registry.healths.components[i].health <= 0) {
+			if (registry.players.has(e)) {
+				restart_game();
+			}
+			else {
+				registry.remove_all_components_of(e);
+			}
 		}
 	}
 	
@@ -507,31 +519,31 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	
 	
 	// Processing the salmon state
-	assert(registry.screenStates.components.size() <= 1);
-	ScreenState &screen = registry.screenStates.components[0];
+	//assert(registry.screenStates.components.size() <= 1);
+	//ScreenState &screen = registry.screenStates.components[0];
 
-	float min_counter_ms = 3000.f;
-	for (Entity entity : registry.deathTimers.entities)
-	{
-		// progress timer
-		DeathTimer &counter = registry.deathTimers.get(entity);
-		counter.counter_ms -= elapsed_ms_since_last_update;
-		if (counter.counter_ms < min_counter_ms)
-		{
-			min_counter_ms = counter.counter_ms;
-		}
+	//float min_counter_ms = 3000.f;
+	//for (Entity entity : registry.deathTimers.entities)
+	//{
+	//	// progress timer
+	//	DeathTimer &counter = registry.deathTimers.get(entity);
+	//	counter.counter_ms -= elapsed_ms_since_last_update;
+	//	if (counter.counter_ms < min_counter_ms)
+	//	{
+	//		min_counter_ms = counter.counter_ms;
+	//	}
 
-		// restart the game once the death timer expired
-		if (counter.counter_ms < 0)
-		{
-			registry.deathTimers.remove(entity);
-			screen.darken_screen_factor = 0;
-			restart_game();
-			return true;
-		}
-	}
+	//	// restart the game once the death timer expired
+	//	if (counter.counter_ms < 0)
+	//	{
+	//		registry.deathTimers.remove(entity);
+	//		//screen.darken_screen_factor = 0;
+	//		restart_game();
+	//		return true;
+	//	}
+	//}
 	// reduce window brightness if any of the present salmons is dying
-	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
+	//screen.darken_screen_factor = 1 - min_counter_ms / 3000;
 
 	// !!! TODO A1: update LightUp timers and remove if time drops below zero, similar to the death counter
 	float time = elapsed_ms_since_last_update / 1000.f;
@@ -548,6 +560,18 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		}
 	}
 
+	// if wall is done drawing or exceeds limit
+	if (wall_hinges.size() > 5 || right_mouse_down == false) {
+		// at least 2 nodes
+		if (wall_hinges.size() < 2) {
+			wall_hinges.clear();
+		}
+		else {
+			createNonConvexWall(20.f, wall_hinges);
+			wall_hinges.clear();
+		}
+	}
+
 	return true;
 }
 
@@ -560,7 +584,7 @@ void WorldSystem::restart_game()
 
 	// Reset the game speed
 	current_speed = 1.f;
-	mouse_down = false;
+	left_mouse_down = false;
 	plant_timer=PLANT_TIMER_MS;
 	explode_timer=BOMB_TIMER_MS;
 	bomb_planted=false;
@@ -572,8 +596,7 @@ void WorldSystem::restart_game()
 
 	// Remove all entities that we created
 	// All that have a motion, we could also iterate over all fish, turtles, ... but that would be more cumbersome
-	while (registry.motions.entities.size() > 0)
-		registry.remove_all_components_of(registry.motions.entities.back());
+	registry.clear_all_components();
 
 	// Debugging for memory/component leaks
 	registry.list_all_components();
@@ -846,49 +869,78 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 
 	int w, h;
 	glfwGetWindowSize(window, &w, &h);
+	vec2 relative_position = vec2(mouse_position.x - w / 2.f, mouse_position.y - h / 2.f);
 
-	float angle = atan2(mouse_position.y - h / 2.f, mouse_position.x - w / 2.f);
+	float angle = atan2(relative_position.y, relative_position.x);
 
 	motion.angle = angle;
 	mousecoord = mouse_position;
+
+	if (right_mouse_down && registry.nonConvexWallColliders.size() == 0) {
+		vec2 mouse_world_coord = vec2(relative_position.x / (w / 2.f) * (window_width_px / 2.f)
+			, relative_position.y / (h / 2.f) * (window_height_px / 2.f)) + motion.position;
+		if (wall_hinges.size() == 0 || length(mouse_world_coord - wall_hinges.back()) > 100.f) {
+			wall_hinges.push_back(mouse_world_coord);
+		}
+	}
 }
 
 void WorldSystem::on_mouse_click(int button, int action, int mods)
 {
 	if (buildmode){
-		if (action == GLFW_PRESS)
-		{
-			mouse_down = true;
+		if (button == GLFW_MOUSE_BUTTON_1) {
+			if (action == GLFW_PRESS)
+			{
+				left_mouse_down = true;
+			}
+			else if (action == GLFW_RELEASE)
+			{
+				left_mouse_down = false;
+			}
 		}
-		else if (action == GLFW_RELEASE)
-		{
-			mouse_down = false;
-		}
-
 	}else {
+		if (button == GLFW_MOUSE_BUTTON_1) {
+			if (action == GLFW_PRESS)
+			{
+				left_mouse_down = true;
+				tap = true;
+			}
+			else if (action == GLFW_RELEASE)
+			{
+				left_mouse_down = false;
+			}
+		}
+	}
+
+	if (button == GLFW_MOUSE_BUTTON_2) {
 		if (action == GLFW_PRESS)
 		{
-			mouse_down = true;
-			tap = true;
+			right_mouse_down = true;
 		}
 		else if (action == GLFW_RELEASE)
 		{
-			mouse_down = false;
+			right_mouse_down = false;
 		}
-
 	}
 }
 
 // e1 should be the bullet
 void WorldSystem::handle_bullet_hit(Entity bullet, Entity entity) {
+	Health& health = registry.healths.get(entity);
 	if (registry.healths.has(entity)) {
-		Health& health = registry.healths.get(entity);
 		health.health -= 20;
 	}
 
 	assert(registry.motions.has(bullet));
+
 	Motion& bullet_motion = registry.motions.get(bullet);
-	createParticleSource(20, 3.f, 1.5f, vec3(1.f, 0.f, 0.f), bullet_motion.position, -normalize(bullet_motion.velocity), 300.f);
+
+	if (registry.nonConvexWallColliders.has(entity)) {
+		createParticleSource(50, 2.f, 1.5f, vec3(0.f, 0.f, 0.f), bullet_motion.position, -normalize(bullet_motion.velocity), 300.f);
+	}
+	else if (registry.enemies.has(entity) || registry.players.has(entity)) {
+		createParticleSource(50, 2.f, 1.5f, vec3(1.f, 0.f, 0.f), bullet_motion.position, -normalize(bullet_motion.velocity), 300.f);
+	}
 
 	if (registry.shockwaveSource.size() == 0) {
 		createShockwave(bullet_motion.position);
