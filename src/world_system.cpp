@@ -13,7 +13,7 @@
 #include "HelpMenu.h"
 
 // Game configuration
-const size_t MAX_TURTLES = 2;
+const size_t MAX_TURTLES = 0;
 const size_t TURTLE_DELAY_MS = 4000 * 3;
 const size_t ANIMATION_DELAY_MS = 100;
 const size_t BULLET_TIMER_MS = 100;
@@ -284,17 +284,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
         if(toggle[0] == -1) {
 //            oldPosition = registry.motions.get(entity).position;
             stories[0] = helpMenu.createStroy1(renderer, window, { BOX1_LOCATION.x,BOX1_LOCATION.y });
-            registry.motions.get(entity).position = {2000, 2000};
-            registry.motions.get(entity).velocity = {0,0};
+//            registry.motions.get(entity).position = {2000, 2000};
+//            registry.motions.get(entity).velocity = {0,0};
             toggle[0] = 0;
         }
 
         if (!helpMenu.showStory1 && toggle[0] == 0) {
             registry.remove_all_components_of(stories[0]);
             toggle[0] = 1;
-            if(toggle[0] == 1) {
-                registry.motions.get(entity).position = oldPosition;
-            }
+//            if(toggle[0] == 1) {
+//                registry.motions.get(entity).position = oldPosition;
+//            }
         }
     }
 
@@ -305,17 +305,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
         if(toggle[1] == -1) {
 //            oldPosition = registry.motions.get(entity).position;
             stories[1] = helpMenu.createStroy2(renderer, window, { BOX2_LOCATION.x,BOX2_LOCATION.y });
-            registry.motions.get(entity).position = {2000, 2000};
-            registry.motions.get(entity).velocity = {0,0};
+//            registry.motions.get(entity).position = {2000, 2000};
+//            registry.motions.get(entity).velocity = {0,0};
             toggle[1] = 0;
         }
 
         if (!helpMenu.showStory2&& toggle[1] == 0) {
             registry.remove_all_components_of(stories[1]);
             toggle[1] = 1;
-            if(toggle[1] == 1) {
-                registry.motions.get(entity).position = oldPosition;
-            }
+//            if(toggle[1] == 1) {
+//                registry.motions.get(entity).position = oldPosition;
+//            }
         }
     }
 
@@ -326,17 +326,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
         if(toggle[2] == -1) {
 //            oldPosition = registry.motions.get(entity).position;
             stories[2] = helpMenu.createStroy3(renderer, window, { BOX3_LOCATION.x,BOX3_LOCATION.y });
-            registry.motions.get(entity).position = {2000, 2000};
-            registry.motions.get(entity).velocity = {0,0};
+//            registry.motions.get(entity).position = {2000, 2000};
+//            registry.motions.get(entity).velocity = {0,0};
             toggle[2] = 0;
         }
 
         if (!helpMenu.showStory3 && toggle[2] == 0) {
             registry.remove_all_components_of(stories[2]);
             toggle[2] = 1;
-            if(toggle[2] == 1) {
-                registry.motions.get(entity).position = oldPosition;
-            }
+//            if(toggle[2] == 1) {
+//                registry.motions.get(entity).position = oldPosition;
+//            }
         }
     }
 
@@ -347,17 +347,18 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
         if(toggle[3] == -1) {
 //            oldPosition = registry.motions.get(entity).position;
             stories[3] = helpMenu.createStroy4(renderer, window, { BOX4_LOCATION.x,BOX4_LOCATION.y });
-            registry.motions.get(entity).position = {2000, 2000};
-            registry.motions.get(entity).velocity = {0,0};
+//            registry.motions.get(entity).position = {2000, 2000};
+//            registry.motions.get(entity).velocity = {0,0};
+            registry.motions.get(player_salmon).velocity = {0,0};
             toggle[3] = 0;
         }
 
         if (!helpMenu.showStory4 && toggle[3] == 0) {
             registry.remove_all_components_of(stories[3]);
             toggle[3] = 1;
-            if(toggle[3] == 1) {
-                registry.motions.get(entity).position = oldPosition;
-            }
+//            if(toggle[3] == 1) {
+//                registry.motions.get(entity).position = oldPosition;
+//            }
         }
     }
 
