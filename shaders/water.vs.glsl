@@ -1,6 +1,6 @@
 #version 330
 
-in vec3 in_position;
+layout(location = 0) in vec3 in_position;
 
 out vec2 texcoord;
 

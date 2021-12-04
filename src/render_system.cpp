@@ -7,20 +7,20 @@
 void RenderSystem::drawTexturedMesh(Entity entity,
 									const mat3 &projection, RenderRequest &render_request, vec2 scaling = {1, 1})
 {
+	if (registry.enemies.has(entity)) {
+		if (!(registry.enemies.get(entity).is_visible))
+			return;
+	}
 	Motion &motion = registry.motions.get(entity);
 	// Transformation code, see Rendering and Transformation in the template
 	// specification for more info Incrementally updates transformation matrix,
 	// thus ORDER IS IMPORTANT
+	Entity player = registry.players.entities[0];
+	vec2 pos = registry.motions.get(player).position;
+
 	Transform transform;
+	transform.translate(vec2(window_width_px / 2 - pos.x, window_height_px / 2 - pos.y)); // translate camera to player
 	transform.translate(motion.position);
-
-	Entity e = registry.players.entities[0];
-	vec2 pos = registry.motions.get(e).position;
-
-	pos = {-pos.x + (window_width_px / 2), -pos.y + (window_height_px / 2)};
-
-	transform.translate(pos); // translate camera to player
-
 	transform.rotate(motion.angle);
 	transform.scale(motion.scale);
 	transform.scale(scaling);
@@ -29,7 +29,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 	const GLuint used_effect_enum = (GLuint)render_request.used_effect;
 	assert(used_effect_enum != (GLuint)EFFECT_ASSET_ID::EFFECT_COUNT);
-	const GLuint program = (GLuint)effects[used_effect_enum];
+	const GLuint program = effects[used_effect_enum];
 
 	// Setting shaders
 	glUseProgram(program);
@@ -150,9 +150,9 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	GLint currProgram;
 	glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
 	// Setting uniform values to the currently bound program
-	GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
+	GLint transform_loc = glGetUniformLocation(currProgram, "transform");
 	glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float *)&transform.mat);
-	GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
+	GLint projection_loc = glGetUniformLocation(currProgram, "projection");
 	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float *)&projection);
 
 	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED && render_request.used_texture == TEXTURE_ASSET_ID::GROUND_WOOD)
@@ -200,7 +200,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 void RenderSystem::drawTexturedInstances(std::vector<Entity>& entities,
 	const mat3& projection, RenderRequest& request) {
 
-	const GLuint program = (GLuint)effects[(GLuint)request.used_effect];
+	const GLuint program = effects[(GLuint)request.used_effect];
 	glUseProgram(program);
 	gl_has_errors();
 
@@ -271,7 +271,7 @@ void RenderSystem::drawTexturedInstances(std::vector<Entity>& entities,
 }
 
 void RenderSystem::drawParticles(ParticleSource ps, mat3 projection) {
-	const GLuint program = (GLuint)effects[(GLuint)EFFECT_ASSET_ID::PARTICLE];
+	const GLuint program = effects[(GLuint)EFFECT_ASSET_ID::PARTICLE];
 	glUseProgram(program);
 	gl_has_errors();
 
@@ -334,9 +334,11 @@ void RenderSystem::drawParticles(ParticleSource ps, mat3 projection) {
 // water
 void RenderSystem::drawToScreen()
 {
+	const GLuint water_program = effects[(GLuint)EFFECT_ASSET_ID::WATER];
+
 	// Setting shaders
 	// get the water texture, sprite mesh, and program
-	glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::WATER]);
+	glUseProgram(water_program);
 	gl_has_errors();
 	// Clearing backbuffer
 	int w, h;
@@ -356,28 +358,25 @@ void RenderSystem::drawToScreen()
 	gl_has_errors();
 	glEnable(GL_STENCIL_TEST);
 
-	const GLuint water_program = effects[(GLuint)EFFECT_ASSET_ID::WATER];
 	// Bind our texture in Texture Unit 0
 	glActiveTexture(GL_TEXTURE0);
 
 	glBindTexture(GL_TEXTURE_2D, off_screen_render_buffer_color);
 	gl_has_errors();
 
-	GLuint dimming_uloc = glGetUniformLocation(water_program, "dimming");
-	GLint in_position_loc = glGetAttribLocation(water_program, "in_position");
-	GLuint time_uloc = glGetUniformLocation(water_program, "time");
-	GLuint pos_uloc = glGetUniformLocation(water_program, "shockwave_position");
+	GLint time_uloc = glGetUniformLocation(water_program, "time");
+	GLint shockwave_pos_uloc = glGetUniformLocation(water_program, "shockwave_pos");
+	GLint darken_factor_uloc = glGetUniformLocation(water_program, "darken_factor");
 
 	// send time and shockwave first
 	if (registry.shockwaveSource.size() > 0) {
 		ShockwaveSource& sws = registry.shockwaveSource.components[0];
 		vec2 pos = registry.motions.get(registry.players.entities[0]).position;
 		glUniform1f(time_uloc, sws.time_elapsed);
-		glUniform2f(pos_uloc, (sws.pos.x - pos.x) / window_width_px + 0.5f, -(sws.pos.y - pos.y) / window_height_px + 0.5f);
+		glUniform2f(shockwave_pos_uloc, (sws.pos.x - pos.x) / window_width_px + 0.5f, -(sws.pos.y - pos.y) / window_height_px + 0.5f);
 	}
 	else {
-		glUniform1f(time_uloc, 100.f);
-		glUniform2f(pos_uloc, 0.f, 0.f);
+		glUniform1f(time_uloc, -1.f);
 	}
 
 	// visibility polygon
@@ -389,14 +388,15 @@ void RenderSystem::drawToScreen()
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * ls.indices.size(), ls.indices.data(), GL_STREAM_DRAW);
 		gl_has_errors();
 
-		glEnableVertexAttribArray(in_position_loc);
-		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
 
-		glUniform1f(dimming_uloc, 1.f);
+		glUniform1f(darken_factor_uloc, 1.f);
 
 		glStencilFunc(GL_ALWAYS, 1, 0xff);
 		glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
 		glDrawElements(GL_TRIANGLES, ls.indices.size(), GL_UNSIGNED_INT, nullptr);
+		gl_has_errors();
 	}
 
 	// Draw the screen texture on the quad geometry
@@ -408,11 +408,11 @@ void RenderSystem::drawToScreen()
 
 	// Set the vertex position and vertex texture coordinates (both stored in the
 	// same VBO)
-	glEnableVertexAttribArray(in_position_loc);
-	glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void *)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void *)0);
 	gl_has_errors();
 
-	glUniform1f(dimming_uloc, 0.5f);
+	glUniform1f(darken_factor_uloc, 0.6f);
 
 	gl_has_errors();
 
