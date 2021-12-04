@@ -43,6 +43,7 @@ public:
 	ComponentContainer<NonConvexCollider> nonConvexWallColliders;
 	ComponentContainer<CustomMesh> customMeshes;
 	ComponentContainer<RenderRequest> customMeshRenderRequests;
+	ComponentContainer<SectorCollider> pushAreaColliders;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -80,6 +81,7 @@ public:
 		registry_list.push_back(&nonConvexWallColliders);
 		registry_list.push_back(&customMeshes);
 		registry_list.push_back(&customMeshRenderRequests);
+		registry_list.push_back(&pushAreaColliders);
 	}
 
 	void clear_all_components()

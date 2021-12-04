@@ -514,3 +514,9 @@ Entity createParticleSource(uint8 size, float radius, float decay, vec3 color, v
 
 	return ps;
 }
+
+Entity createPushArea(vec2 pos, float dist, float angle, float span) {
+	Entity entity = Entity();
+	registry.pushAreaColliders.emplace(entity, pos, dist, angle, span);
+	return entity;
+}

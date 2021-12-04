@@ -114,6 +114,15 @@ struct CircleCollider {
 
 struct PointCollider {};
 
+struct SectorCollider {
+	vec2 position;
+	float distance;
+	float angle;
+	float span;
+	SectorCollider(vec2 pos, float distance, float angle, float span) : position(pos), distance(distance), angle(angle), span(span) {}
+};
+
+
 // indicate this is a wall type object
 struct Wall
 {

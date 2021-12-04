@@ -38,3 +38,4 @@ Entity createLightSource(vec2 pos, std::vector<vec3>& vertices, std::vector<unsi
 Entity createShockwave(vec2 pos);
 Entity createNonConvexWall(float thickness, std::vector<vec2>& hinges);
 Entity createParticleSource(uint8 size, float radius, float decay, vec3 color, vec2 pos, vec2 dir, float speed);
+Entity createPushArea(vec2 pos, float dist, float angle, float span);
