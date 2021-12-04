@@ -290,16 +290,6 @@ void PhysicsSystem::step(float elapsed_ms)
 		wall_bb.push_back(get_bounding_box(vertices));
 	}
 
-	// all bullets' bounding box
-	std::vector<vec2> bullet_vertices;
-	std::vector<std::vector<float>> bullet_bb;
-	for (Entity e : registry.bullets.entities) {
-		vec2 vertex = registry.motions.get(e).position;
-		bullet_vertices.push_back(vertex);
-		std::vector<float> bb = { vertex.x, vertex.y, vertex.x, vertex.y };
-		bullet_bb.push_back(bb);
-	}
-
 	//// all non convex walls bounding box
 	//std::vector<std::vector<float>> nc_walls_bb;
 	//for (NonConvexCollider ncc : registry.nonConvexWallColliders.components) {
@@ -310,12 +300,12 @@ void PhysicsSystem::step(float elapsed_ms)
 	// in reversed order
 	for (int i = registry.bullets.entities.size() - 1; i >= 0; i--) {
 		// bullet vs boundry
-		if (bullet_bb[i][0] < 0 || bullet_bb[i][1] < 0 || bullet_bb[i][2] > 5000 || bullet_bb[i][3] > 5000) {
+		Entity bullet = registry.bullets.entities[i];
+		Motion& bullet_motion = registry.motions.get(bullet);
+		std::vector<vec2> bullet_vertex_vector = { bullet_motion.position };
+		std::vector<float> bullet_bb = get_bounding_box(bullet_vertex_vector);
+		if (bullet_bb[0] < 0 || bullet_bb[1] < 0 || bullet_bb[2] > 5000 || bullet_bb[3] > 5000) {
 			registry.remove_all_components_of(registry.bullets.entities[i]);
-			bullet_vertices[i] = bullet_vertices.back();
-			bullet_vertices.pop_back();
-			bullet_bb[i] = bullet_bb.back();
-			bullet_bb.pop_back();
 			continue;
 		}
 
@@ -324,7 +314,7 @@ void PhysicsSystem::step(float elapsed_ms)
 		// stationary walls
 		for (int j = 0; j < wall_bb.size(); j++) {
 			std::vector<float> bb = wall_bb[j];
-			if (aabb_collides(bullet_bb[i], bb)) {
+			if (aabb_collides(bullet_bb, bb)) {
 				Entity &p = registry.walls.entities[j];
 				if(registry.destroyable.has(p)){
 					Health &h = registry.healths.get(p);
@@ -333,29 +323,26 @@ void PhysicsSystem::step(float elapsed_ms)
 						registry.remove_all_components_of(p);
 					}
 				}
+				registry.remove_all_components_of(bullet);
 				bullet_removed = true;
 				break;
 			}
 		}
 
 		if (bullet_removed) {
-			registry.remove_all_components_of(registry.bullets.entities[i]);
-			bullet_vertices[i] = bullet_vertices.back();
-			bullet_vertices.pop_back();
-			bullet_bb[i] = bullet_bb.back();
-			bullet_bb.pop_back();
 			continue;
 		}
 
 		// non convex walls
 		for (int j = registry.nonConvexWallColliders.size() - 1; j >= 0; j--) {
 			std::vector<float> bb = get_bounding_box(registry.nonConvexWallColliders.components[j].vertices);
-			if (aabb_collides(bullet_bb[i], bb)) {
-				vec2 dir = -registry.motions.get(registry.bullets.entities[i]).velocity * elapsed_ms / 1000.f;
-				if (non_convex_collides(bullet_vertices[i], dir, registry.nonConvexWallColliders.components[j].vertices)) {
+			if (aabb_collides(bullet_bb, bb)) {
+				vec2 dir = -bullet_motion.velocity * elapsed_ms / 1000.f;
+				if (non_convex_collides(bullet_motion.position, dir, registry.nonConvexWallColliders.components[j].vertices)) {
 					for (auto callback : bullet_hit_callbacks) {
 						callback(registry.bullets.entities[i], registry.nonConvexWallColliders.entities[j]);
 					}
+					registry.remove_all_components_of(bullet);
 					bullet_removed = true;
 					break;
 				}
@@ -363,28 +350,17 @@ void PhysicsSystem::step(float elapsed_ms)
 		}
 
 		if (bullet_removed) {
-			registry.remove_all_components_of(registry.bullets.entities[i]);
-			bullet_vertices[i] = bullet_vertices.back();
-			bullet_vertices.pop_back();
-			bullet_bb[i] = bullet_bb.back();
-			bullet_bb.pop_back();
 			continue;
 		}
-	}
 
-	// bullet vs player/enemies
-	for (int i = registry.bullets.entities.size() - 1; i >= 0; i--) {
 		for (int j = registry.avatarColliders.entities.size() - 1; j >= 0; j--) {
 			Entity p = registry.avatarColliders.entities[j];
-			if (length(bullet_vertices[i] - registry.motions.get(p).position) < registry.avatarColliders.components[j].radius) {
+			if (length(bullet_motion.position - registry.motions.get(p).position) < registry.avatarColliders.components[j].radius) {
 				for (auto callback : bullet_hit_callbacks) {
 					callback(registry.bullets.entities[i], p);
 				}
 				registry.remove_all_components_of(registry.bullets.entities[i]);
-				bullet_vertices[i] = bullet_vertices.back();
-				bullet_vertices.pop_back();
-				bullet_bb[i] = bullet_bb.back();
-				bullet_bb.pop_back();
+				bullet_removed = true;
 				break;
 			}
 		}
