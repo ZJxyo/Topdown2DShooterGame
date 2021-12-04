@@ -851,7 +851,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	if (key == GLFW_KEY_R && action == GLFW_PRESS) {
 		// create an area that applies force
 		Motion& player_motion = registry.motions.get(player_salmon);
-		player_motion.angle
+		//player_motion.angle;
 	}
 
 
@@ -956,25 +956,4 @@ void WorldSystem::handle_bullet_hit(Entity bullet, Entity entity) {
 
 void WorldSystem::update_player_velocity() {
 	registry.motions.get(player_salmon).velocity = player_speed * vec2(input.right - input.left, input.down - input.up);
-}
-
-Entity WorldSystem::createParticleSource(uint8 size, float radius, float decay, vec3 color, vec2 pos, vec2 dir, float speed) {
-	assert(size != 0);
-	std::vector<vec2> positions;
-	std::vector<vec2> velocities;
-	for (uint i = 0; i < size; i++) {
-		positions.push_back(pos);
-		 //-0.5 to 0.5
-		float random_float = ((float)rand() / (float)RAND_MAX) - 0.5f;
-		float cs = cos(random_float * M_PI / 2.f);
-		float sn = sin(random_float * M_PI / 2.f);
-		vec2 random_dir = vec2(dir.x * cs - dir.y * sn, dir.x * sn + dir.y * cs);
-		float random_speed = speed * (1.f + (((float)rand() / (float)RAND_MAX) - 0.5f));
-		velocities.push_back(random_dir * random_speed);
-	}
-
-	Entity ps = Entity();
-	registry.particleSources.emplace(ps, size, radius, decay, color, positions, velocities);
-
-	return ps;
 }
