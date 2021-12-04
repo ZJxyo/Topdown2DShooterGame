@@ -75,7 +75,7 @@ private:
 	bool bomb_planted;
     bool canMove;
     int toggle[4] = {-1, -1, -1, -1};
-    Entity stories[4];
+    Entity tutorials[4];
     Entity boxes[4];
 	float plant_timer;
 	float explode_timer;

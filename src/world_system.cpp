@@ -278,14 +278,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
     && abs(registry.motions.get(player_salmon).position.y - BOX1_LOCATION.y) < 50) {
 
         if(toggle[0] == -1) {
-            stories[0] = helpMenu.createStroy1(renderer, window, { BOX1_LOCATION.x,BOX1_LOCATION.y });
+            tutorials[0] = helpMenu.createTutorial1(renderer, window, {BOX1_LOCATION.x, BOX1_LOCATION.y});
             toggle[0] = 0;
             canMove = false;
             registry.motions.get(player_salmon).velocity = {0,0};
         }
 
-        if (!helpMenu.showStory1 && toggle[0] == 0) {
-            registry.remove_all_components_of(stories[0]);
+        if (!helpMenu.showTutorial1 && toggle[0] == 0) {
+            registry.remove_all_components_of(tutorials[0]);
             toggle[0] = 1;
             registry.motions.get(player_salmon).velocity = {0,0};
             canMove = true;
@@ -301,14 +301,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
        && abs(registry.motions.get(player_salmon).position.y - BOX2_LOCATION.y) < 50) {
 
         if(toggle[1] == -1) {
-            stories[1] = helpMenu.createStroy2(renderer, window, { BOX2_LOCATION.x,BOX2_LOCATION.y });
+            tutorials[1] = helpMenu.createTutorial2(renderer, window, {BOX2_LOCATION.x, BOX2_LOCATION.y});
             toggle[1] = 0;
             canMove = false;
             registry.motions.get(player_salmon).velocity = {0,0};
         }
 
-        if (!helpMenu.showStory2&& toggle[1] == 0) {
-            registry.remove_all_components_of(stories[1]);
+        if (!helpMenu.showTutorial2 && toggle[1] == 0) {
+            registry.remove_all_components_of(tutorials[1]);
             toggle[1] = 1;
             registry.motions.get(player_salmon).velocity = {0,0};
             canMove = true;
@@ -324,14 +324,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
        && abs(registry.motions.get(player_salmon).position.y - BOX3_LOCATION.y) < 50) {
 
         if(toggle[2] == -1) {
-            stories[2] = helpMenu.createStroy3(renderer, window, { BOX3_LOCATION.x,BOX3_LOCATION.y });
+            tutorials[2] = helpMenu.createTutorial3(renderer, window, {BOX3_LOCATION.x, BOX3_LOCATION.y});
             toggle[2] = 0;
             canMove = false;
             registry.motions.get(player_salmon).velocity = {0,0};
         }
 
-        if (!helpMenu.showStory3 && toggle[2] == 0) {
-            registry.remove_all_components_of(stories[2]);
+        if (!helpMenu.showTutorial3 && toggle[2] == 0) {
+            registry.remove_all_components_of(tutorials[2]);
             toggle[2] = 1;
             registry.motions.get(player_salmon).velocity = {0,0};
             canMove = true;
@@ -347,14 +347,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
        && abs(registry.motions.get(player_salmon).position.y - BOX4_LOCATION.y) < 50) {
 
         if(toggle[3] == -1) {
-            stories[3] = helpMenu.createStroy4(renderer, window, { BOX4_LOCATION.x,BOX4_LOCATION.y });
+            tutorials[3] = helpMenu.createTutorial4(renderer, window, {BOX4_LOCATION.x, BOX4_LOCATION.y});
             toggle[3] = 0;
             canMove = false;
             registry.motions.get(player_salmon).velocity = {0,0};
         }
 
-        if (!helpMenu.showStory4 && toggle[3] == 0) {
-            registry.remove_all_components_of(stories[3]);
+        if (!helpMenu.showTutorial4 && toggle[3] == 0) {
+            registry.remove_all_components_of(tutorials[3]);
             toggle[3] = 1;
             registry.motions.get(player_salmon).velocity = {0,0};
             canMove = true;
@@ -683,24 +683,24 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory1 && toggle[0] == 0)
+    if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showTutorial1 && toggle[0] == 0)
     {
-        helpMenu.showStory1 = false;
+        helpMenu.showTutorial1 = false;
         canMove = true;
         registry.remove_all_components_of(boxes[0]);
-    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory2 && toggle[1] == 0)
+    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showTutorial2 && toggle[1] == 0)
     {
-        helpMenu.showStory2 = false;
+        helpMenu.showTutorial2 = false;
         canMove = true;
         registry.remove_all_components_of(boxes[1]);
-    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory3 && toggle[2] == 0)
+    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showTutorial3 && toggle[2] == 0)
     {
-        helpMenu.showStory3 = false;
+        helpMenu.showTutorial3 = false;
         canMove = true;
         registry.remove_all_components_of(boxes[2]);
-    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory4 && toggle[3] == 0)
+    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showTutorial4 && toggle[3] == 0)
     {
-        helpMenu.showStory4 = false;
+        helpMenu.showTutorial4 = false;
         canMove = true;
         registry.remove_all_components_of(boxes[3]);
     }
