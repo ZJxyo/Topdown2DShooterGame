@@ -13,7 +13,7 @@
 #include "HelpMenu.h"
 
 // Game configuration
-const size_t MAX_TURTLES = 2;
+const size_t MAX_TURTLES = 5;
 const size_t TURTLE_DELAY_MS = 4000 * 3;
 const size_t ANIMATION_DELAY_MS = 100;
 const size_t BULLET_TIMER_MS = 100;
@@ -30,7 +30,7 @@ WorldSystem::WorldSystem()
 	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f), tap(false), can_plant(false),
 	plant_timer(PLANT_TIMER_MS), explode_timer(BOMB_TIMER_MS), bomb_planted(false), is_planting(false),
 	 bomb_exploded(false),footsteps_timer(FOOTSTEPS_SOUND_TIMER_MS), buildmode(false), buildcoord({0,0}),
-	  mousecoord({0,0}), building(false), maxWall(10), attack_mode(false)
+	  mousecoord({0,0}), building(false), maxWall(10), attack_mode(true)
 
 {
 	// Seeding rng with random device
@@ -201,6 +201,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		registry.remove_all_components_of(registry.debugComponents.entities.back());
 
 	if(bomb_exploded){
+
 		return true;
 	}
 
@@ -249,33 +250,31 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	// Spawning new turtles
 
-	next_turtle_spawn -= elapsed_ms_since_last_update * current_speed;
-	if (registry.enemies.components.size() <= MAX_TURTLES && next_turtle_spawn < 0.f)
-	{
-		// Reset timer
-		next_turtle_spawn = (TURTLE_DELAY_MS / 2) + uniform_dist(rng) * (TURTLE_DELAY_MS / 2);
-		// Create turtle
-		entity = createTurtle(renderer, {1000, 1000});
-		// Setting random initial position and constant velocity
-
-		Motion &motion = registry.motions.get(entity);
-        motion.position =
-                vec2(1200.f -200.f,
-                     50.f + uniform_dist(rng) * (800.f - 100.f));
-//		motion.position =
-//			vec2(window_width_px - 200.f,
-//				 50.f + uniform_dist(rng) * (window_height_px - 100.f));
-
-		motion.velocity = vec2(10.f, 10.f);
-	}
-
 	// AIvy
-	Chase chase(player_salmon);
 	ShootNBullets shoot(player_salmon, renderer, elapsed_ms_since_last_update);
 	Build build(player_salmon);
-	BTIfCondition btIfCondition(&chase, &shoot, &build);
-	btIfCondition.init(entity);
-	btIfCondition.process(entity);
+	Guard guard(player_salmon, renderer, elapsed_ms_since_last_update);
+
+	for(int i = 0; i < registry.enemies.entities.size(); i++ ){
+		if (i == 1 || i == 2){
+			vec2 pos; 
+			if (i == 1){
+				pos = {900,1200};
+			} else {
+				pos = {4500,500};
+			}
+			Move move(pos);
+			BTIfCondition btIfCondition(NULL, &shoot, &build, &guard, &move);
+			Entity entity = registry.enemies.entities[i];
+			btIfCondition.process(entity);
+		} else {
+			Chase chase(player_salmon);
+			BTIfCondition btIfCondition(&chase, &shoot, &build, &guard,NULL);
+			Entity entity = registry.enemies.entities[i];
+			btIfCondition.init(entity);
+			btIfCondition.process(entity);
+		}
+	}
 
     // show storybox 1
     if(abs(registry.motions.get(player_salmon).position.x -  BOX1_LOCATION.x)  < 50
@@ -487,6 +486,15 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		
 		createEndScreen(renderer,motion.position);
 	}
+	if (registry.enemies.entities.size() > 0){
+		cout << registry.motions.get(registry.enemies.entities[0]).position.x << " ";
+		cout << registry.motions.get(registry.enemies.entities[0]).position.y;
+	}
+	
+	if (registry.enemies.entities.size() == 0){
+		
+		createEndScreen(renderer,motion.position);
+	}
 
 
 	// checking HP for player
@@ -577,17 +585,11 @@ void WorldSystem::restart_game()
 
 	// Debugging for memory/component leaks
 	registry.list_all_components();
-
 	// create ground
 	createGround(renderer);
-
-	// Create a new salmon
-	player_salmon = createSalmon(renderer, {1000, 4900});
-	registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
-
+	
 	SetupMap(renderer);
-	createMatrix();
-  
+
 	std::vector<vec3> vertices = {
 		vec3(-1.f, 1.f, 0.f),
 		vec3(1.f, 1.f, 0.f),
@@ -596,12 +598,35 @@ void WorldSystem::restart_game()
 	};
 	std::vector<unsigned int> indices = { 0, 1, 3, 1, 3, 2 };
 	createLightSource(vec2(0, 0), vertices, indices);
+	if (attack_mode){
+	for (int i = 0; i < MAX_TURTLES; i++){
 
-    // create story box
-    boxes[0] = createStoryBox(renderer, BOX1_LOCATION);
-    boxes[1] = createStoryBox(renderer, BOX2_LOCATION);
-    boxes[2] = createStoryBox(renderer, BOX3_LOCATION);
-    boxes[3] = createStoryBox(renderer, BOX4_LOCATION);
+		entity = createTurtle(renderer, {100.f * i + 2000.f, 100.f});
+		Motion &motion = registry.motions.get(entity);
+
+	}
+		// Create a new salmon
+		player_salmon = createSalmon(renderer, {1000, 1000});
+		registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
+	
+		// create story box
+		boxes[0] = createStoryBox(renderer, BOX1_LOCATION);
+		boxes[1] = createStoryBox(renderer, BOX2_LOCATION);
+		boxes[2] = createStoryBox(renderer, BOX3_LOCATION);
+		boxes[3] = createStoryBox(renderer, BOX4_LOCATION);
+	} else {
+		
+
+		// Create a new salmon
+		player_salmon = createSalmon(renderer, {2000, 100});
+		registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
+	
+		// create story box
+		boxes[0] = createStoryBox(renderer, BOX1_LOCATION);
+		boxes[1] = createStoryBox(renderer, BOX2_LOCATION);
+		boxes[2] = createStoryBox(renderer, BOX3_LOCATION);
+		boxes[3] = createStoryBox(renderer, BOX4_LOCATION);
+	}
 
 	// CLEAN
 
@@ -705,6 +730,11 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
 	{
+		restart_game();
+	}
+
+	if (bomb_exploded && GLFW_KEY_ENTER){
+		attack_mode = false;
 		restart_game();
 	}
 

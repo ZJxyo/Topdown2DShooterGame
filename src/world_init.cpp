@@ -121,7 +121,7 @@ Entity createTurtle(RenderSystem *renderer, vec2 position)
 	// Initialize the motion
 	auto &motion = registry.motions.emplace(entity);
 	motion.angle = 0.f;
-	motion.velocity = {100.f, 0.f};
+	motion.velocity = {0.f, 0.f};
 	motion.position = position;
 
 	// Setting initial values, scale is negative to make it face the opposite way
