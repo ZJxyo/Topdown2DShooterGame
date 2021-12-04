@@ -9,7 +9,7 @@
 #include "tiny_ecs.hpp"
 #include "render_system.hpp"
 static const float MENU_WIDTH = 1000;
-static const float MENU_HEIGHT = 550;
+static const float MENU_HEIGHT = 650;
 
 class HelpMenu {
 public:
