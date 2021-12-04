@@ -229,6 +229,36 @@ bool point_convex_polygon_collides(vec2 point, std::vector<vec2>& vertices) {
 //
 //}
 
+// check bullet path against every edge
+bool non_convex_collides(vec2& l1v1, vec2& d1, std::vector<vec2>& ncc_vertices) {
+	for (int i = 0; i < ncc_vertices.size() / 4; i++) {
+		for (int j = 0; j <= 1; j++) {
+			vec2 l2v1 = ncc_vertices[i * 4 + j];
+
+			vec2 d2 = ncc_vertices[i * 4 + j + 2] - l2v1;
+
+			float det = d1.x * d2.y - d2.x * d1.y;
+
+			if (det == 0.f)
+			{
+				continue;
+			}
+
+			vec2 k = l1v1 - l2v1;
+
+			float t1 = (d2.x * k.y - d2.y * k.x) / det;
+			float t2 = (d1.x * k.y - d1.y * k.x) / det;
+
+			// if intersects
+			if (t1 > 0.f && t1 < 1.f && t2 > 0.f && t2 < 1.f)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 void PhysicsSystem::step(float elapsed_ms)
 {
 	// Move fish based on how much time has passed, this is to (partially) avoid
@@ -251,7 +281,7 @@ void PhysicsSystem::step(float elapsed_ms)
 		}
 	}
 
-	// all walls' bounding box
+	// all stationary walls' bounding box
 	std::vector<std::vector<vec2>> wall_vertices;
 	std::vector<std::vector<float>> wall_bb;
 	for (auto w : registry.walls.entities) {
@@ -270,6 +300,12 @@ void PhysicsSystem::step(float elapsed_ms)
 		bullet_bb.push_back(bb);
 	}
 
+	//// all non convex walls bounding box
+	//std::vector<std::vector<float>> nc_walls_bb;
+	//for (NonConvexCollider ncc : registry.nonConvexWallColliders.components) {
+	//	nc_walls_bb.push_back(get_bounding_box(ncc.vertices));
+	//}
+
 	// bullets vs walls
 	// in reversed order
 	for (int i = registry.bullets.entities.size() - 1; i >= 0; i--) {
@@ -280,9 +316,12 @@ void PhysicsSystem::step(float elapsed_ms)
 			bullet_vertices.pop_back();
 			bullet_bb[i] = bullet_bb.back();
 			bullet_bb.pop_back();
-			break;
+			continue;
 		}
 
+		bool bullet_removed = false;
+
+		// stationary walls
 		for (int j = 0; j < wall_bb.size(); j++) {
 			std::vector<float> bb = wall_bb[j];
 			if (aabb_collides(bullet_bb[i], bb)) {
@@ -294,13 +333,42 @@ void PhysicsSystem::step(float elapsed_ms)
 						registry.remove_all_components_of(p);
 					}
 				}
-				registry.remove_all_components_of(registry.bullets.entities[i]);
-				bullet_vertices[i] = bullet_vertices.back();
-				bullet_vertices.pop_back();
-				bullet_bb[i] = bullet_bb.back();
-				bullet_bb.pop_back();
+				bullet_removed = true;
 				break;
 			}
+		}
+
+		if (bullet_removed) {
+			registry.remove_all_components_of(registry.bullets.entities[i]);
+			bullet_vertices[i] = bullet_vertices.back();
+			bullet_vertices.pop_back();
+			bullet_bb[i] = bullet_bb.back();
+			bullet_bb.pop_back();
+			continue;
+		}
+
+		// non convex walls
+		for (int j = registry.nonConvexWallColliders.size() - 1; j >= 0; j--) {
+			std::vector<float> bb = get_bounding_box(registry.nonConvexWallColliders.components[j].vertices);
+			if (aabb_collides(bullet_bb[i], bb)) {
+				vec2 dir = -registry.motions.get(registry.bullets.entities[i]).velocity * elapsed_ms / 1000.f;
+				if (non_convex_collides(bullet_vertices[i], dir, registry.nonConvexWallColliders.components[j].vertices)) {
+					for (auto callback : bullet_hit_callbacks) {
+						callback(registry.bullets.entities[i], registry.nonConvexWallColliders.entities[j]);
+					}
+					bullet_removed = true;
+					break;
+				}
+			}
+		}
+
+		if (bullet_removed) {
+			registry.remove_all_components_of(registry.bullets.entities[i]);
+			bullet_vertices[i] = bullet_vertices.back();
+			bullet_vertices.pop_back();
+			bullet_bb[i] = bullet_bb.back();
+			bullet_bb.pop_back();
+			continue;
 		}
 	}
 

@@ -489,17 +489,29 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	}
 
 
-	// checking HP for player
-	Health &health = registry.healths.get(player_salmon);
-	if (health.health < 0) {
-		restart_game();
-	}
+	//// checking HP for player
+	//Health &health = registry.healths.get(player_salmon);
+	//if (health.health < 0) {
+	//	restart_game();
+	//}
 
-	// checking HP for AI turtle
-	for (Entity entity : registry.enemies.entities) {
-		Health &health = registry.healths.get(entity);
-		if (health.health < 0) {
-			registry.remove_all_components_of(entity);
+	//// checking HP for AI turtle
+	//for (Entity entity : registry.enemies.entities) {
+	//	Health &health = registry.healths.get(entity);
+	//	if (health.health < 0) {
+	//		registry.remove_all_components_of(entity);
+	//	}
+	//}
+
+	for (int i = registry.healths.size() - 1; i >= 0; i--) {
+		Entity e = registry.healths.entities[i];
+		if (registry.healths.components[i].health <= 0) {
+			if (registry.players.has(e)) {
+				restart_game();
+			}
+			else {
+				registry.remove_all_components_of(e);
+			}
 		}
 	}
 	
@@ -507,31 +519,31 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	
 	
 	// Processing the salmon state
-	assert(registry.screenStates.components.size() <= 1);
-	ScreenState &screen = registry.screenStates.components[0];
+	//assert(registry.screenStates.components.size() <= 1);
+	//ScreenState &screen = registry.screenStates.components[0];
 
-	float min_counter_ms = 3000.f;
-	for (Entity entity : registry.deathTimers.entities)
-	{
-		// progress timer
-		DeathTimer &counter = registry.deathTimers.get(entity);
-		counter.counter_ms -= elapsed_ms_since_last_update;
-		if (counter.counter_ms < min_counter_ms)
-		{
-			min_counter_ms = counter.counter_ms;
-		}
+	//float min_counter_ms = 3000.f;
+	//for (Entity entity : registry.deathTimers.entities)
+	//{
+	//	// progress timer
+	//	DeathTimer &counter = registry.deathTimers.get(entity);
+	//	counter.counter_ms -= elapsed_ms_since_last_update;
+	//	if (counter.counter_ms < min_counter_ms)
+	//	{
+	//		min_counter_ms = counter.counter_ms;
+	//	}
 
-		// restart the game once the death timer expired
-		if (counter.counter_ms < 0)
-		{
-			registry.deathTimers.remove(entity);
-			screen.darken_screen_factor = 0;
-			restart_game();
-			return true;
-		}
-	}
+	//	// restart the game once the death timer expired
+	//	if (counter.counter_ms < 0)
+	//	{
+	//		registry.deathTimers.remove(entity);
+	//		//screen.darken_screen_factor = 0;
+	//		restart_game();
+	//		return true;
+	//	}
+	//}
 	// reduce window brightness if any of the present salmons is dying
-	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
+	//screen.darken_screen_factor = 1 - min_counter_ms / 3000;
 
 	// !!! TODO A1: update LightUp timers and remove if time drops below zero, similar to the death counter
 	float time = elapsed_ms_since_last_update / 1000.f;
@@ -555,7 +567,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			wall_hinges.clear();
 		}
 		else {
-			createNonConvexWall(30.f, wall_hinges);
+			createNonConvexWall(20.f, wall_hinges);
 			wall_hinges.clear();
 		}
 	}
@@ -583,8 +595,7 @@ void WorldSystem::restart_game()
 
 	// Remove all entities that we created
 	// All that have a motion, we could also iterate over all fish, turtles, ... but that would be more cumbersome
-	while (registry.motions.entities.size() > 0)
-		registry.remove_all_components_of(registry.motions.entities.back());
+	registry.clear_all_components();
 
 	// Debugging for memory/component leaks
 	registry.list_all_components();
@@ -914,14 +925,21 @@ void WorldSystem::on_mouse_click(int button, int action, int mods)
 
 // e1 should be the bullet
 void WorldSystem::handle_bullet_hit(Entity bullet, Entity entity) {
+	Health& health = registry.healths.get(entity);
 	if (registry.healths.has(entity)) {
-		Health& health = registry.healths.get(entity);
 		health.health -= 20;
 	}
 
 	assert(registry.motions.has(bullet));
+
 	Motion& bullet_motion = registry.motions.get(bullet);
-	createParticleSource(20, 3.f, 1.5f, vec3(1.f, 0.f, 0.f), bullet_motion.position, -normalize(bullet_motion.velocity), 300.f);
+
+	if (registry.nonConvexWallColliders.has(entity)) {
+		createParticleSource(50, 2.f, 1.5f, vec3(0.f, 0.f, 0.f), bullet_motion.position, -normalize(bullet_motion.velocity), 300.f);
+	}
+	else if (registry.enemies.has(entity) || registry.players.has(entity)) {
+		createParticleSource(50, 2.f, 1.5f, vec3(1.f, 0.f, 0.f), bullet_motion.position, -normalize(bullet_motion.velocity), 300.f);
+	}
 
 	if (registry.shockwaveSource.size() == 0) {
 		createShockwave(bullet_motion.position);
