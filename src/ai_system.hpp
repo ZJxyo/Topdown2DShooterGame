@@ -197,6 +197,9 @@ private:
     void init(Entity e) override {}
 
     BTState process(Entity e) override {
+        if (registry.physics.has(e)) {
+            return BTState::Success;
+        }
         AISystem ai;
         auto& vel = registry.motions.get(e).velocity;
         //WorldSystem::getEntity()

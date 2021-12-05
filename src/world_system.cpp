@@ -852,6 +852,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		// create an area that apply impulse
 		Motion& player_motion = registry.motions.get(player_salmon);
 		createPushArea(player_motion.position, 200.f, player_motion.angle, M_PI / 3.f);
+		createParticleSource(100, 5.f, 1.f, vec3(0.886, 0.345, 0.133), player_motion.position, vec2(cos(player_motion.angle), sin(player_motion.angle)), 1000.f);
 	}
 
 

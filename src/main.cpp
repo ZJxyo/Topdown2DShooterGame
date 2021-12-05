@@ -74,8 +74,8 @@ int main()
         // game loop
         else {
             world.step(elapsed_ms);
-            ai.step(elapsed_ms);
-            physics.step(elapsed_ms);
+			ai.step(elapsed_ms);
+			physics.step(elapsed_ms);
             //world.handle_collisions();
         }
 

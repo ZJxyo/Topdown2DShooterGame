@@ -272,6 +272,15 @@ void PhysicsSystem::step(float elapsed_ms)
 		Motion &motion = motion_registry.components[i];
 		Entity entity = motion_registry.entities[i];
 		motion.position += motion.velocity * time;
+
+		if (registry.physics.has(entity)) {
+			float acceleration = 1000.f;
+			vec2 dir = -normalize(motion.velocity);
+			motion.velocity += acceleration * dir * time;
+			if (length(motion.velocity) < 100.f) {
+				registry.physics.remove(entity);
+			}
+		}
 	}
 
 	for (int i = registry.shockwaveSource.size() - 1; i >= 0; i--) {
@@ -366,44 +375,6 @@ void PhysicsSystem::step(float elapsed_ms)
 		}
 	}
 
-	// push area vs enemies
-	for (int i = registry.pushAreaColliders.size() - 1; i >= 0; i--) {
-		SectorCollider& push_area_collider = registry.pushAreaColliders.components[i];
-		for (Entity enemy : registry.enemies.entities) {
-			vec2 enemy_pos = registry.motions.get(enemy).position;
-			float enemy_radius = registry.avatarColliders.get(enemy).radius;
-			// direction of enemy from source of push area
-			vec2 dir = enemy_pos - push_area_collider.position;
-
-			// out of range
-			if (length(dir) > enemy_radius + push_area_collider.distance) {
-				continue;
-			}
-
-			float angle = atan2(dir.y, dir.x);
-
-			float angle_diff = angle - push_area_collider.angle;
-			angle_diff += (angle_diff > M_PI) ? -2 * M_PI : (angle_diff < -M_PI) ? 2 * M_PI : 0;
-
-			float half_span = push_area_collider.span / 2.f;
-
-			// not in the span of the sector
-			if (abs(angle_diff) > half_span) {
-				continue;
-			}
-
-			printf("%f\n", angle_diff);
-
-			if (registry.physics.has(enemy)) {
-				registry.physics.get(enemy).impulse = 500.f;
-			}
-			else {
-				registry.physics.emplace(enemy).impulse = 500.f;
-			}
-		}
-		registry.remove_all_components_of(registry.pushAreaColliders.entities[i]);
-	}
-
 	// player/enemies vs walls
 	for (int i = registry.avatarColliders.entities.size() - 1; i >= 0; i--) {
 		Entity p = registry.avatarColliders.entities[i];
@@ -459,6 +430,9 @@ void PhysicsSystem::step(float elapsed_ms)
 
 		if (restore_xAndy) {
 			pos -= offset;
+			if (registry.physics.has(p)) {
+				p_motion.velocity = -p_motion.velocity;
+			}
 			continue;
 		}
 
@@ -478,17 +452,74 @@ void PhysicsSystem::step(float elapsed_ms)
 		}
 
 		if (restore_xAndy || (restore_x && restore_y)) {
+			if (registry.physics.has(p)) {
+				p_motion.velocity = -p_motion.velocity;
+			}
 			pos -= offset;
 		}
 		else if (restore_x) {
+			if (registry.physics.has(p)) {
+				p_motion.velocity.x = -p_motion.velocity.x;
+			}
 			pos.x -= offset.x;
 		}
 		else if (restore_y) {
+			if (registry.physics.has(p)) {
+				p_motion.velocity.y = -p_motion.velocity.y;
+			}
 			pos.y -= offset.y;
 		}
 		else if (restore_xOry) {
+			if (registry.physics.has(p)) {
+				p_motion.velocity.x = -p_motion.velocity.x;
+			}
 			pos.x -= offset.x;
 		}
+	}
+
+	// push area vs enemies
+	for (int i = registry.pushAreaColliders.size() - 1; i >= 0; i--) {
+		SectorCollider& push_area_collider = registry.pushAreaColliders.components[i];
+		for (Entity enemy : registry.enemies.entities) {
+			Motion& enemy_motion = registry.motions.get(enemy);
+			float enemy_radius = registry.avatarColliders.get(enemy).radius;
+			// direction of enemy from source of push area
+			vec2 dir = enemy_motion.position - push_area_collider.position;
+
+			// out of range
+			if (length(dir) > enemy_radius + push_area_collider.distance) {
+				continue;
+			}
+
+			float angle = atan2(dir.y, dir.x);
+
+			// find the different in angles to the center of the sector
+			float angle_diff = angle - push_area_collider.angle;
+			angle_diff += (angle_diff > M_PI) ? -2 * M_PI : (angle_diff < -M_PI) ? 2 * M_PI : 0;
+
+			float half_span = push_area_collider.span / 2.f;
+
+			// not in the span of the sector
+			if (abs(angle_diff) > half_span) {
+				continue;
+			}
+
+			printf("%f\n", angle_diff);
+
+			float mass;
+			if (!registry.physics.has(enemy)) {
+				mass = registry.physics.emplace(enemy).mass;
+			}
+			else {
+				mass = registry.physics.get(enemy).mass;
+			}
+
+			float acceleration = 1000.f;
+
+			vec2 vel = normalize(dir) * acceleration / mass;
+			enemy_motion.velocity = vel;
+		}
+		registry.remove_all_components_of(registry.pushAreaColliders.entities[i]);
 	}
 
 	while (registry.lightSources.size() > 0) {

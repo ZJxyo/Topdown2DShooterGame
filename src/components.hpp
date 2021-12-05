@@ -186,7 +186,6 @@ struct NonConvexCollider {
 };
 
 struct Physics {
-	float impulse;
 	float mass = 1.f;
 };
 
