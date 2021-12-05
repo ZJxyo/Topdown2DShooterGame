@@ -40,6 +40,8 @@ public:
 	ComponentContainer<ShockwaveSource> shockwaveSource;
 	ComponentContainer<StoryBox> storyBox;
 	ComponentContainer<Wall> destroyable;
+	ComponentContainer<Bomb> bomb;
+
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -74,6 +76,7 @@ public:
 		registry_list.push_back(&shockwaveSource);
 		registry_list.push_back(&storyBox);
 		registry_list.push_back(&destroyable);
+		registry_list.push_back(&bomb);
 	}
 
 	void clear_all_components()

@@ -199,6 +199,7 @@ Entity createBomb(RenderSystem *renderer, vec2 pos){
 	Entity bomb = Entity();
 	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(bomb, &mesh);
+	Bomb &b = registry.bomb.emplace(bomb);
 	Motion &m = registry.motions.emplace(bomb);
 	m.position = pos;
 	m.scale = {50.f,80.f};

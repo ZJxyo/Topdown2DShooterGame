@@ -171,7 +171,10 @@ public:
                     return BTState::Success;
                 }
             } else {
-                if (move->process(e) == BTState::Success) {
+                if (shoot->process(e) == BTState::Success) {
+                    return BTState::Success;
+                } 
+                else if (move->process(e) == BTState::Success) {
                     return BTState::Success;
                 } 
                 else if (guard->process(e) == BTState::Success){
@@ -315,6 +318,14 @@ private:
         int playerY = registry.motions.get(player).position.y;
         Motion& AImotion = registry.motions.get(e);
 
+        int AIX = registry.motions.get(e).position.x;
+        int AIY = registry.motions.get(e).position.y;
+        int distance = sqrt(pow(playerX - AIX, 2) + pow(playerY - AIY, 2));
+
+        if (distance > 300 ){
+            return BTState::Failure;
+        }
+
         if (AImotion.position.x <= playerX) {
             AImotion.angle = atan2(playerY, playerX);
         }
@@ -387,7 +398,7 @@ private:
         int AIY = registry.motions.get(e).position.y;
         int distance = sqrt(pow(playerX - AIX, 2) + pow(playerY - AIY, 2));
 
-        if (distance >500 ){
+        if (distance >700 ){
             return BTState::Success;
         }
 
