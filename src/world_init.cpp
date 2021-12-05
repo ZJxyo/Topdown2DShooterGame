@@ -305,34 +305,35 @@ int SetupMap(RenderSystem *renderer)
 			 EFFECT_ASSET_ID::PLANTSPOT,
 			 GEOMETRY_BUFFER_ID::RECTANGLE});
 	}
-	
-	for (json w : j["walls"]["motion"])
-	{
-		auto entity = Entity();
+	for (json wall_obj: j["walls"]){
+		for (json w : wall_obj["motion"])
+		{
+			auto entity = Entity();
 
-		// Store a reference to the potentially re-used mesh object
-		Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::RECTANGLE);
-		registry.meshPtrs.emplace(entity, &mesh);
+			// Store a reference to the potentially re-used mesh object
+			Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::RECTANGLE);
+			registry.meshPtrs.emplace(entity, &mesh);
 
-		// Setting initial motion values
-		Motion &motion = registry.motions.emplace(entity);
-		int pre_value1 = int(w["position"]["x"]);
-		int pre_value2 = int(w["position"]["y"]);
-		int value1 = pre_value1 + 50;
-		int value2 = pre_value2 + 50;
-		motion.position = vec2(value1, value2);
-		motion.angle = w["angle"];
-		motion.scale = vec2(w["scale"]["x"], w["scale"]["y"]);
+			// Setting initial motion values
+			Motion &motion = registry.motions.emplace(entity);
+			int pre_value1 = int(w["position"]["x"]);
+			int pre_value2 = int(w["position"]["y"]);
+			int value1 = pre_value1 + 50;
+			int value2 = pre_value2 + 50;
+			motion.position = vec2(value1, value2);
+			motion.angle = w["angle"];
+			motion.scale = vec2(w["scale"]["x"], w["scale"]["y"]);
 
-		registry.polygonColliders.emplace(entity);
-		registry.walls.emplace(entity);
+			registry.polygonColliders.emplace(entity);
+			registry.walls.emplace(entity);
 
-		// Create and (empty) Salmon component to be able to refer to all turtles
-		registry.renderRequests.insert(
-			entity,
-			{TEXTURE_ASSET_ID::WALL,
-			 EFFECT_ASSET_ID::TEXTURED,
-			 GEOMETRY_BUFFER_ID::SPRITE});
+			// Create and (empty) Salmon component to be able to refer to all turtles
+			registry.renderRequests.insert(
+				entity,
+				{TEXTURE_ASSET_ID::WALL,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+		}
 	}
 	return 0;
 }
@@ -367,29 +368,31 @@ int createGround(RenderSystem *renderer)
 	json j;
 	ifs >> j;
 
-	for (json g:j["ground"]["motion"])
-	{
-		auto entity = Entity();
+	for (json ground_obj: j["ground"]){
+		for (json m: ground_obj["motion"])
+		{
+			auto entity = Entity();
 
-		Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::RECTANGLE);
-		registry.meshPtrs.emplace(entity, &mesh);
+			Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::RECTANGLE);
+			registry.meshPtrs.emplace(entity, &mesh);
 
-		// Setting initial motion values
-		Motion &motion = registry.motions.emplace(entity);
-		motion.angle = 0.f;
-		motion.velocity = {0.f, 0.f};
-		motion.scale = {g["scale"]["x"], g["scale"]["y"]};
+			// Setting initial motion values
+			Motion &motion = registry.motions.emplace(entity);
+			motion.angle = 0.f;
+			motion.velocity = {0.f, 0.f};
+			motion.scale = {m["scale"]["x"], m["scale"]["y"]};
 
-		motion.position = {g["position"]["x"], g["position"]["y"]};
+			motion.position = {m["position"]["x"], m["position"]["y"]};
 
-		// Create and (empty) Salmon component to be able to refer to all turtles
+			// Create and (empty) Salmon component to be able to refer to all turtles
 
-		registry.floorRenderRequests.insert(
-			entity,
-			{TEXTURE_ASSET_ID::GROUND_WOOD,
-				EFFECT_ASSET_ID::TEXTURED,
-				GEOMETRY_BUFFER_ID::SPRITE});
-		
+			registry.floorRenderRequests.insert(
+				entity,
+				{TEXTURE_ASSET_ID::GROUND_WOOD,
+					EFFECT_ASSET_ID::TEXTURED,
+					GEOMETRY_BUFFER_ID::SPRITE});
+			
+		}
 	}
 
 	return 0;

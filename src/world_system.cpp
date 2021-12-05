@@ -34,7 +34,7 @@ WorldSystem::WorldSystem()
 	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f), tap(false), can_plant(false),
 	plant_timer(PLANT_TIMER_MS), explode_timer(BOMB_TIMER_MS), bomb_planted(false), is_planting(false),
 	 bomb_exploded(false),footsteps_timer(FOOTSTEPS_SOUND_TIMER_MS), buildmode(false), buildcoord({0,0}),
-	  mousecoord({0,0}), building(false), maxWall(10), attack_mode(false)
+	  mousecoord({0,0}), building(false), maxWall(10), attack_mode(true)
 
 {
 	// Seeding rng with random device
@@ -481,8 +481,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		createEndScreen(renderer,motion.position);
 	}
 	if (registry.enemies.entities.size() > 0){
-		cout << "x: "<< registry.motions.get(registry.enemies.entities[0]).position.x << "y: " << registry.motions.get(registry.enemies.entities[0]).position.y;
-		cout << registry.motions.get(registry.enemies.entities[0]).position.y;
+		//cout << "x: "<< registry.motions.get(registry.enemies.entities[0]).position.x << "y: " << registry.motions.get(registry.enemies.entities[0]).position.y;
+		
 	}
 	
 	if (registry.enemies.entities.size() == 0){
