@@ -21,6 +21,8 @@ using namespace std;
 
 const size_t BULLET_TIMER_AI_MS = 100;
 
+
+
 class AISystem
 {
 public:
@@ -153,33 +155,44 @@ public:
 class BTIfCondition : public BTNode {
 public:
     BTIfCondition(BTNode* chase, BTNode* shoot, BTNode* build) : chase(chase), shoot(shoot), build(build) {
-
     }
 
     virtual void init(Entity e) override {
         chase->init(e);
     }
 
-    virtual BTState process(Entity e) override {
-        if (registry.motions.has(e)) {
+    virtual BTState process(Entity e1) override {
+        BTState state = BTState::Success;
+        int count = 1;
+            for (Entity e : registry.enemies.entities) {
+                // std::cout << "count: " << count << std::endl;
+                if (registry.motions.has(e)) {
+                    if (chase->process(e) == BTState::Success) {
+                        //return BTState::Success;
+                        state = BTState::Success;
+                    }
+                    else if (shoot->process(e) == BTState::Success) {
+                        //return BTState::Success;
+                        state = BTState::Success;
+                    }
+                    else if (build->process(e) == BTState::Success) {
+                        //return BTState::Success;
+                        state = BTState::Success;
+                    }
+                    state = BTState::Success;
+                    //return BTState::Success;
+                }
+                else {
+                    state = BTState::Success;
+                    //return BTState::Success;
+                    //std::cout << "don't have" << registry.enemies.entities.size();
+                }
 
-
-            if (chase->process(e) == BTState::Success) {
-                return BTState::Success;
+                // count++;
             }
-            else if (shoot->process(e) == BTState::Success) {
-                return BTState::Success;
-            }
-            else if (build->process(e) == BTState::Success) {
-                return BTState::Success;
-            }
+        
 
-            return BTState::Success;
-        }
-        else {
-            return BTState::Success;
-        }
-
+        return BTState::Success;
     }
 private:
     BTNode* chase;
@@ -204,6 +217,8 @@ private:
         int playerY = registry.motions.get(player).position.y;
         int AIX = registry.motions.get(e).position.x;
         int AIY = registry.motions.get(e).position.y;
+
+        std::cout << "AIX: "<<AIX << std::endl;
 
         ai.BFS(AIY / 100,AIX/100, playerY/100, playerX / 100);
         //        ai.BFS(AIX/100, AIY/100, 22,6);
@@ -246,38 +261,79 @@ private:
             //if (abs(AIX - curr.first * 100) < 200 && abs(AIY - curr.second * 100) < 200) {
             //    ai.path.pop();
             //}
-
         }
 
+       // avoid other AI
+        int eplison = 200;
+        for (Entity enemy : registry.enemies.entities) {
 
-        //        std::this_thread::sleep_for(std::chrono::milliseconds(5));
-//        for (auto it = begin (ai.path); it != end (ai.path); ++it) {
-//            if(vel.x == 0 && vel.y == 0) {
-//                std::cout <<"AI is not moving" << " \n";
-//                vel.x = playerX % 100;
-//                vel.y = playerY % 100;
-//            }
-//            if(it->first*100 >= AIX && it->second*100 <= AIY) {
-////                std::cout <<"moving upper left" << " \n";
-//                vel.x = 100;
-//                vel.y = -100;
-//            }
-//            if(it->first*100 >= AIX && it->second*100 >= AIY) {
-////                std::cout <<"moving lower left" << " \n";
-//                vel.x = 100;
-//                vel.y = 100;
-//            }
-//            if(it->first*100 <= AIX && it->second*100 <= AIY) {
-////                std::cout <<"moving upper right" << " \n";
-//                vel.x = -100;
-//                vel.y = -100;
-//            }
-//            if(it->first*100 <= AIX && it->second*100 >= AIY) {
-////                std::cout <<"moving lower right" << " \n";
-//                vel.x = -100;
-//                vel.y = 100;
-//            }
-//        }
+            float y = registry.motions.get(enemy).position.y; //enemy y
+            float x = registry.motions.get(enemy).position.x; //enemy x
+            auto& velEnemy = registry.motions.get(enemy).velocity; //turtle
+            for (Entity enemy1 : registry.enemies.entities) {
+
+                if (enemy == enemy1) { continue; }
+
+                float y1 = registry.motions.get(enemy1).position.y; //enemy y
+                float x1 = registry.motions.get(enemy1).position.x; //enemy x
+
+                //check if sourranded by fish
+                float rightX = x + eplison;
+                float LeftX = x - eplison;
+                float downY = y + eplison;
+                float upY = y - eplison;
+
+                if (x1<rightX && x1>LeftX && y1< downY && y1>upY) {
+
+                    //yes, avoid it.
+                    if (x > x1) {
+
+                        velEnemy.x = 200;
+                    }
+                    if (x < x1) {
+                        velEnemy.x = -200;
+                    }
+
+                    if (y > y1) {
+                        velEnemy.y = 200;
+                    }
+                    if (y < y1) {
+                        velEnemy.y = -200;
+                    }
+                }
+
+            }
+
+
+            //        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    //        for (auto it = begin (ai.path); it != end (ai.path); ++it) {
+    //            if(vel.x == 0 && vel.y == 0) {
+    //                std::cout <<"AI is not moving" << " \n";
+    //                vel.x = playerX % 100;
+    //                vel.y = playerY % 100;
+    //            }
+    //            if(it->first*100 >= AIX && it->second*100 <= AIY) {
+    ////                std::cout <<"moving upper left" << " \n";
+    //                vel.x = 100;
+    //                vel.y = -100;
+    //            }
+    //            if(it->first*100 >= AIX && it->second*100 >= AIY) {
+    ////                std::cout <<"moving lower left" << " \n";
+    //                vel.x = 100;
+    //                vel.y = 100;
+    //            }
+    //            if(it->first*100 <= AIX && it->second*100 <= AIY) {
+    ////                std::cout <<"moving upper right" << " \n";
+    //                vel.x = -100;
+    //                vel.y = -100;
+    //            }
+    //            if(it->first*100 <= AIX && it->second*100 >= AIY) {
+    ////                std::cout <<"moving lower right" << " \n";
+    //                vel.x = -100;
+    //                vel.y = 100;
+    //            }
+    //        }
+        }
 
         if (distance < 300) {
             return BTState::Failure;
