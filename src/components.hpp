@@ -220,7 +220,12 @@ enum class TEXTURE_ASSET_ID
     STORY2 = STORY1 + 1,
     STORY3 = STORY2 + 1,
     STORY4 = STORY3 + 1,
-	TEXTURE_COUNT = STORY4 + 1
+    STORY5 = STORY4 + 1,
+    STORY6 = STORY5 + 1,
+    STORY7 = STORY6 + 1,
+    STORY8 = STORY7 + 1,
+    STORY9 = STORY8 + 1,
+    TEXTURE_COUNT = STORY9 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
