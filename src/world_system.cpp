@@ -36,7 +36,7 @@ vec2 oldPosition;
 WorldSystem::WorldSystem()
 	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f), tap(false), can_plant(false),
 	plant_timer(PLANT_TIMER_MS), explode_timer(BOMB_TIMER_MS), bomb_planted(false), is_planting(false),
-	 bomb_exploded(false),footsteps_timer(FOOTSTEPS_SOUND_TIMER_MS), buildmode(false), buildcoord({0,0}),
+	 win_game(false),footsteps_timer(FOOTSTEPS_SOUND_TIMER_MS), buildmode(false), buildcoord({0,0}),
 	  mousecoord({0,0}), building(false), maxWall(10), attack_mode(false), defuse_timer(DEFUSE_TIMER_MS),
 	  attack_side(0),is_defusing(false)
 
@@ -208,7 +208,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	while (registry.debugComponents.entities.size() > 0)
 		registry.remove_all_components_of(registry.debugComponents.entities.back());
 
-	if(bomb_exploded){
+	if(win_game){
 
 		return true;
 	}
@@ -525,19 +525,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		restart_game();
 	}
 
-	if (explode_timer < 0 && !bomb_exploded && attack_mode) {
+	if (explode_timer < 0 && !win_game && attack_mode) {
 		cout << "explode";
-		bomb_exploded = true;
+		win_game = true;
 		
 		Mix_PlayChannel(-1, bomb_explosion_sound, 0);
 		
 		createEndScreen(renderer,motion.position);
 	}
 	
-	if (explode_timer < 0 && !bomb_exploded && !attack_mode) {
-		cout << "explode";
-		bomb_exploded = true;
-		
+	if (explode_timer < 0 && !win_game && !attack_mode) {
+		cout << "explode";		
 		Mix_PlayChannel(-1, bomb_explosion_sound, 0);
 		
 		restart_game();
@@ -548,7 +546,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	}
 	
 	if (registry.enemies.entities.size() == 0){
-		
+		win_game = true;
 		createEndScreen(renderer,motion.position);
 	}
 
@@ -627,7 +625,7 @@ void WorldSystem::restart_game()
 	defuse_timer=DEFUSE_TIMER_MS;
 	bomb_planted=false;
 	is_planting=false;
-	bomb_exploded=false;
+	win_game=false;
 
 	Mix_HaltChannel(-1);
 	Mix_Volume(-1,MIX_MAX_VOLUME/20);
@@ -831,12 +829,12 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		restart_game();
 	}
 
-	if (bomb_exploded && GLFW_KEY_ENTER){
+	if (win_game && GLFW_KEY_ENTER){
 		attack_mode = false;
 		restart_game();
 	}
 
-	if(bomb_exploded){
+	if(win_game){
 		input.up = 0;
 		input.down = 0;
 		input.left = 0;

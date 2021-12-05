@@ -76,7 +76,7 @@ private:
 	float plant_timer;
 	float explode_timer;
 	bool is_planting;
-	bool bomb_exploded;
+	bool win_game;
 	float footsteps_timer;
 	bool buildmode;
 	bool building;
