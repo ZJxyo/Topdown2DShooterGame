@@ -72,6 +72,7 @@ private:
 	Entity player_salmon;
 	bool left_mouse_down;
 	bool tap;
+    Entity bomb;
 	bool can_plant;
 	bool bomb_planted;
     bool canMove;

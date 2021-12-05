@@ -92,6 +92,13 @@ struct Mesh
 	std::vector<uint16_t> vertex_indices;
 };
 
+// BombVertex to store vertex and isPlanted of the bomb
+struct BombInfo
+{
+    vec2 position;
+    bool isPlanted = false;
+};
+
 struct Health
 {
 	int health;
