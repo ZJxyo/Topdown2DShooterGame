@@ -68,9 +68,11 @@ private:
 	float next_turtle_spawn;
 	float next_fish_spawn;
 	float next_animation;
+	float next_chase;
 	Entity player_salmon;
 	bool left_mouse_down;
 	bool tap;
+    Entity bomb;
 	bool can_plant;
 	bool bomb_planted;
     bool canMove;
