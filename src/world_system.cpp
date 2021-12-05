@@ -550,8 +550,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	for (int i = registry.particleSources.entities.size() - 1; i >= 0; i--) {
 		ParticleSource& ps = registry.particleSources.components[i];
-		ps.alpha -= ps.decay * time;
-		if (ps.alpha <= 0.5) {
+		ps.life_span -= time;
+		if (ps.life_span <= 0) {
 			registry.remove_all_components_of(registry.particleSources.entities[i]);
 			continue;
 		}
@@ -852,7 +852,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		// create an area that apply impulse
 		Motion& player_motion = registry.motions.get(player_salmon);
 		createPushArea(player_motion.position, 200.f, player_motion.angle, M_PI / 3.f);
-		createParticleSource(100, 5.f, 1.f, vec3(0.886, 0.345, 0.133), player_motion.position, vec2(cos(player_motion.angle), sin(player_motion.angle)), 1000.f);
+		createParticleSource(100, 3.f, 0.3f, vec3(0.2f, 0.5f, 0.7f), player_motion.position, player_motion.angle, 1000.f);
 	}
 
 
@@ -944,10 +944,12 @@ void WorldSystem::handle_bullet_hit(Entity bullet, Entity entity) {
 	Motion& bullet_motion = registry.motions.get(bullet);
 
 	if (registry.nonConvexWallColliders.has(entity)) {
-		createParticleSource(50, 2.f, 1.5f, vec3(0.f, 0.f, 0.f), bullet_motion.position, -normalize(bullet_motion.velocity), 300.f);
+		vec2 dir = -normalize(bullet_motion.velocity);
+		createParticleSource(50, 2.f, 0.7f, vec3(0.f, 0.f, 0.f), bullet_motion.position, atan2(dir.y, dir.x), 200.f);
 	}
 	else if (registry.enemies.has(entity) || registry.players.has(entity)) {
-		createParticleSource(50, 2.f, 1.5f, vec3(1.f, 0.f, 0.f), bullet_motion.position, -normalize(bullet_motion.velocity), 300.f);
+		vec2 dir = -normalize(bullet_motion.velocity);
+		createParticleSource(50, 2.f, 0.7f, vec3(1.f, 0.f, 0.f), bullet_motion.position, atan2(dir.y, dir.x), 200.f);
 	}
 
 	if (registry.shockwaveSource.size() == 0) {

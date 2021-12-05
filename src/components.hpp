@@ -154,12 +154,12 @@ struct ParticleSource {
 	uint8 size;
 	float radius;
 	float alpha = 1.f;
-	float decay;
+	float life_span;
 	vec3 color;
 	std::vector<vec2> positions;
 	std::vector<vec2> velocities;
-	ParticleSource(uint8 size, float radius, float decay, vec3 color, std::vector<vec2> positions, std::vector<vec2> velocities) :
-		size(size), radius(radius), decay(decay), color(color), positions(positions), velocities(velocities) {}
+	ParticleSource(uint8 size, float radius, float life_span, vec3 color, std::vector<vec2> positions, std::vector<vec2> velocities) :
+		size(size), radius(radius), life_span(life_span), color(color), positions(positions), velocities(velocities) {}
 };
 
 struct CustomMesh {

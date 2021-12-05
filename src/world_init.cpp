@@ -494,7 +494,7 @@ Entity createNonConvexWall(float thickness, std::vector<vec2>& hinges) {
 	return e;
 }
 
-Entity createParticleSource(uint8 size, float radius, float decay, vec3 color, vec2 pos, vec2 dir, float speed) {
+Entity createParticleSource(uint8 size, float radius, float life_span, vec3 color, vec2 pos, float angle, float speed) {
 	assert(size != 0);
 	std::vector<vec2> positions;
 	std::vector<vec2> velocities;
@@ -502,15 +502,15 @@ Entity createParticleSource(uint8 size, float radius, float decay, vec3 color, v
 		positions.push_back(pos);
 		//-0.5 to 0.5
 		float random_float = ((float)rand() / (float)RAND_MAX) - 0.5f;
-		float cs = cos(random_float * M_PI / 2.f);
-		float sn = sin(random_float * M_PI / 2.f);
-		vec2 random_dir = vec2(dir.x * cs - dir.y * sn, dir.x * sn + dir.y * cs);
+		float angle_span = M_PI / 3.f;
+		float random_angle = angle + random_float * angle_span;
+		vec2 random_dir = vec2(cos(random_angle), sin(random_angle));
 		float random_speed = speed * (1.f + (((float)rand() / (float)RAND_MAX) - 0.5f));
 		velocities.push_back(random_dir * random_speed);
 	}
 
 	Entity ps = Entity();
-	registry.particleSources.emplace(ps, size, radius, decay, color, positions, velocities);
+	registry.particleSources.emplace(ps, size, radius, life_span, color, positions, velocities);
 
 	return ps;
 }
