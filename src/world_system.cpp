@@ -584,7 +584,7 @@ void WorldSystem::restart_game()
 	registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
 
 	SetupMap(renderer);
-	createMatrix();
+	createMatrix("src/map/map2.json");
   
 	std::vector<vec3> vertices = {
 		vec3(-1.f, 1.f, 0.f),
