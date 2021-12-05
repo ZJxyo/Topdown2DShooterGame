@@ -80,6 +80,11 @@ private:
 	float footsteps_timer;
 	bool buildmode;
 	bool building;
+	int maxWall;
+	bool attack_mode;
+	float defuse_timer;
+	int attack_side;
+	bool is_defusing;
 	vec2 buildcoord;
 	vec2 mousecoord;
 	

@@ -36,3 +36,9 @@ void Print(const MyArray &T);
 Entity createBullet(RenderSystem *renderer, vec2 position, float angle);
 Entity createLightSource(vec2 pos, std::vector<vec3>& vertices, std::vector<unsigned int>& indices);
 Entity createShockwave(vec2 pos);
+
+
+const vec2 BOX1_LOCATION = {1000, 4800};
+const vec2 BOX2_LOCATION = {1000, 4600};
+const vec2 BOX3_LOCATION = {1000, 4400};
+const vec2 BOX4_LOCATION = {1000, 4200};
