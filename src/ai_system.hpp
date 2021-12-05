@@ -240,20 +240,20 @@ private:
             //std::cout << "AIX : " << AIX << " AIY : " << AIY << " \n";
             if (AIX > curr.second * 100 + 50) {
 
-                vel.x = -200;
+                vel.x = -300;
             }
             if (AIX < curr.second * 100 + 50 ) {
 
-                vel.x = 200;
+                vel.x = 300;
             }
 
             if (AIY > curr.first* 100 + 50) {
 
-                vel.y = -200;
+                vel.y = -300;
             }
             if (AIY < curr.first * 100+ 50) {
 
-                vel.y = +200;
+                vel.y = +300;
             }
 
             //if (abs(AIX - curr.first * 100) < 200 && abs(AIY - curr.second * 100) < 200) {
@@ -439,20 +439,20 @@ private:
             pair<int, int> curr = ai.path.top();
             if (AIX > curr.second * 100 + 50) {
 
-                vel.x = -200;
+                vel.x = -300;
             }
             if (AIX < curr.second * 100 + 50 ) {
 
-                vel.x = 200;
+                vel.x = 300;
             }
 
             if (AIY > curr.first* 100 + 50) {
 
-                vel.y = -200;
+                vel.y = -300;
             }
             if (AIY < curr.first * 100+ 50) {
 
-                vel.y = 200;
+                vel.y = 300;
             }
 
         }

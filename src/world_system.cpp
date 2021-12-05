@@ -24,6 +24,9 @@ const size_t BULLET_TIMER_MS = 100;
 const size_t BOMB_TIMER_MS = 40000.f;
 const size_t FOOTSTEPS_SOUND_TIMER_MS = 400.f;
 const size_t PLANT_TIMER_MS = 2000.0f;
+const size_t DEFUSE_TIMER_MS = 6000.0f;
+json j;
+
 int toggle[4] = {-1, -1, -1, -1};
 Entity stories[4];
 Entity boxes[4];
@@ -34,7 +37,8 @@ WorldSystem::WorldSystem()
 	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f), tap(false), can_plant(false),
 	plant_timer(PLANT_TIMER_MS), explode_timer(BOMB_TIMER_MS), bomb_planted(false), is_planting(false),
 	 bomb_exploded(false),footsteps_timer(FOOTSTEPS_SOUND_TIMER_MS), buildmode(false), buildcoord({0,0}),
-	  mousecoord({0,0}), building(false), maxWall(10), attack_mode(true)
+	  mousecoord({0,0}), building(false), maxWall(10), attack_mode(false), defuse_timer(DEFUSE_TIMER_MS),
+	  attack_side(0),is_defusing(false)
 
 {
 	// Seeding rng with random device
@@ -261,10 +265,40 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	for(int i = 0; i < registry.enemies.entities.size(); i++ ){
 		if (registry.enemies.components[i].guard_mode){
+			Enemy &e = registry.enemies.components[i];
+			Motion m = registry.motions.get(registry.enemies.entities[i]);
+			if (bomb_planted && attack_mode){
+				e.guard_mode = false;
+				vec2 bomb_pos = registry.motions.get(registry.bomb.entities[0]).position;
+				if (i == 0){
+					e.guard_mode = true;
+					e.pos = bomb_pos;
+				}
+        		int distance = sqrt(pow(m.position.x - bomb_pos.x, 2) + pow(m.position.y - bomb_pos.y, 2));
+				if (distance < 100){
+					defuse_timer -= elapsed_ms_since_last_update * current_speed;
+				}
+			}
+			if (!attack_mode){
+				vec2 site_pos = {j["plant_spots"][attack_side]["position"]["x"], j["plant_spots"][attack_side]["position"]["y"]};
+				if (i == 0 && !bomb_planted){
+					e.pos = site_pos;
+				}
+				if (i == 0 && is_defusing){
+					e.guard_mode = false;
+				}
+        		int distance = sqrt(pow(m.position.x - site_pos.x, 2) + pow(m.position.y - site_pos.y, 2));
+				if (distance < 100){
+					is_planting = true;
+					plant_timer -= elapsed_ms_since_last_update * current_speed;
+				}
+			}
 			Move move(registry.enemies.components[i].pos);
 			BTIfCondition btIfCondition(NULL, &shoot, &build, &guard, &move);
 			Entity entity = registry.enemies.entities[i];
 			btIfCondition.process(entity);
+
+			
 		} else {
 			Chase chase(player_salmon);
 			BTIfCondition btIfCondition(&chase, &shoot, &build, &guard,NULL);
@@ -449,12 +483,20 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			}
 
 	}
-
-	if (is_planting && !bomb_planted){
+	
+	if (is_planting && !bomb_planted && attack_mode){
 		plant_timer -= elapsed_ms_since_last_update * current_speed;
 	}
+	
+	if (is_defusing && bomb_planted && !attack_mode){
+		defuse_timer -= elapsed_ms_since_last_update * current_speed;
+	}
 
-	if (plant_timer < 0 && !bomb_planted) {
+	if (defuse_timer < 0 && bomb_planted && !attack_mode){
+		createEndScreen(renderer,motion.position);
+	}
+
+	if (plant_timer < 0 && !bomb_planted &&  attack_mode) {
 		cout << "planted";
 		createBomb(renderer,motion.position);
 		Mix_PlayChannel(-1, bomb_planted_sound, 0);
@@ -463,22 +505,42 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		
 	} 
 
+	if (plant_timer < 0 && !bomb_planted &&  !attack_mode) {
+		cout << "planted";
+		vec2 site_pos = {j["plant_spots"][attack_side]["position"]["x"], j["plant_spots"][attack_side]["position"]["y"]};
+		createBomb(renderer, site_pos);
+		Mix_PlayChannel(-1, bomb_planted_sound, 0);
+		is_planting = false;
+		bomb_planted = true;
+	} 
+
 	if (bomb_planted) {
 		if (explode_timer == BOMB_TIMER_MS) {
 			Mix_PlayChannel(-1, bomb_countdown_sound, 0);	
 		}
 		explode_timer -= elapsed_ms_since_last_update * current_speed;
-		
-		
 	}
 
-	if (explode_timer < 0 && !bomb_exploded) {
+	if (bomb_planted && attack_mode && defuse_timer < 0){
+		restart_game();
+	}
+
+	if (explode_timer < 0 && !bomb_exploded && attack_mode) {
 		cout << "explode";
 		bomb_exploded = true;
 		
 		Mix_PlayChannel(-1, bomb_explosion_sound, 0);
 		
 		createEndScreen(renderer,motion.position);
+	}
+	
+	if (explode_timer < 0 && !bomb_exploded && !attack_mode) {
+		cout << "explode";
+		bomb_exploded = true;
+		
+		Mix_PlayChannel(-1, bomb_explosion_sound, 0);
+		
+		restart_game();
 	}
 	if (registry.enemies.entities.size() > 0){
 		//cout << "x: "<< registry.motions.get(registry.enemies.entities[0]).position.x << "y: " << registry.motions.get(registry.enemies.entities[0]).position.y;
@@ -565,6 +627,7 @@ void WorldSystem::restart_game()
 	mouse_down = false;
 	plant_timer=PLANT_TIMER_MS;
 	explode_timer=BOMB_TIMER_MS;
+	defuse_timer=DEFUSE_TIMER_MS;
 	bomb_planted=false;
 	is_planting=false;
 	bomb_exploded=false;
@@ -597,9 +660,11 @@ void WorldSystem::restart_game()
 	string src = PROJECT_SOURCE_DIR;
 	src += "src/map/map.json";
 	ifstream ifs(src);
-	json j;
+	
 	ifs >> j;
+
 	if (attack_mode){
+		// AI defending site
 		std::set<int> guard_pos;
 		for (int i = 0; i < MAX_TURTLES; i++){
 			entity = createTurtle(renderer, {100.f * i + 2000.f, 100.f});
@@ -629,26 +694,28 @@ void WorldSystem::restart_game()
 		boxes[1] = createStoryBox(renderer, BOX2_LOCATION);
 		boxes[2] = createStoryBox(renderer, BOX3_LOCATION);
 		boxes[3] = createStoryBox(renderer, BOX4_LOCATION);
-	} else {
+	} else { 
+		// AI attcking random site
 		std::set<int> guard_pos;
+		srand((unsigned int) time(NULL));
 		int side = rand() % 2;
+		attack_side = side;
 		for (int i = 0; i < MAX_TURTLES; i++){
 			entity = createTurtle(renderer, {100.f * i + 2000.f, 4800.f});
 			Motion &motion = registry.motions.get(entity);
 			Enemy &enemy = registry.enemies.get(entity);
-			if (i >= 0 && i < 4){
-				int r = rand() % j["AI_guard_pos"]["attack"][side].size();
-				while (guard_pos.find(r) != guard_pos.end()){
-					r += 1;
-					if (r == j["AI_guard_pos"]["attack"][side].size()){
-						r = 0;
-					}
-				} 
-				guard_pos.insert(r);
-				vec2 pos = {j["AI_guard_pos"]["attack"][side][r]["x"], j["AI_guard_pos"]["attack"][side][r]["y"]};
-				enemy.pos = pos;
-				enemy.guard_mode = true;
-			}
+			int r = rand() % j["AI_guard_pos"]["attack"][side].size();
+			while (guard_pos.find(r) != guard_pos.end()){
+				r += 1;
+				if (r == j["AI_guard_pos"]["attack"][side].size()){
+					r = 0;
+				}
+			} 
+			guard_pos.insert(r);
+			vec2 pos = {j["AI_guard_pos"]["attack"][side][r]["x"], j["AI_guard_pos"]["attack"][side][r]["y"]};
+			enemy.pos = pos;
+			enemy.guard_mode = true;
+
 		}
 
 		// Create a new salmon
@@ -794,8 +861,8 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 	if (!registry.deathTimers.has(player_salmon)) {
 		if (key == GLFW_KEY_E) {
-
-			if (!bomb_planted){
+			
+			if (!bomb_planted && attack_mode){
 				if (action == GLFW_PRESS) {
 					if (can_plant ) {
 						is_planting = true;
@@ -810,6 +877,27 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 					plant_timer = PLANT_TIMER_MS;
 					is_planting = false;
 					//cout << "plant release";
+				}
+			}
+			if (!attack_mode && bomb_planted){
+				if (action == GLFW_PRESS) {
+					vec2 bomb_pos = registry.motions.get(registry.bomb.entities[0]).position;
+					vec2 player_pos = registry.motions.get(player_salmon).position;
+					
+        			int distance = sqrt(pow(bomb_pos.x - player_pos.x, 2) + pow(bomb_pos.y - player_pos.y, 2));
+					if (distance < 50) {
+						is_defusing = true;
+						cout << "defusing";
+						//Mix_PlayChannel(-1, bomb_planting_sound, 0);
+						
+					
+					} 
+
+				}
+				else if (action == GLFW_RELEASE) {
+					defuse_timer = DEFUSE_TIMER_MS;
+					is_defusing = false;
+					cout << "defuse release";
 				}
 			}
 		}
@@ -880,7 +968,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			}
 		}
 
-		if (is_planting) {
+		if ((is_planting && attack_mode) || (is_defusing && !attack_mode)) {
 			input.up = 0;
 			input.down = 0;
 			input.left = 0;
