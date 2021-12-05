@@ -34,7 +34,7 @@ WorldSystem::WorldSystem()
 	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f), tap(false), can_plant(false),
 	plant_timer(PLANT_TIMER_MS), explode_timer(BOMB_TIMER_MS), bomb_planted(false), is_planting(false),
 	 bomb_exploded(false),footsteps_timer(FOOTSTEPS_SOUND_TIMER_MS), buildmode(false), buildcoord({0,0}),
-	  mousecoord({0,0}), building(false), maxWall(10), attack_mode(true)
+	  mousecoord({0,0}), building(false), maxWall(10), attack_mode(false)
 
 {
 	// Seeding rng with random device
@@ -631,7 +631,7 @@ void WorldSystem::restart_game()
 		boxes[3] = createStoryBox(renderer, BOX4_LOCATION);
 	} else {
 		std::set<int> guard_pos;
-		int side = rand() % 1;
+		int side = rand() % 2;
 		for (int i = 0; i < MAX_TURTLES; i++){
 			entity = createTurtle(renderer, {100.f * i + 2000.f, 4800.f});
 			Motion &motion = registry.motions.get(entity);
