@@ -185,6 +185,11 @@ struct NonConvexCollider {
 	std::vector<vec2> vertices;
 };
 
+struct Physics {
+	float impulse;
+	float mass = 1.f;
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture

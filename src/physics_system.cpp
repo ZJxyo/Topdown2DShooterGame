@@ -366,6 +366,42 @@ void PhysicsSystem::step(float elapsed_ms)
 		}
 	}
 
+	// push area vs enemies
+	for (int i = registry.pushAreaColliders.size() - 1; i >= 0; i--) {
+		SectorCollider& push_area_collider = registry.pushAreaColliders.components[i];
+		for (Entity enemy : registry.enemies.entities) {
+			vec2 enemy_pos = registry.motions.get(enemy).position;
+			float enemy_radius = registry.avatarColliders.get(enemy).radius;
+			// direction of enemy from source of push area
+			vec2 dir = enemy_pos - push_area_collider.position;
+
+			// out of range
+			if (length(dir) > enemy_radius + push_area_collider.distance) {
+				continue;
+			}
+
+			float angle = atan2(dir.y, dir.x);
+
+			float angle_diff = angle - push_area_collider.angle;
+			angle_diff += (angle_diff > M_PI) ? -2 * M_PI : (angle_diff < -M_PI) ? 2 * M_PI : 0;
+
+			float half_span = push_area_collider.span / 2.f;
+
+			// not in the span of the sector
+			if (abs(angle_diff) > half_span) {
+				continue;
+			}
+
+			if (registry.physics.has(enemy)) {
+				registry.physics.get(enemy).impulse = 500.f;
+			}
+			else {
+				registry.physics.emplace(enemy).impulse = 500.f;
+			}
+		}
+		registry.remove_all_components_of(registry.pushAreaColliders.entities[i]);
+	}
+
 	// player/enemies vs walls
 	for (int i = registry.avatarColliders.entities.size() - 1; i >= 0; i--) {
 		Entity p = registry.avatarColliders.entities[i];

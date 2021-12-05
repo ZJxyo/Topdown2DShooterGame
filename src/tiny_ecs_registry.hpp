@@ -44,6 +44,7 @@ public:
 	ComponentContainer<CustomMesh> customMeshes;
 	ComponentContainer<RenderRequest> customMeshRenderRequests;
 	ComponentContainer<SectorCollider> pushAreaColliders;
+	ComponentContainer<Physics> physics;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -82,6 +83,7 @@ public:
 		registry_list.push_back(&customMeshes);
 		registry_list.push_back(&customMeshRenderRequests);
 		registry_list.push_back(&pushAreaColliders);
+		registry_list.push_back(&physics);
 	}
 
 	void clear_all_components()

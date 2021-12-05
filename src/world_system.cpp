@@ -848,8 +848,8 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		}
 	}
 
-	if (key == GLFW_KEY_E && action == GLFW_PRESS) {
-		// create an area that applies force
+	if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
+		// create an area that apply impulse
 		Motion& player_motion = registry.motions.get(player_salmon);
 		createPushArea(player_motion.position, 200.f, player_motion.angle, 60.f);
 	}
