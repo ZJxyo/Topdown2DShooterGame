@@ -851,8 +851,8 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	if (key == GLFW_KEY_V && action == GLFW_PRESS) {
 		// create an area that apply impulse
 		Motion& player_motion = registry.motions.get(player_salmon);
-		createPushArea(player_motion.position, 200.f, player_motion.angle, M_PI / 3.f);
-		createParticleSource(100, 3.f, 0.3f, vec3(0.2f, 0.5f, 0.7f), player_motion.position, player_motion.angle, 1000.f);
+		createPushArea(player_motion.position, 300.f, player_motion.angle, M_PI / 3.f);
+		createParticleSource(100, 2.f, 0.2f, vec3(0.7f, 0.7f, 0.7f), player_motion.position, player_motion.angle, 1500.f);
 	}
 
 
