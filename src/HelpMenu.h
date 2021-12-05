@@ -8,23 +8,25 @@
 
 #include "tiny_ecs.hpp"
 #include "render_system.hpp"
-static const float MENU_WIDTH = 2.5f * 296.f;
-static const float MENU_HEIGHT = 2.5f * 165.f;
+static const float MENU_WIDTH = 1000;
+static const float MENU_HEIGHT = 650;
 
 class HelpMenu {
 public:
-    Entity createInto(RenderSystem* renderer, GLFWwindow* window, vec2 position);
-    Entity createMenu(RenderSystem* renderer, GLFWwindow* window, vec2 position);
-    Entity createStroy1(RenderSystem* renderer, GLFWwindow* window, vec2 position);
-    Entity createStroy2(RenderSystem* renderer, GLFWwindow* window, vec2 position);
-    Entity createStroy3(RenderSystem* renderer, GLFWwindow* window, vec2 position);
-    Entity createStroy4(RenderSystem* renderer, GLFWwindow* window, vec2 position);
-    bool showMenu = true;
+    Entity createStory1(RenderSystem* renderer, GLFWwindow* window, vec2 position);
+    Entity createStory2(RenderSystem* renderer, GLFWwindow* window, vec2 position);
+    Entity createStory3(RenderSystem* renderer, GLFWwindow* window, vec2 position);
+    Entity createStory4(RenderSystem* renderer, GLFWwindow* window, vec2 position);
+    Entity createStory5(RenderSystem* renderer, GLFWwindow* window, vec2 position);
+    Entity createTutorial1(RenderSystem* renderer, GLFWwindow* window, vec2 position);
+    Entity createTutorial2(RenderSystem* renderer, GLFWwindow* window, vec2 position);
+    Entity createTutorial3(RenderSystem* renderer, GLFWwindow* window, vec2 position);
+    Entity createTutorial4(RenderSystem* renderer, GLFWwindow* window, vec2 position);
     bool showInto = true;
-    bool showStory1 = true;
-    bool showStory2 = true;
-    bool showStory3 = true;
-    bool showStory4 = true;
+    bool showTutorial1 = true;
+    bool showTutorial2 = true;
+    bool showTutorial3 = true;
+    bool showTutorial4 = true;
 private:
     static RenderSystem* renderer;
     // OpenGL window handle

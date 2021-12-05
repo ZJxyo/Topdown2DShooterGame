@@ -48,7 +48,12 @@ class RenderSystem
         textures_path("story1.png"),
         textures_path("story2.png"),
         textures_path("story3.png"),
-        textures_path("story4.png")};
+        textures_path("story4.png"),
+        textures_path("story5.png"),
+        textures_path("story6.png"),
+        textures_path("story7.png"),
+        textures_path("story8.png"),
+        textures_path("story9.png")};
 
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -103,6 +108,7 @@ private:
 	void drawTexturedMesh(Entity entity, const mat3 &projection, RenderRequest &render_request, vec2 scaling);
 	void drawTexturedInstances(std::vector<Entity>& entities, const mat3& projection, RenderRequest& request);
 	void drawParticles(ParticleSource ps, mat3 projection_2d);
+	void drawCustomMesh(Entity entity, mat3& projection, RenderRequest& render_request);
 	void drawToScreen();
 
 	// Window handle

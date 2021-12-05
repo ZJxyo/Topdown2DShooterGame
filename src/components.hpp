@@ -153,12 +153,11 @@ struct ParticleSource {
 		size(size), radius(radius), decay(decay), color(color), positions(positions), velocities(velocities) {}
 };
 
-struct LightSource {
-	vec2 pos = vec2(0.f, 0.f);
+struct CustomMesh {
+	vec3 color = vec3(0.f);
 	std::vector<vec3> vertices;
 	std::vector<unsigned int> indices;
-	LightSource(vec2 pos, std::vector<vec3> vertices, std::vector<unsigned int> indices) :
-		pos(pos), vertices(vertices), indices(indices) {}
+	CustomMesh(std::vector<vec3> vertices, std::vector<unsigned int> indices) : vertices(vertices), indices(indices) {}
 };
 
 
@@ -170,6 +169,11 @@ struct ShockwaveSource {
 
 struct StoryBox {
     bool isOpened = false;
+};
+
+// vertices 0123 forms a rectangle, 4567 is the next rectangle
+struct NonConvexCollider {
+	std::vector<vec2> vertices;
 };
 
 /**
@@ -216,7 +220,12 @@ enum class TEXTURE_ASSET_ID
     STORY2 = STORY1 + 1,
     STORY3 = STORY2 + 1,
     STORY4 = STORY3 + 1,
-	TEXTURE_COUNT = STORY4 + 1
+    STORY5 = STORY4 + 1,
+    STORY6 = STORY5 + 1,
+    STORY7 = STORY6 + 1,
+    STORY8 = STORY7 + 1,
+    STORY9 = STORY8 + 1,
+    TEXTURE_COUNT = STORY9 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -244,7 +253,8 @@ enum class GEOMETRY_BUFFER_ID
 	PEBBLE = SPRITE + 1,
 	RECTANGLE = PEBBLE + 1,
 	SCREEN_TRIANGLE = RECTANGLE + 1,
-	GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
+	GEOMETRY_COUNT = SCREEN_TRIANGLE + 1,
+	CUSTOM = GEOMETRY_COUNT + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 
