@@ -66,11 +66,17 @@ private:
 	float next_turtle_spawn;
 	float next_fish_spawn;
 	float next_animation;
+	float next_chase;
 	Entity player_salmon;
 	bool left_mouse_down;
 	bool tap;
+    Entity bomb;
 	bool can_plant;
 	bool bomb_planted;
+    bool canMove;
+    int toggle[4] = {-1, -1, -1, -1};
+    Entity tutorials[4];
+    Entity boxes[4];
 	float plant_timer;
 	float explode_timer;
 	bool is_planting;

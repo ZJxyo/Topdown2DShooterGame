@@ -13,6 +13,7 @@
 #include "HelpMenu.h"
 
 // Game configuration
+const size_t CHASE_DELAY_MS = 250;
 const size_t MAX_TURTLES = 2;
 const size_t TURTLE_DELAY_MS = 4000 * 3;
 const size_t ANIMATION_DELAY_MS = 100;
@@ -20,17 +21,13 @@ const size_t BULLET_TIMER_MS = 100;
 const size_t BOMB_TIMER_MS = 40000.f;
 const size_t FOOTSTEPS_SOUND_TIMER_MS = 400.f;
 const size_t PLANT_TIMER_MS = 2000.0f;
-int toggle[4] = {-1, -1, -1, -1};
-Entity stories[4];
-Entity boxes[4];
-vec2 oldPosition;
 
 // Create the fish world
 WorldSystem::WorldSystem()
 	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f), tap(false), can_plant(false),
 	plant_timer(PLANT_TIMER_MS), explode_timer(BOMB_TIMER_MS), bomb_planted(false), is_planting(false),
 	 bomb_exploded(false),footsteps_timer(FOOTSTEPS_SOUND_TIMER_MS), buildmode(false), buildcoord({0,0}),
-	  mousecoord({0,0}), building(false), maxWall(10)
+	  mousecoord({0,0}), building(false), maxWall(10),next_chase(0.f)
 
 {
 	// Seeding rng with random device
@@ -190,7 +187,6 @@ Entity entity;
 
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
-
 	// Updating window title with points
 	std::stringstream title_ss;
 	title_ss << "Points: " << points;
@@ -270,31 +266,39 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	}
 
 	// AIvy
-	Chase chase(player_salmon);
+	
 	ShootNBullets shoot(player_salmon, renderer, elapsed_ms_since_last_update);
-	Build build(player_salmon);
-	BTIfCondition btIfCondition(&chase, &shoot, &build);
-	btIfCondition.init(entity);
-	btIfCondition.process(entity);
 
+	next_chase -= elapsed_ms_since_last_update * current_speed;
+
+	if (next_chase < 0.f) {
+		next_chase = CHASE_DELAY_MS;
+		Chase chase(player_salmon);
+		Build build(player_salmon);
+		BTIfCondition btIfCondition(&chase, &shoot, &build);
+		btIfCondition.init(entity);
+		btIfCondition.process(entity);
+	}
     // show storybox 1
     if(abs(registry.motions.get(player_salmon).position.x -  BOX1_LOCATION.x)  < 50
     && abs(registry.motions.get(player_salmon).position.y - BOX1_LOCATION.y) < 50) {
 
         if(toggle[0] == -1) {
-            oldPosition = registry.motions.get(entity).position;
-            stories[0] = helpMenu.createStroy1(renderer, window, { BOX1_LOCATION.x,BOX1_LOCATION.y });
-            registry.motions.get(entity).position = {2000, 2000};
-            registry.motions.get(entity).velocity = {0,0};
+            tutorials[0] = helpMenu.createTutorial1(renderer, window, {BOX1_LOCATION.x, BOX1_LOCATION.y});
             toggle[0] = 0;
+            canMove = false;
+            registry.motions.get(player_salmon).velocity = {0,0};
         }
 
-        if (!helpMenu.showStory1 && toggle[0] == 0) {
-            registry.remove_all_components_of(stories[0]);
+        if (!helpMenu.showTutorial1 && toggle[0] == 0) {
+            registry.remove_all_components_of(tutorials[0]);
             toggle[0] = 1;
-            if(toggle[0] == 1) {
-                registry.motions.get(entity).position = oldPosition;
-            }
+            registry.motions.get(player_salmon).velocity = {0,0};
+            canMove = true;
+            input.right = 0;
+            input.left = 0;
+            input.down = 0;
+            input.up = 0;
         }
     }
 
@@ -303,19 +307,21 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
        && abs(registry.motions.get(player_salmon).position.y - BOX2_LOCATION.y) < 50) {
 
         if(toggle[1] == -1) {
-            oldPosition = registry.motions.get(entity).position;
-            stories[1] = helpMenu.createStroy2(renderer, window, { BOX2_LOCATION.x,BOX2_LOCATION.y });
-            registry.motions.get(entity).position = {2000, 2000};
-            registry.motions.get(entity).velocity = {0,0};
+            tutorials[1] = helpMenu.createTutorial2(renderer, window, {BOX2_LOCATION.x, BOX2_LOCATION.y});
             toggle[1] = 0;
+            canMove = false;
+            registry.motions.get(player_salmon).velocity = {0,0};
         }
 
-        if (!helpMenu.showStory2&& toggle[1] == 0) {
-            registry.remove_all_components_of(stories[1]);
+        if (!helpMenu.showTutorial2 && toggle[1] == 0) {
+            registry.remove_all_components_of(tutorials[1]);
             toggle[1] = 1;
-            if(toggle[1] == 1) {
-                registry.motions.get(entity).position = oldPosition;
-            }
+            registry.motions.get(player_salmon).velocity = {0,0};
+            canMove = true;
+            input.right = 0;
+            input.left = 0;
+            input.down = 0;
+            input.up = 0;
         }
     }
 
@@ -324,19 +330,21 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
        && abs(registry.motions.get(player_salmon).position.y - BOX3_LOCATION.y) < 50) {
 
         if(toggle[2] == -1) {
-            oldPosition = registry.motions.get(entity).position;
-            stories[2] = helpMenu.createStroy3(renderer, window, { BOX3_LOCATION.x,BOX3_LOCATION.y });
-            registry.motions.get(entity).position = {2000, 2000};
-            registry.motions.get(entity).velocity = {0,0};
+            tutorials[2] = helpMenu.createTutorial3(renderer, window, {BOX3_LOCATION.x, BOX3_LOCATION.y});
             toggle[2] = 0;
+            canMove = false;
+            registry.motions.get(player_salmon).velocity = {0,0};
         }
 
-        if (!helpMenu.showStory3 && toggle[2] == 0) {
-            registry.remove_all_components_of(stories[2]);
+        if (!helpMenu.showTutorial3 && toggle[2] == 0) {
+            registry.remove_all_components_of(tutorials[2]);
             toggle[2] = 1;
-            if(toggle[2] == 1) {
-                registry.motions.get(entity).position = oldPosition;
-            }
+            registry.motions.get(player_salmon).velocity = {0,0};
+            canMove = true;
+            input.right = 0;
+            input.left = 0;
+            input.down = 0;
+            input.up = 0;
         }
     }
 
@@ -345,19 +353,21 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
        && abs(registry.motions.get(player_salmon).position.y - BOX4_LOCATION.y) < 50) {
 
         if(toggle[3] == -1) {
-            oldPosition = registry.motions.get(entity).position;
-            stories[3] = helpMenu.createStroy4(renderer, window, { BOX4_LOCATION.x,BOX4_LOCATION.y });
-            registry.motions.get(entity).position = {2000, 2000};
-            registry.motions.get(entity).velocity = {0,0};
+            tutorials[3] = helpMenu.createTutorial4(renderer, window, {BOX4_LOCATION.x, BOX4_LOCATION.y});
             toggle[3] = 0;
+            canMove = false;
+            registry.motions.get(player_salmon).velocity = {0,0};
         }
 
-        if (!helpMenu.showStory4 && toggle[3] == 0) {
-            registry.remove_all_components_of(stories[3]);
+        if (!helpMenu.showTutorial4 && toggle[3] == 0) {
+            registry.remove_all_components_of(tutorials[3]);
             toggle[3] = 1;
-            if(toggle[3] == 1) {
-                registry.motions.get(entity).position = oldPosition;
-            }
+            registry.motions.get(player_salmon).velocity = {0,0};
+            canMove = true;
+            input.right = 0;
+            input.left = 0;
+            input.down = 0;
+            input.up = 0;
         }
     }
 
@@ -434,9 +444,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	int player_y = motion.position.y ;
 
 
-
-
-
 	auto &pa_entities = registry.plantAreas.entities;
 	for (int i = 0; i < registry.plantAreas.components.size(); i++)
 	{
@@ -467,7 +474,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		Mix_PlayChannel(-1, bomb_planted_sound, 0);
 		is_planting = false;
 		bomb_planted = true;
-		
+        // registry.bombInfo.get(bomb).isPlanted = true;
 	} 
 
 	if (bomb_planted) {
@@ -514,10 +521,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			}
 		}
 	}
-	
-	
-	
-	
+
 	// Processing the salmon state
 	//assert(registry.screenStates.components.size() <= 1);
 	//ScreenState &screen = registry.screenStates.components[0];
@@ -590,6 +594,7 @@ void WorldSystem::restart_game()
 	bomb_planted=false;
 	is_planting=false;
 	bomb_exploded=false;
+    canMove = true;
 
 	Mix_HaltChannel(-1);
 	Mix_Volume(-1,MIX_MAX_VOLUME/20);
@@ -621,19 +626,22 @@ void WorldSystem::restart_game()
 	createLightSource(vec2(0, 0), vertices, indices);
 
     // create story box
-    boxes[0] = createStoryBox(renderer, BOX1_LOCATION);
-    boxes[1] = createStoryBox(renderer, BOX2_LOCATION);
-    boxes[2] = createStoryBox(renderer, BOX3_LOCATION);
-    boxes[3] = createStoryBox(renderer, BOX4_LOCATION);
+    if(toggle[0] == -1) {
+        boxes[0] = createStoryBox(renderer, BOX1_LOCATION);
+    }
 
-	// CLEAN
+    if(toggle[1] == -1) {
+        boxes[1] = createStoryBox(renderer, BOX2_LOCATION);
+    }
 
-	//createWall(renderer, { 300, 100 }, 0.f, { 200, 200 });
-	//createWall(renderer, { 900, 100 }, 0.f, { 200, 200 });
-	//createWall(renderer, { 300, 500 }, 0.f, { 200, 200 });
-	//createWall(renderer, { 700, 500 }, 0.f, { 200, 200 });
-	//createWall(renderer, { 1100, 500 }, 0.f, { 200, 200 });
-	//createWall(renderer, { 1100, 700 }, 0.f, { 200, 200 });
+    if(toggle[2] == -1) {
+        boxes[2] = createStoryBox(renderer, BOX3_LOCATION);
+    }
+
+    if(toggle[3] == -1) {
+        boxes[3] = createStoryBox(renderer, BOX4_LOCATION);
+    }
+
 }
 
 // Compute collisions between entities
@@ -704,24 +712,25 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory1 && toggle[0] == 0)
+    if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showTutorial1 && toggle[0] == 0)
     {
-        helpMenu.showStory1 = false;
+        helpMenu.showTutorial1 = false;
+        canMove = true;
         registry.remove_all_components_of(boxes[0]);
-
-    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory2 && toggle[1] == 0)
+    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showTutorial2 && toggle[1] == 0)
     {
-        helpMenu.showStory2 = false;
+        helpMenu.showTutorial2 = false;
+        canMove = true;
         registry.remove_all_components_of(boxes[1]);
-
-    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory3 && toggle[2] == 0)
+    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showTutorial3 && toggle[2] == 0)
     {
-        helpMenu.showStory3 = false;
+        helpMenu.showTutorial3 = false;
+        canMove = true;
         registry.remove_all_components_of(boxes[2]);
-
-    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showStory4 && toggle[3] == 0)
+    } else if (action == GLFW_PRESS && key == GLFW_KEY_SPACE && helpMenu.showTutorial4 && toggle[3] == 0)
     {
-        helpMenu.showStory4 = false;
+        helpMenu.showTutorial4 = false;
+        canMove = true;
         registry.remove_all_components_of(boxes[3]);
     }
 
@@ -760,8 +769,6 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 						is_planting = true;
 						cout << "planting";
 						Mix_PlayChannel(-1, bomb_planting_sound, 0);
-						
-					
 					} 
 
 				}
@@ -787,13 +794,11 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		}
 	}
 
-	// Player movment WASD 
-
-	if (!registry.deathTimers.has(player_salmon))
+	// Player movment WASD
+	if (!registry.deathTimers.has(player_salmon) && canMove)
 	{
 		if (action == GLFW_PRESS)
 		{
-			
 			if (key == GLFW_KEY_W)
 			{
 				input.up = 1.f;

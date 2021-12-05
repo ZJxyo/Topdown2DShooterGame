@@ -13,8 +13,9 @@
 #include "HelpMenu.h"
 
 using Clock = std::chrono::high_resolution_clock;
-const vec2 INTRO_LOCATION = {1000, 4800};
-
+const vec2 INTRO_LOCATION = {1000, 4900};
+Entity stories[5];
+int toggle = 1;
 
 // Entry point
 int main()
@@ -59,20 +60,41 @@ int main()
         renderer.draw();
         // menu intro loop
         if(helpMenu.showInto) {
-            helpMenu.createInto(&renderer, window, INTRO_LOCATION);
-//            ai.BFS(0,0, 40,35);
-            helpMenu.showInto = false;
-        }
+            if(toggle == 1) {
+                stories[0] = helpMenu.createStory1(&renderer, window, INTRO_LOCATION);
+                toggle = 2;
 
-        // show menu page loop
-        if(helpMenu.showMenu && !helpMenu.showInto) {
-            helpMenu.createMenu(&renderer, window, INTRO_LOCATION);
-            if(!helpMenu.showMenu) {
-                world.init(&renderer);
+            } else if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && toggle == 2) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                registry.remove_all_components_of(stories[0]);
+                stories[1] = helpMenu.createStory2(&renderer, window, INTRO_LOCATION);
+                toggle = 3;
+
+            } else if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && toggle == 3) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                registry.remove_all_components_of(stories[1]);
+                stories[2] = helpMenu.createStory3(&renderer, window, INTRO_LOCATION);
+                toggle = 4;
+
+            } else if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && toggle == 4) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                registry.remove_all_components_of(stories[2]);
+                stories[3] = helpMenu.createStory4(&renderer, window, INTRO_LOCATION);
+                toggle = 5;
+
+            } else if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && toggle == 5) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                registry.remove_all_components_of(stories[3]);
+                stories[4] = helpMenu.createStory5(&renderer, window, INTRO_LOCATION);
+                toggle = 6;
+
+            } else if(glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS && toggle == 6) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                registry.remove_all_components_of(stories[4]);
+                helpMenu.showInto = false;
             }
-        }
-        // game loop
-        else {
+
+        } else {
             world.step(elapsed_ms);
 			ai.step(elapsed_ms);
 			physics.step(elapsed_ms);
