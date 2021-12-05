@@ -17,6 +17,10 @@ struct Bullet
 // Turtles and pebbles have a hard shell
 struct Enemy
 {
+	bool is_visible = true;
+	bool is_activated = false;
+	bool guard_mode = false;
+	vec2 pos = {0,0};
 };
 
 // Fish and Salmon have a soft shell
@@ -163,11 +167,16 @@ struct LightSource {
 struct ShockwaveSource {
 	vec2 pos = vec2(0.f, 0.f);
 	float time_elapsed = 0.f;
-	ShockwaveSource(vec2 pos) : pos(pos), time_elapsed(time_elapsed) {}
+	ShockwaveSource(vec2 pos) : pos(pos) {}
 };
 
 struct StoryBox {
     bool isOpened = false;
+};
+
+
+struct Bomb {
+    
 };
 
 /**

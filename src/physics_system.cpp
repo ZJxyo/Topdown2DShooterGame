@@ -2,17 +2,47 @@
 #include "physics_system.hpp"
 #include "world_init.hpp"
 
+void update_visibility_status(std::vector<vec2> contact_points, std::vector<float> new_angles) {
+	Entity player = registry.players.entities[0];
+	vec2 player_position = registry.motions.get(player).position;
+	for (int i = 0; i < registry.enemies.size(); i++) {
+		Entity enemy = registry.enemies.entities[i];
+		vec2 enemy_position = registry.motions.get(enemy).position;
+		// relative position from the player
+		vec2 relative_pos = enemy_position - player_position;
+		// angle in radians
+		float angle = atan2(relative_pos.y, relative_pos.x);
+		for (int j = 0; j < new_angles.size(); j++) {
+			// first new angle that is larger than angle 
+			if (angle < new_angles[j]|| angle > new_angles[new_angles.size() - 1]) {
+				// vector from j vertex to j - 1 vertex
+				vec2 dir1;
+				if (j - 1 < 0) {
+					dir1 = contact_points[(int)new_angles.size() - 1] - contact_points[j];
+				}
+				else {
+					dir1 = contact_points[j - 1] - contact_points[j];
+				}
+				// vector from j vertex to enemy relative position
+				vec2 dir2 = relative_pos - contact_points[j];
+				registry.enemies.components[i].is_visible = dir1.x * dir2.y - dir2.x * dir1.y <= 0;
+				break;
+			}
+		}
+	}
+}
+
 std::vector<vec3> compute_light_polygon(vec2& pos, std::vector<std::vector<vec2>>& wall_vertices) {
-	float half_width = (float)window_width_px / 2.f;
-	float half_height = (float)window_height_px / 2.f;
-	float radius = half_width + half_height;
+	float half_width_with_offset = (float)window_width_px / 2.f + 50.f;
+	float half_height_with_offset = (float)window_height_px / 2.f + 50.f;
+	float radius = half_width_with_offset + half_height_with_offset;
 	
 	// screen corners
 	std::vector<vec2> corners = {
-		vec2(-half_width, -half_height),
-		vec2(half_width, -half_height),
-		vec2(half_width, half_height),
-		vec2(-half_width, half_height)
+		vec2(-half_width_with_offset, -half_height_with_offset),
+		vec2(half_width_with_offset, -half_height_with_offset),
+		vec2(half_width_with_offset, half_height_with_offset),
+		vec2(-half_width_with_offset, half_height_with_offset)
 	};
 
 	// screen corner angles
@@ -41,8 +71,8 @@ std::vector<vec3> compute_light_polygon(vec2& pos, std::vector<std::vector<vec2>
 			std::vector<float> wbb = get_bounding_box(line_vertices);
 			if (aabb_collides(bb, wbb)) {
 				segments.push_back(vec4(v1, v2));
-				angles.push_back(atan2(clamp(v1.y, -half_height, half_height), clamp(v1.x, -half_width, half_width)));
-				angles.push_back(atan2(clamp(v2.y, -half_height, half_height), clamp(v2.x, -half_width, half_width)));
+				angles.push_back(atan2(clamp(v1.y, -half_height_with_offset, half_height_with_offset), clamp(v1.x, -half_width_with_offset, half_width_with_offset)));
+				angles.push_back(atan2(clamp(v2.y, -half_height_with_offset, half_height_with_offset), clamp(v2.x, -half_width_with_offset, half_width_with_offset)));
 			}
 		}
 	}
@@ -50,6 +80,8 @@ std::vector<vec3> compute_light_polygon(vec2& pos, std::vector<std::vector<vec2>
 	std::sort(angles.begin(), angles.end());
 	angles.erase(std::unique(angles.begin(), angles.end()), angles.end());
 
+	std::vector<vec2> contact_points;
+	std::vector<float> new_angles;
 	std::vector<vec3> light_polygon;
 
 	vec2 l1v1 = vec2(0, 0);
@@ -87,9 +119,15 @@ std::vector<vec3> compute_light_polygon(vec2& pos, std::vector<std::vector<vec2>
 			}
 
 			// store the closest colliding position the ray hits
-			light_polygon.push_back(vec3(d1.x * smallest_t / half_width, -d1.y * smallest_t / half_height, 0.0f));
+			vec2 contact_point = d1 * smallest_t;
+			contact_points.push_back(contact_point);
+			new_angles.push_back(new_angle);
+			light_polygon.push_back(vec3(contact_point.x * 2.f / (float)window_width_px, -contact_point.y * 2.f / (float)window_height_px, 0.0f));
 		}
 	}
+
+	update_visibility_status(contact_points, new_angles);
+
 	// center point
 	light_polygon.push_back(vec3(0.f, 0.f, 0.f));
 	return light_polygon;
@@ -245,8 +283,17 @@ void PhysicsSystem::step(float elapsed_ms)
 			break;
 		}
 
-		for (std::vector<float> bb : wall_bb) {
+		for (int j = 0; j < wall_bb.size(); j++) {
+			std::vector<float> bb = wall_bb[j];
 			if (aabb_collides(bullet_bb[i], bb)) {
+				Entity &p = registry.walls.entities[j];
+				if(registry.destroyable.has(p)){
+					Health &h = registry.healths.get(p);
+					h.health -= 10;
+					if (h.health <= 0){
+						registry.remove_all_components_of(p);
+					}
+				}
 				registry.remove_all_components_of(registry.bullets.entities[i]);
 				bullet_vertices[i] = bullet_vertices.back();
 				bullet_vertices.pop_back();
@@ -287,23 +334,39 @@ void PhysicsSystem::step(float elapsed_ms)
 		bool restore_xOry = false;
 		bool restore_xAndy = false;
 		std::vector<float> bb = { pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius };
-		std::vector<float> bb_x = { bb[0] - offset.x, bb[1], bb[2] - offset.x, bb[3] };
-		std::vector<float> bb_y = { bb[0], bb[1] - offset.y, bb[2], bb[3] - offset.y };
+		std::vector<float> bb_restored_x = { bb[0] - offset.x, bb[1], bb[2] - offset.x, bb[3] };
+		std::vector<float> bb_restored_y = { bb[0], bb[1] - offset.y, bb[2], bb[3] - offset.y };
 		for (int j = registry.walls.entities.size() - 1; j >= 0; j--) {
 			if (aabb_collides(bb, wall_bb[j])) {
+				// when vel.x = 0 or vel.x = 0, restore x and y is equivalent to restore one of x and y
+				if (offset.x == 0.f || offset.y == 0.f) {
+					restore_xAndy = true;
+					break;
+				}
+
 				// is colliding after restoring x
-				bool rx = aabb_collides(bb_x, wall_bb[j]);
+				bool rx = aabb_collides(bb_restored_x, wall_bb[j]);
 				// is colliding after restoring y
-				bool ry = aabb_collides(bb_y, wall_bb[j]);
+				bool ry = aabb_collides(bb_restored_y, wall_bb[j]);
 				
 				if (rx && ry) {
 					restore_xAndy = true;
 					break;
 				}
 				else if (rx) {
+					if (restore_x) {
+						restore_xAndy = true;
+						break;
+					}
+					bb = bb_restored_y;
 					restore_y = true;
 				}
 				else if (ry) {
+					if (restore_y) {
+						restore_xAndy = true;
+						break;
+					}
+					bb = bb_restored_x;
 					restore_x = true;
 				}
 				else {
@@ -312,7 +375,14 @@ void PhysicsSystem::step(float elapsed_ms)
 			}
 		}
 
+		if (restore_xAndy) {
+			pos -= offset;
+			continue;
+		}
+
+		// x is out of boundry
 		bool x_out = bb[0] < 0 || bb[2] > 5000;
+		// y is out of boundry
 		bool y_out = bb[1] < 0 || bb[3] > 5000;
 
 		if (x_out && y_out) {
