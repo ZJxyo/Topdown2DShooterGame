@@ -167,15 +167,48 @@ public:
             for (Entity e : registry.enemies.entities) {
                 // std::cout << "count: " << count << std::endl;
                 if (registry.motions.has(e)) {
+
+
                     if (chase->process(e) == BTState::Success) {
                         //return BTState::Success;
                         state = BTState::Success;
                     }
-                    else if (shoot->process(e) == BTState::Success) {
-                        //return BTState::Success;
-                        state = BTState::Success;
-                    }
-                    else if (build->process(e) == BTState::Success) {
+
+                    if (chase->process(e) != BTState::Success) {
+                        int bombX = 0;
+                        int bombY = 0;
+                        bool is_planted = false;
+                        for (Entity b : registry.bombInfo.entities) {
+                            bombX = registry.bombInfo.get(b).position.x;
+                            bombY = registry.bombInfo.get(b).position.y;
+                            // is_planted = registry.bombInfo.get(b).isPlanted;
+                            is_planted = true;
+
+                        }
+
+                        int bombDistance = 10000;
+                        Entity closet = e1; //dummy entity
+                        if (is_planted) {
+                            for (Entity enemy : registry.enemies.entities) {
+                                int enemyX = registry.motions.get(enemy).position.x;
+                                int enemyY = registry.motions.get(enemy).position.y;
+                                int dis = sqrt(pow(enemyX - bombX, 2) + pow(enemyY - bombY, 2));
+                                if (dis < bombDistance) {
+                                    bombDistance = dis;
+                                    closet = enemy;
+                                }
+                            }
+
+                        }
+
+                        if (e == closet) {
+                            // defuse
+                        }
+                        else {
+                            shoot->process(e);
+                        }
+
+                        // shoot->process(e) == BTState::Success;
                         //return BTState::Success;
                         state = BTState::Success;
                     }
@@ -217,10 +250,18 @@ private:
         int playerY = registry.motions.get(player).position.y;
         int AIX = registry.motions.get(e).position.x;
         int AIY = registry.motions.get(e).position.y;
-
-        int bombX = 100;
-        int bombY = 100;
-        bool is_planted = true;
+        
+        int bombX = 0;
+        int bombY = 0;
+        bool is_planted = false;
+        for (Entity b : registry.bombInfo.entities) {
+            
+            bombX = registry.bombInfo.get(b).position.x;
+            bombY = registry.bombInfo.get(b).position.y;
+            // is_planted = registry.bombInfo.get(b).isPlanted;
+            is_planted = true;
+       
+        }
 
         int bombDistance = 10000;
         Entity closet = player; //dummy entity
@@ -235,7 +276,6 @@ private:
                 }
             }
 
-
         }
 
         
@@ -244,7 +284,7 @@ private:
         // if bomb is planted, then AI that closet to bomb will chase bomb and defuse it
 
         if (e == closet) {
-            ai.BFS(bombY / 100, bombX / 100, bombY / 100, bombX / 100);
+            ai.BFS(AIY / 100, AIX / 100, bombY / 100, bombX / 100);
         }
         else {
             ai.BFS(AIY / 100, AIX / 100, playerY / 100, playerX / 100);
@@ -295,7 +335,7 @@ private:
         }
 
        // avoid other AI
-        int eplison = 200;
+        int eplison = 150;
         for (Entity enemy : registry.enemies.entities) {
 
             float y = registry.motions.get(enemy).position.y; //enemy y
@@ -366,7 +406,7 @@ private:
     //        }
         }
 
-        if (distance < 300) {
+        if (distance < 200) {
             return BTState::Failure;
         }
         return BTState::Success;
