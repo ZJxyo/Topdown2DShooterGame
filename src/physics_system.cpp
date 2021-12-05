@@ -392,6 +392,8 @@ void PhysicsSystem::step(float elapsed_ms)
 				continue;
 			}
 
+			printf("%f\n", angle_diff);
+
 			if (registry.physics.has(enemy)) {
 				registry.physics.get(enemy).impulse = 500.f;
 			}
