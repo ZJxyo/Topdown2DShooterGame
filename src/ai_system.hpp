@@ -218,9 +218,40 @@ private:
         int AIX = registry.motions.get(e).position.x;
         int AIY = registry.motions.get(e).position.y;
 
-        std::cout << "AIX: "<<AIX << std::endl;
+        int bombX = 100;
+        int bombY = 100;
+        bool is_planted = true;
 
-        ai.BFS(AIY / 100,AIX/100, playerY/100, playerX / 100);
+        int bombDistance = 10000;
+        Entity closet = player; //dummy entity
+        if (is_planted) {
+            for (Entity enemy : registry.enemies.entities) {
+                int enemyX = registry.motions.get(enemy).position.x;
+                int enemyY = registry.motions.get(enemy).position.y;
+                int dis = sqrt(pow(enemyX - bombX, 2) + pow(enemyY - bombY, 2));
+                if (dis < bombDistance) {
+                    bombDistance = dis;
+                    closet = enemy;
+                }
+            }
+
+
+        }
+
+        
+        // std::cout << "AIX: "<<AIX << std::endl;
+
+        // if bomb is planted, then AI that closet to bomb will chase bomb and defuse it
+
+        if (e == closet) {
+            ai.BFS(bombY / 100, bombX / 100, bombY / 100, bombX / 100);
+        }
+        else {
+            ai.BFS(AIY / 100, AIX / 100, playerY / 100, playerX / 100);
+        }
+
+
+        
         //        ai.BFS(AIX/100, AIY/100, 22,6);
         int distance = sqrt(pow(playerX - AIX, 2) + pow(playerY - AIY, 2));
 

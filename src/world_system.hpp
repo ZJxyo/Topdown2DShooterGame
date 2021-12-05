@@ -70,10 +70,14 @@ private:
 	float next_animation;
 	float next_chase;
 	Entity player_salmon;
-	bool mouse_down;
+	bool left_mouse_down;
 	bool tap;
 	bool can_plant;
 	bool bomb_planted;
+    bool canMove;
+    int toggle[4] = {-1, -1, -1, -1};
+    Entity tutorials[4];
+    Entity boxes[4];
 	float plant_timer;
 	float explode_timer;
 	bool is_planting;
@@ -84,6 +88,10 @@ private:
 	int maxWall;
 	vec2 buildcoord;
 	vec2 mousecoord;
+
+	// non convex walls
+	bool right_mouse_down = false;
+	std::vector<vec2> wall_hinges;
 	
 
 	// music references
