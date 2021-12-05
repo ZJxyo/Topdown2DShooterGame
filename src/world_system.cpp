@@ -188,7 +188,6 @@ Entity entity;
 
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
-
 	// Updating window title with points
 	std::stringstream title_ss;
 	title_ss << "Points: " << points;
@@ -476,7 +475,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		Mix_PlayChannel(-1, bomb_planted_sound, 0);
 		is_planting = false;
 		bomb_planted = true;
-		
+        registry.bombInfo.get(bomb).isPlanted = true;
 	} 
 
 	if (bomb_planted) {
