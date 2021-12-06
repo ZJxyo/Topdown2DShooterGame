@@ -472,12 +472,12 @@ private:
 
         // if bomb is planted, then AI that closet to bomb will chase bomb and defuse it
 
-        if (e == closet) {
-            ai.BFS(AIY / 100, AIX / 100, bombY / 100, bombX / 100);
-        }
-        else {
+        // if (e == closet) {
+        //     ai.BFS(AIY / 100, AIX / 100, bombY / 100, bombX / 100);
+        // }
+        // else {
             ai.BFS(AIY / 100, AIX / 100, playerY / 100, playerX / 100);
-        }
+        //}
 
 
 
