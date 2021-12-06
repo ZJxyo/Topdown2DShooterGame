@@ -283,10 +283,10 @@ MyArray createMatrix(std::string path) {// matrix 2d array
     return T;
 }
 
-int SetupMap(RenderSystem *renderer)
+int SetupMap(RenderSystem *renderer, int current_map)
 {
 	string src = PROJECT_SOURCE_DIR;
-	src += "src/map/map1.json";
+	src += "src/map/map" + to_string(current_map) + ".json";
 	ifstream ifs(src);
 	json j;
 	ifs >> j;
@@ -366,11 +366,11 @@ void Print(const MyArray &T){
 
 
 
-int createGround(RenderSystem *renderer)
+int createGround(RenderSystem *renderer, int current_map)
 {
 	
 	string src = PROJECT_SOURCE_DIR;
-	src += "src/map/map1.json";
+	src += "src/map/map" + to_string(current_map) + ".json";
 	ifstream ifs(src);
 	json j;
 	ifs >> j;

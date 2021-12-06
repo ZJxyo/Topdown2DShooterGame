@@ -33,7 +33,7 @@ WorldSystem::WorldSystem()
 	plant_timer(PLANT_TIMER_MS), explode_timer(BOMB_TIMER_MS), bomb_planted(false), is_planting(false),
 	 win_game(false),footsteps_timer(FOOTSTEPS_SOUND_TIMER_MS), buildmode(false), buildcoord({0,0}),
 	  mousecoord({0,0}), building(false), maxWall(10), attack_mode(true), defuse_timer(DEFUSE_TIMER_MS),
-	  attack_side(0),is_defusing(false),next_chase(0.f)
+	  attack_side(0),is_defusing(false),next_chase(0.f),current_map(1)
 
 {
 	// Seeding rng with random device
@@ -661,6 +661,7 @@ void WorldSystem::restart_game()
 	defuse_timer=DEFUSE_TIMER_MS;
 	bomb_planted=false;
 	is_planting=false;
+	is_defusing=false;
 	win_game=false;
     canMove = true;
 
@@ -674,10 +675,10 @@ void WorldSystem::restart_game()
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 	// create ground
-	createGround(renderer);
+	createGround(renderer, current_map);
 	
-	SetupMap(renderer);
-	createMatrix("src/map/map2.json");
+	SetupMap(renderer, current_map);
+	createMatrix("src/map/map" + to_string(current_map) + ".json");
   
 	std::vector<vec3> vertices = {
 		vec3(-1.f, 1.f, 0.f),
@@ -690,7 +691,7 @@ void WorldSystem::restart_game()
 
 	
 	string src = PROJECT_SOURCE_DIR;
-	src += "src/map/map1.json";
+	src += "src/map/map" + to_string(current_map) + ".json";
 	ifstream ifs(src);
 	
 	ifs >> j;
@@ -717,8 +718,7 @@ void WorldSystem::restart_game()
 			}
 		}
 		// Create a new salmon
-		// player_salmon = createSalmon(renderer, {1000, 1000});
-		player_salmon = createSalmon(renderer, {2500, 4700});
+		player_salmon = createSalmon(renderer, {j["attack_spawn"]["x"], j["attack_spawn"]["y"]});
 		registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
 	
 	} else { 
@@ -746,7 +746,7 @@ void WorldSystem::restart_game()
 		}
 
 		// Create a new salmon
-		player_salmon = createSalmon(renderer, {2000, 100});
+		player_salmon = createSalmon(renderer, {j["defense_spawn"]["x"], j["defense_spawn"]["y"]});
 		registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
 	
 	}
@@ -875,7 +875,14 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	}
 
 	if (win_game && GLFW_KEY_ENTER){
-		attack_mode = false;
+		if (!attack_mode){
+			current_map+=1;
+			if (current_map > 3){
+				current_map = 1;
+			}
+		}
+		attack_mode = !attack_mode;
+
 		restart_game();
 	}
 

@@ -93,6 +93,7 @@ private:
 	bool is_defusing;
 	vec2 buildcoord;
 	vec2 mousecoord;
+	int current_map;
 
 	// non convex walls
 	bool right_mouse_down = false;
