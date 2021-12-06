@@ -30,7 +30,7 @@ Entity createSalmon(RenderSystem *renderer, vec2 pos)
 	registry.players.emplace(entity);
 	Health &health = registry.healths.emplace(entity);
 	health.health = 1000;
-	registry.circleColliders.emplace(entity, 50);
+	registry.avatarColliders.emplace(entity, 50);
 	registry.animates.emplace(entity);
 	registry.fireRates.emplace(entity);
 	registry.renderRequests.insert(
@@ -62,7 +62,7 @@ Entity createWall(RenderSystem *renderer, vec2 pos, float angle, vec2 scale)
 	motion.angle = angle;
 	motion.scale = scale;
 
-	registry.polygonColliders.emplace(entity);
+	registry.wallColliders.emplace(entity);
 	registry.walls.emplace(entity);
 	registry.destroyable.emplace(entity);
 	Health &h = registry.healths.emplace(entity);
@@ -116,7 +116,7 @@ Entity createTurtle(RenderSystem *renderer, vec2 position)
 	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
 	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
-	registry.circleColliders.emplace(entity, 50);
+	registry.avatarColliders.emplace(entity, 50);
 
 	// Initialize the motion
 	auto &motion = registry.motions.emplace(entity);
@@ -200,6 +200,8 @@ Entity createBomb(RenderSystem *renderer, vec2 pos){
 	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(bomb, &mesh);
 	Bomb &b = registry.bomb.emplace(bomb);
+    BombInfo &bombInfo = registry.bombInfo.emplace(bomb);
+    bombInfo.position = pos;
 	Motion &m = registry.motions.emplace(bomb);
 	m.position = pos;
 	m.scale = {50.f,80.f};
@@ -313,6 +315,8 @@ int SetupMap(RenderSystem *renderer)
 			// Store a reference to the potentially re-used mesh object
 			Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::RECTANGLE);
 			registry.meshPtrs.emplace(entity, &mesh);
+			registry.wallColliders.emplace(entity);
+			registry.walls.emplace(entity);
 
 			// Setting initial motion values
 			Motion &motion = registry.motions.emplace(entity);
@@ -324,7 +328,7 @@ int SetupMap(RenderSystem *renderer)
 			motion.angle = w["angle"];
 			motion.scale = vec2(w["scale"]["x"], w["scale"]["y"]);
 
-			registry.polygonColliders.emplace(entity);
+			//registry.polygonColliders.emplace(entity);
 			registry.walls.emplace(entity);
 
 			// Create and (empty) Salmon component to be able to refer to all turtles
@@ -420,7 +424,7 @@ Entity createBullet(RenderSystem *renderer, vec2 pos, float angle)
 
 	motion.velocity = {x_speed, y_speed};
 
-	registry.pointColliders.emplace(entity);
+	registry.bulletColliders.emplace(entity);
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.bulletsRenderRequests.insert(
@@ -441,7 +445,56 @@ Entity createShockwave(vec2 pos) {
 Entity createLightSource(vec2 pos, std::vector<vec3>& vertices, std::vector<unsigned int>& indices) {
 	
 	Entity entity = Entity();
-	registry.lightSources.emplace(entity, pos, vertices, indices);
+	registry.lightSources.emplace(entity, vertices, indices);
 
 	return entity;
+}
+
+Entity createNonConvexWall(float thickness, std::vector<vec2>& hinges) {
+	float half_thickness = thickness / 2.f;
+	std::vector<vec2> vertices;
+	std::vector<vec3> verticesV3;
+	std::vector<unsigned int> indices;
+	for (int i = 0; i < hinges.size() - 1; i++) {
+		vec2 h1 = hinges[i];
+		vec2 h2 = hinges[i + 1];
+		// direction from hinge i to hinge i+1 
+		vec2 dir = normalize(h2 - h1);
+		vec2 normal = vec2(-dir.y, dir.x);
+		// hinge 1 vertex 1
+		vec2 v = h1 + (normal - dir) * half_thickness;
+		vertices.push_back(v);
+		verticesV3.push_back(vec3(v, 1.f));
+		// hinge 1 vertex 2
+		v = h1 + (-normal - dir) * half_thickness;
+		vertices.push_back(v);
+		verticesV3.push_back(vec3(v, 1.f));
+		// hinge 2 vertex 1
+		v = h2 + (normal + dir) * half_thickness;
+		vertices.push_back(v);
+		verticesV3.push_back(vec3(v, 1.f));
+		// hinge 2 vertex 2
+		v = h2 + (-normal + dir) * half_thickness;
+		vertices.push_back(v);
+		verticesV3.push_back(vec3(v, 1.f));
+		unsigned int index = (unsigned int)i;
+		//triangle 1
+		indices.push_back(index * 4);
+		indices.push_back(index * 4 + 1);
+		indices.push_back(index * 4 + 2);
+		//triangle 2
+		indices.push_back(index * 4 + 1);
+		indices.push_back(index * 4 + 2);
+		indices.push_back(index * 4 + 3);
+	}
+
+	Entity e = Entity();
+	registry.nonConvexWallColliders.emplace(e).vertices = vertices;
+	registry.customMeshes.emplace(e, verticesV3, indices).color = vec3(0.678f, 0.847f, 0.902f);
+	registry.healths.emplace(e).health = 200;
+	registry.customMeshRenderRequests.insert(e,
+		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
+		 EFFECT_ASSET_ID::COLOURED,
+		 GEOMETRY_BUFFER_ID::CUSTOM });
+	return e;
 }
