@@ -543,6 +543,7 @@ Entity createItem(vec2 pos, ITEM_TYPE type) {
 		EFFECT_ASSET_ID::ITEM,
 		GEOMETRY_BUFFER_ID::CUSTOM
 		});
+	return entity;
 }
 
 Entity createParticleSource(uint8 size, float radius, float life_span, vec3 color, vec2 pos, float angle, float speed) {
