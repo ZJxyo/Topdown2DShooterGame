@@ -158,11 +158,11 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED && render_request.used_texture == TEXTURE_ASSET_ID::GROUND_WOOD)
 	{
 		GLint tex_uloc = glGetUniformLocation(currProgram, "repeatx");
-		glUniform1i(tex_uloc, 10);
+		glUniform1i(tex_uloc, motion.scale.x/100);
 		gl_has_errors();
 
 		GLint tex_uloc2 = glGetUniformLocation(currProgram, "repeaty");
-		glUniform1i(tex_uloc2, 10);
+		glUniform1i(tex_uloc2, motion.scale.y/100);
 		gl_has_errors();
 	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED && render_request.used_texture == TEXTURE_ASSET_ID::WALL)

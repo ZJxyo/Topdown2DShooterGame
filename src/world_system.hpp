@@ -42,10 +42,11 @@ public:
 
 	void update_player_velocity();
 
-	static Entity createParticleSource(uint8 size, float radius, float decay, vec3 color, vec2 pos, vec2 dir, float speed);
-
 	// Should the game be over ?
 	bool is_over() const;
+
+    //get current map
+    int getCurrentMap();
 
 private:
 	// Input callback functions
@@ -83,13 +84,19 @@ private:
 	float plant_timer;
 	float explode_timer;
 	bool is_planting;
-	bool bomb_exploded;
+	bool win_game;
+	bool end_screen;
 	float footsteps_timer;
 	bool buildmode;
 	bool building;
 	int maxWall;
+	bool attack_mode;
+	float defuse_timer;
+	int attack_side;
+	bool is_defusing;
 	vec2 buildcoord;
 	vec2 mousecoord;
+	int current_map;
 
 	float wall_timer = -1.f;
 
@@ -107,6 +114,8 @@ private:
 	Mix_Chunk *bomb_explosion_sound;
 	Mix_Chunk *footsteps_sound;
 	Mix_Chunk *ak47_sound;
+	Mix_Chunk *defuse_sound;
+	
 
 	// C++ random number generator
 	std::default_random_engine rng;

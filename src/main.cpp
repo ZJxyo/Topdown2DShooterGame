@@ -13,7 +13,7 @@
 #include "HelpMenu.h"
 
 using Clock = std::chrono::high_resolution_clock;
-const vec2 INTRO_LOCATION = {1000, 4900};
+const vec2 INTRO_LOCATION = {2400, 4900};
 Entity stories[5];
 int toggle = 1;
 
@@ -97,8 +97,8 @@ int main()
 
         } else {
             world.step(elapsed_ms);
-            ai.step(elapsed_ms);
-            physics.step(elapsed_ms);
+			ai.step(elapsed_ms, world.getCurrentMap());
+			physics.step(elapsed_ms);
             //world.handle_collisions();
         }
 

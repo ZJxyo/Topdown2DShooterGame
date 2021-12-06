@@ -272,6 +272,15 @@ void PhysicsSystem::step(float elapsed_ms)
 		Motion &motion = motion_registry.components[i];
 		Entity entity = motion_registry.entities[i];
 		motion.position += motion.velocity * time;
+
+		if (registry.physics.has(entity)) {
+			float acceleration = 1000.f;
+			vec2 dir = -normalize(motion.velocity);
+			motion.velocity += acceleration * dir * time;
+			if (length(motion.velocity) < 100.f) {
+				registry.physics.remove(entity);
+			}
+		}
 	}
 
 	for (int i = registry.boosts.size() - 1; i >= 0; i--) {
@@ -298,16 +307,6 @@ void PhysicsSystem::step(float elapsed_ms)
 		wall_bb.push_back(get_bounding_box(vertices));
 	}
 
-	// all bullets' bounding box
-	std::vector<vec2> bullet_vertices;
-	std::vector<std::vector<float>> bullet_bb;
-	for (Entity e : registry.bullets.entities) {
-		vec2 vertex = registry.motions.get(e).position;
-		bullet_vertices.push_back(vertex);
-		std::vector<float> bb = { vertex.x, vertex.y, vertex.x, vertex.y };
-		bullet_bb.push_back(bb);
-	}
-
 	//// all non convex walls bounding box
 	//std::vector<std::vector<float>> nc_walls_bb;
 	//for (NonConvexCollider ncc : registry.nonConvexWallColliders.components) {
@@ -318,12 +317,12 @@ void PhysicsSystem::step(float elapsed_ms)
 	// in reversed order
 	for (int i = registry.bullets.entities.size() - 1; i >= 0; i--) {
 		// bullet vs boundry
-		if (bullet_bb[i][0] < 0 || bullet_bb[i][1] < 0 || bullet_bb[i][2] > 5000 || bullet_bb[i][3] > 5000) {
+		Entity bullet = registry.bullets.entities[i];
+		Motion& bullet_motion = registry.motions.get(bullet);
+		std::vector<vec2> bullet_vertex_vector = { bullet_motion.position };
+		std::vector<float> bullet_bb = get_bounding_box(bullet_vertex_vector);
+		if (bullet_bb[0] < 0 || bullet_bb[1] < 0 || bullet_bb[2] > 5000 || bullet_bb[3] > 5000) {
 			registry.remove_all_components_of(registry.bullets.entities[i]);
-			bullet_vertices[i] = bullet_vertices.back();
-			bullet_vertices.pop_back();
-			bullet_bb[i] = bullet_bb.back();
-			bullet_bb.pop_back();
 			continue;
 		}
 
@@ -332,7 +331,7 @@ void PhysicsSystem::step(float elapsed_ms)
 		// stationary walls
 		for (int j = 0; j < wall_bb.size(); j++) {
 			std::vector<float> bb = wall_bb[j];
-			if (aabb_collides(bullet_bb[i], bb)) {
+			if (aabb_collides(bullet_bb, bb)) {
 				Entity &p = registry.walls.entities[j];
 				if(registry.destroyable.has(p)){
 					Health &h = registry.healths.get(p);
@@ -341,29 +340,26 @@ void PhysicsSystem::step(float elapsed_ms)
 						registry.remove_all_components_of(p);
 					}
 				}
+				registry.remove_all_components_of(bullet);
 				bullet_removed = true;
 				break;
 			}
 		}
 
 		if (bullet_removed) {
-			registry.remove_all_components_of(registry.bullets.entities[i]);
-			bullet_vertices[i] = bullet_vertices.back();
-			bullet_vertices.pop_back();
-			bullet_bb[i] = bullet_bb.back();
-			bullet_bb.pop_back();
 			continue;
 		}
 
 		// non convex walls
 		for (int j = registry.nonConvexWallColliders.size() - 1; j >= 0; j--) {
 			std::vector<float> bb = get_bounding_box(registry.nonConvexWallColliders.components[j].vertices);
-			if (aabb_collides(bullet_bb[i], bb)) {
-				vec2 dir = -registry.motions.get(registry.bullets.entities[i]).velocity * elapsed_ms / 1000.f;
-				if (non_convex_collides(bullet_vertices[i], dir, registry.nonConvexWallColliders.components[j].vertices)) {
+			if (aabb_collides(bullet_bb, bb)) {
+				vec2 dir = -bullet_motion.velocity * elapsed_ms / 1000.f;
+				if (non_convex_collides(bullet_motion.position, dir, registry.nonConvexWallColliders.components[j].vertices)) {
 					for (auto callback : bullet_hit_callbacks) {
 						callback(registry.bullets.entities[i], registry.nonConvexWallColliders.entities[j]);
 					}
+					registry.remove_all_components_of(bullet);
 					bullet_removed = true;
 					break;
 				}
@@ -371,28 +367,17 @@ void PhysicsSystem::step(float elapsed_ms)
 		}
 
 		if (bullet_removed) {
-			registry.remove_all_components_of(registry.bullets.entities[i]);
-			bullet_vertices[i] = bullet_vertices.back();
-			bullet_vertices.pop_back();
-			bullet_bb[i] = bullet_bb.back();
-			bullet_bb.pop_back();
 			continue;
 		}
-	}
 
-	// bullet vs player/enemies
-	for (int i = registry.bullets.entities.size() - 1; i >= 0; i--) {
 		for (int j = registry.avatarColliders.entities.size() - 1; j >= 0; j--) {
 			Entity p = registry.avatarColliders.entities[j];
-			if (length(bullet_vertices[i] - registry.motions.get(p).position) < registry.avatarColliders.components[j].radius) {
+			if (length(bullet_motion.position - registry.motions.get(p).position) < registry.avatarColliders.components[j].radius) {
 				for (auto callback : bullet_hit_callbacks) {
 					callback(registry.bullets.entities[i], p);
 				}
 				registry.remove_all_components_of(registry.bullets.entities[i]);
-				bullet_vertices[i] = bullet_vertices.back();
-				bullet_vertices.pop_back();
-				bullet_bb[i] = bullet_bb.back();
-				bullet_bb.pop_back();
+				bullet_removed = true;
 				break;
 			}
 		}
@@ -472,6 +457,9 @@ void PhysicsSystem::step(float elapsed_ms)
 
 		if (restore_xAndy) {
 			pos -= offset;
+			if (registry.physics.has(p)) {
+				p_motion.velocity = -p_motion.velocity;
+			}
 			continue;
 		}
 
@@ -491,17 +479,74 @@ void PhysicsSystem::step(float elapsed_ms)
 		}
 
 		if (restore_xAndy || (restore_x && restore_y)) {
+			if (registry.physics.has(p)) {
+				p_motion.velocity = -p_motion.velocity;
+			}
 			pos -= offset;
 		}
 		else if (restore_x) {
+			if (registry.physics.has(p)) {
+				p_motion.velocity.x = -p_motion.velocity.x;
+			}
 			pos.x -= offset.x;
 		}
 		else if (restore_y) {
+			if (registry.physics.has(p)) {
+				p_motion.velocity.y = -p_motion.velocity.y;
+			}
 			pos.y -= offset.y;
 		}
 		else if (restore_xOry) {
+			if (registry.physics.has(p)) {
+				p_motion.velocity.x = -p_motion.velocity.x;
+			}
 			pos.x -= offset.x;
 		}
+	}
+
+	// push area vs enemies
+	for (int i = registry.pushAreaColliders.size() - 1; i >= 0; i--) {
+		SectorCollider& push_area_collider = registry.pushAreaColliders.components[i];
+		for (Entity enemy : registry.enemies.entities) {
+			Motion& enemy_motion = registry.motions.get(enemy);
+			float enemy_radius = registry.avatarColliders.get(enemy).radius;
+			// direction of enemy from source of push area
+			vec2 dir = enemy_motion.position - push_area_collider.position;
+
+			// out of range
+			if (length(dir) > enemy_radius + push_area_collider.distance) {
+				continue;
+			}
+
+			float angle = atan2(dir.y, dir.x);
+
+			// find the different in angles to the center of the sector
+			float angle_diff = angle - push_area_collider.angle;
+			angle_diff += (angle_diff > M_PI) ? -2 * M_PI : (angle_diff < -M_PI) ? 2 * M_PI : 0;
+
+			float half_span = push_area_collider.span / 2.f;
+
+			// not in the span of the sector
+			if (abs(angle_diff) > half_span) {
+				continue;
+			}
+
+			printf("%f\n", angle_diff);
+
+			float mass;
+			if (!registry.physics.has(enemy)) {
+				mass = registry.physics.emplace(enemy).mass;
+			}
+			else {
+				mass = registry.physics.get(enemy).mass;
+			}
+
+			float acceleration = 1000.f;
+
+			vec2 vel = normalize(dir) * acceleration / mass;
+			enemy_motion.velocity = vel;
+		}
+		registry.remove_all_components_of(registry.pushAreaColliders.entities[i]);
 	}
 
 	while (registry.lightSources.size() > 0) {

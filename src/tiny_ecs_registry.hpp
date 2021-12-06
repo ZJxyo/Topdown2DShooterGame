@@ -40,6 +40,7 @@ public:
 	ComponentContainer<ShockwaveSource> shockwaveSource;
 	ComponentContainer<StoryBox> storyBox;
 	ComponentContainer<Wall> destroyable;
+	ComponentContainer<Bomb> bomb;
 	ComponentContainer<NonConvexCollider> nonConvexWallColliders;
 	ComponentContainer<CustomMesh> customMeshes;
 	ComponentContainer<RenderRequest> customMeshRenderRequests;
@@ -48,6 +49,8 @@ public:
     ComponentContainer<CircleCollider> itemColliders;
     ComponentContainer<RenderRequest> itemRenderRequests;
     ComponentContainer<Boost> boosts;
+	ComponentContainer<SectorCollider> pushAreaColliders;
+	ComponentContainer<Physics> physics;
 
 
 	// constructor that adds all containers for looping over them
@@ -83,6 +86,7 @@ public:
 		registry_list.push_back(&shockwaveSource);
 		registry_list.push_back(&storyBox);
 		registry_list.push_back(&destroyable);
+		registry_list.push_back(&bomb);
 		registry_list.push_back(&nonConvexWallColliders);
 		registry_list.push_back(&customMeshes);
 		registry_list.push_back(&customMeshRenderRequests);
@@ -91,6 +95,8 @@ public:
         registry_list.push_back(&itemColliders);
         registry_list.push_back(&itemRenderRequests);
         registry_list.push_back(&boosts);
+		registry_list.push_back(&pushAreaColliders);
+		registry_list.push_back(&physics);
 	}
 
 	void clear_all_components()
