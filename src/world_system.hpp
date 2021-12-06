@@ -125,4 +125,5 @@ private:
     const vec2 BOX2_LOCATION = {1000, 4600};
     const vec2 BOX3_LOCATION = {1000, 4400};
     const vec2 BOX4_LOCATION = {1000, 4200};
+
 };
