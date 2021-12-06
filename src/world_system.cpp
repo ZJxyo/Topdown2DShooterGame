@@ -656,6 +656,7 @@ void WorldSystem::restart_game()
     }
 
 	createItem(vec2(1300, 4600), ITEM_TYPE::HEALTH_REGEN);
+	createItem(vec2(700, 4300), ITEM_TYPE::SPEED_BOOST);
 }
 
 // Compute collisions between entities
@@ -967,7 +968,11 @@ void WorldSystem::handle_bullet_hit(Entity bullet, Entity entity) {
 }
 
 void WorldSystem::update_player_velocity() {
-	registry.motions.get(player_salmon).velocity = player_speed * vec2(input.right - input.left, input.down - input.up);
+	float multiplier = 1.f;
+	if (registry.boosts.has(player_salmon)) {
+		multiplier = registry.boosts.get(player_salmon).speed_multiplier;
+	}
+	registry.motions.get(player_salmon).velocity = player_speed * multiplier * vec2(input.right - input.left, input.down - input.up);
 }
 
 Entity WorldSystem::createParticleSource(uint8 size, float radius, float decay, vec3 color, vec2 pos, vec2 dir, float speed) {
@@ -989,4 +994,13 @@ Entity WorldSystem::createParticleSource(uint8 size, float radius, float decay, 
 	registry.particleSources.emplace(ps, size, radius, decay, color, positions, velocities);
 
 	return ps;
+}
+
+void WorldSystem::handle_items(Entity entity_1, ITEM_TYPE type) {
+	if (type == ITEM_TYPE::HEALTH_REGEN) {
+		registry.healths.get(entity_1).health += 100;
+	}
+	else if (type == ITEM_TYPE::SPEED_BOOST) {
+		registry.boosts.emplace(entity_1);
+	}
 }

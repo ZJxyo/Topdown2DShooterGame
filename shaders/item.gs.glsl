@@ -11,7 +11,7 @@ void main() {
     // cross
     if (type == 0) {
         float offset1 = 10.f;
-        float offset2 = 30.f;
+        float offset2 = 35.f;
         gl_Position = vec4(projection * vec3(center.x - offset1, center.y + offset2, 1.f), 1.f);
         EmitVertex();
         gl_Position = vec4(projection * vec3(center.x + offset1, center.y + offset2, 1.f), 1.f);
@@ -33,11 +33,21 @@ void main() {
         EndPrimitive();
 
     } else if (type == 1) {
-        gl_Position = vec4(center, 1.f, 1.f);
+        float offset_x = 35.f;
+        float offset_y = 25.f;
+        gl_Position = vec4(projection * vec3(center.x - offset_x, center.y + offset_y, 1.f), 1.f);
+        EmitVertex();
+        gl_Position = vec4(projection * vec3(center.x - offset_x, center.y - offset_y, 1.f), 1.f);
+        EmitVertex();
+        gl_Position = vec4(projection * vec3(center.x + 5.f, center.y, 1.f), 1.f);
         EmitVertex();
         EndPrimitive();
-    } else {
-        gl_Position = vec4(center, 1.f, 1.f);
+
+        gl_Position = vec4(projection * vec3(center.x - offset_x + 30.f, center.y + offset_y, 1.f), 1.f);
+        EmitVertex();
+        gl_Position = vec4(projection * vec3(center.x - offset_x + 30.f, center.y - offset_y, 1.f), 1.f);
+        EmitVertex();
+        gl_Position = vec4(projection * vec3(center.x + offset_x, center.y, 1.f), 1.f);
         EmitVertex();
         EndPrimitive();
     }

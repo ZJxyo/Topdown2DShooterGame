@@ -197,6 +197,12 @@ struct Item {
 	}
 };
 
+struct Boost {
+	// in ms
+	float timer = 5000.f;
+	float speed_multiplier = 1.5f;
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture

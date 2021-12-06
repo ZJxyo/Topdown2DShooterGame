@@ -47,6 +47,7 @@ public:
     ComponentContainer<Item> items;
     ComponentContainer<CircleCollider> itemColliders;
     ComponentContainer<RenderRequest> itemRenderRequests;
+    ComponentContainer<Boost> boosts;
 
 
 	// constructor that adds all containers for looping over them
@@ -89,6 +90,7 @@ public:
         registry_list.push_back(&items);
         registry_list.push_back(&itemColliders);
         registry_list.push_back(&itemRenderRequests);
+        registry_list.push_back(&boosts);
 	}
 
 	void clear_all_components()

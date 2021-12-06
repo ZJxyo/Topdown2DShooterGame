@@ -274,6 +274,14 @@ void PhysicsSystem::step(float elapsed_ms)
 		motion.position += motion.velocity * time;
 	}
 
+	for (int i = registry.boosts.size() - 1; i >= 0; i--) {
+		Boost& boost = registry.boosts.components[i];
+		boost.timer -= elapsed_ms;
+		if (boost.timer <= 0) {
+			registry.boosts.remove(registry.boosts.entities[i]);
+		}
+	}
+
 	for (int i = registry.shockwaveSource.size() - 1; i >= 0; i--) {
 		registry.shockwaveSource.components[i].time_elapsed += time;
 		if (registry.shockwaveSource.components[i].time_elapsed > 1.f) {
@@ -398,7 +406,9 @@ void PhysicsSystem::step(float elapsed_ms)
 		Entity item_entity = registry.itemColliders.entities[i];
 		Item& item_comp = registry.items.get(item_entity);
 		if (length(player_pos - item_comp.position) < player_radius + registry.itemColliders.components[i].radius) {
-			// TODO:call handle item function
+			for (auto callbacks : item_callbacks) {
+				callbacks(player, item_comp.item_type);
+			}
 			registry.itemColliders.remove(item_entity);
 			if (registry.itemColliders.has(item_entity)) {
 				assert(false);

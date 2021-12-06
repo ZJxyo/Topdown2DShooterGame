@@ -38,6 +38,7 @@ public:
 	// Check for collisions
 	void handle_collisions();
 	static void handle_bullet_hit(Entity entity_1, Entity entity_2);
+	static void handle_items(Entity entity_1, ITEM_TYPE type);
 
 	void update_player_velocity();
 
