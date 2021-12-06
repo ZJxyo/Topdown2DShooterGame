@@ -26,7 +26,7 @@ Entity createLine(vec2 position, float angle, vec2 size);
 Entity createPebble(vec2 pos, vec2 size);
 Entity createBomb(RenderSystem *renderer, vec2 pos);
 Entity createEndScreen(RenderSystem *renderer, vec2 pos);
-MyArray createMatrix();
+MyArray createMatrix(std::string path);
 int createGround(RenderSystem *renderer);
 int SetupMap(RenderSystem *renderer);
 

@@ -241,7 +241,7 @@ struct wall
 	vec2 scale;
 };
 
-MyArray createMatrix() {// matrix 2d array
+MyArray createMatrix(std::string path) {// matrix 2d array
 	
 	MyArray T;
 	Fill(T);
@@ -249,12 +249,13 @@ MyArray createMatrix() {// matrix 2d array
 
 	//load from map.json
 	string src = PROJECT_SOURCE_DIR;
-	src += "src/map/map.json";
+	src += path;
 	ifstream ifs(src);
 	json j;
 	ifs >> j;
 
-	for (json w : j["walls"]) {
+	for (json q : j["walls"]) {
+		for (json w: q["motion"]) {
 		int value_x = int(w["position"]["x"]) / 100;
 		int value_y = int(w["position"]["y"]) / 100;
 		T[value_y][value_x] = 1;
@@ -274,16 +275,18 @@ MyArray createMatrix() {// matrix 2d array
 		// 	T[value_y + i][value_x] = 1;
 		// 	T[value_y - i][value_x] = 1;
 		// }
+		}
+		
 	}
 
-//	Print(T);
+	Print(T);
     return T;
 }
 
 int SetupMap(RenderSystem *renderer)
 {
 	string src = PROJECT_SOURCE_DIR;
-	src += "src/map/map.json";
+	src += "src/map/map1.json";
 	ifstream ifs(src);
 	json j;
 	ifs >> j;
@@ -367,7 +370,7 @@ int createGround(RenderSystem *renderer)
 {
 	
 	string src = PROJECT_SOURCE_DIR;
-	src += "src/map/map.json";
+	src += "src/map/map1.json";
 	ifstream ifs(src);
 	json j;
 	ifs >> j;
