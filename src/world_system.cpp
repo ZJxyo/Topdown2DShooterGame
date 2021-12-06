@@ -656,7 +656,7 @@ void WorldSystem::restart_game()
 
 	
 	string src = PROJECT_SOURCE_DIR;
-	src += "src/map/map.json";
+	src += "src/map/map1.json";
 	ifstream ifs(src);
 	
 	ifs >> j;

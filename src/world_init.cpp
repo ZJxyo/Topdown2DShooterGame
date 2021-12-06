@@ -284,7 +284,7 @@ MyArray createMatrix(std::string path) {// matrix 2d array
 int SetupMap(RenderSystem *renderer)
 {
 	string src = PROJECT_SOURCE_DIR;
-	src += "src/map/map.json";
+	src += "src/map/map1.json";
 	ifstream ifs(src);
 	json j;
 	ifs >> j;
@@ -367,7 +367,7 @@ int createGround(RenderSystem *renderer)
 {
 	
 	string src = PROJECT_SOURCE_DIR;
-	src += "src/map/map.json";
+	src += "src/map/map1.json";
 	ifstream ifs(src);
 	json j;
 	ifs >> j;
