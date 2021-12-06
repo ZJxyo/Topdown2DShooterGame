@@ -32,7 +32,7 @@ WorldSystem::WorldSystem()
 	: points(0), next_turtle_spawn(0.f), next_fish_spawn(0.f), tap(false), can_plant(false),
 	plant_timer(PLANT_TIMER_MS), explode_timer(BOMB_TIMER_MS), bomb_planted(false), is_planting(false),
 	 win_game(false),footsteps_timer(FOOTSTEPS_SOUND_TIMER_MS), buildmode(false), buildcoord({0,0}),
-	  mousecoord({0,0}), building(false), maxWall(10), attack_mode(false), defuse_timer(DEFUSE_TIMER_MS),
+	  mousecoord({0,0}), building(false), maxWall(10), attack_mode(true), defuse_timer(DEFUSE_TIMER_MS),
 	  attack_side(0),is_defusing(false),next_chase(0.f)
 
 {
@@ -304,14 +304,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	next_chase -= elapsed_ms_since_last_update * current_speed;
 
-	if (next_chase < 0.f) {
-		next_chase = CHASE_DELAY_MS;
-		Chase chase(player_salmon);
-		Build build(player_salmon);
-		BTIfCondition btIfCondition(&chase, &shoot, &build);
-		btIfCondition.init(entity);
-		btIfCondition.process(entity);
-	}
+	// if (next_chase < 0.f) {
+	// 	next_chase = CHASE_DELAY_MS;
+	// 	Chase chase(player_salmon);
+	// 	Build build(player_salmon);
+	// 	BTIfCondition btIfCondition(&chase, &shoot, &build);
+	// 	btIfCondition.init(entity);
+	// 	btIfCondition.process(entity);
+	// }
     // show storybox 1
     if(abs(registry.motions.get(player_salmon).position.x -  BOX1_LOCATION.x)  < 50
     && abs(registry.motions.get(player_salmon).position.y - BOX1_LOCATION.y) < 50) {

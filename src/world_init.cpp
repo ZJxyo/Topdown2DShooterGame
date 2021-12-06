@@ -316,7 +316,6 @@ int SetupMap(RenderSystem *renderer)
 			Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::RECTANGLE);
 			registry.meshPtrs.emplace(entity, &mesh);
 			registry.wallColliders.emplace(entity);
-			registry.walls.emplace(entity);
 
 			// Setting initial motion values
 			Motion &motion = registry.motions.emplace(entity);

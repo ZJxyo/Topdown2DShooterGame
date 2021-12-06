@@ -202,9 +202,8 @@ public:
             // if (build->process(e) == BTState::Success) {
             //     return BTState::Success;
             // }
-
-        return BTState::Success;
         }
+        return BTState::Success;
     }
 private:
     BTNode* chase;
