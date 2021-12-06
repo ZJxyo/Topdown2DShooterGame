@@ -183,6 +183,20 @@ struct NonConvexCollider {
 	std::vector<vec2> vertices;
 };
 
+enum class ITEM_TYPE {
+	HEALTH_REGEN = 0,
+	SPEED_BOOST = HEALTH_REGEN + 1
+};
+
+struct Item {
+	vec2 position;
+	ITEM_TYPE item_type;
+	bool active = false;
+	float respawn_timer = 0.f;
+	Item(vec2 pos, ITEM_TYPE item_type) : position(pos), item_type(item_type) {
+	}
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture

@@ -21,6 +21,7 @@ const size_t BULLET_TIMER_MS = 100;
 const size_t BOMB_TIMER_MS = 40000.f;
 const size_t FOOTSTEPS_SOUND_TIMER_MS = 400.f;
 const size_t PLANT_TIMER_MS = 2000.0f;
+const size_t ITEM_RESPAWN_DELAY = 30000.f;
 
 // Create the fish world
 WorldSystem::WorldSystem()
@@ -564,7 +565,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		}
 	}
 
-	// if wall is done drawing or exceeds limit
+	// generate wall when drawing is done or exceeds length limit
 	if (wall_hinges.size() > 5 || right_mouse_down == false) {
 		// at least 2 nodes
 		if (wall_hinges.size() < 2) {
@@ -573,6 +574,18 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		else {
 			createNonConvexWall(20.f, wall_hinges);
 			wall_hinges.clear();
+		}
+	}
+
+	for (int i = 0; i < registry.items.size(); i++) {
+		Item& item = registry.items.components[i];
+		if (!item.active) {
+			item.respawn_timer -= elapsed_ms_since_last_update;
+			if (item.respawn_timer <= 0) {
+				item.active = true;
+				item.respawn_timer = ITEM_RESPAWN_DELAY;
+				registry.itemColliders.emplace(registry.items.entities[i], 50.f);
+			}
 		}
 	}
 
@@ -642,6 +655,7 @@ void WorldSystem::restart_game()
         boxes[3] = createStoryBox(renderer, BOX4_LOCATION);
     }
 
+	createItem(vec2(1300, 4600), ITEM_TYPE::HEALTH_REGEN);
 }
 
 // Compute collisions between entities

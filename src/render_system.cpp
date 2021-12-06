@@ -361,6 +361,36 @@ void RenderSystem::drawCustomMesh(Entity entity, mat3& projection, RenderRequest
 	glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
 
 	glDrawElements(GL_TRIANGLES, cm.indices.size(), GL_UNSIGNED_INT, nullptr);
+	gl_has_errors();
+
+}
+
+void RenderSystem::drawPoint(Entity entity, mat3& projection, RenderRequest& render_request) {
+	const GLuint program = effects[(GLuint)render_request.used_effect];
+	glUseProgram(program);
+	gl_has_errors();
+
+	glBindBuffer(GL_ARRAY_BUFFER, vertices_buffer);
+	Item& item = registry.items.get(entity);
+	vec2 player_postion = registry.motions.get(registry.players.entities[0]).position;
+	vec2 offset = vec2(window_width_px / 2.f - player_postion.x, window_height_px / 2.f - player_postion.y);
+	vec3 pos = vec3(item.position + offset, 1.f);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vec3), &pos, GL_STREAM_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), 0);
+	glEnableVertexAttribArray(0);
+	gl_has_errors();
+
+
+	GLint projection_uloc = glGetUniformLocation(program, "projection");
+	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
+
+	GLint type_uloc = glGetUniformLocation(program, "type");
+	glUniform1i(type_uloc, (int)item.item_type);
+	gl_has_errors();
+
+
+	glDrawArrays(GL_POINTS, 0, 1);
+	gl_has_errors();
 }
 
 // draw the intermediate texture to the screen, with some distortion to simulate
@@ -503,6 +533,10 @@ void RenderSystem::draw()
 		RenderRequest &render_request2 = registry.renderRequests2.get(entity);
 
 		drawTexturedMesh(entity, projection_2D, render_request2, {0.7, 0.7});
+	}
+
+	for (int i = 0; i < registry.itemRenderRequests.size(); i++) {
+		drawPoint(registry.itemRenderRequests.entities[i], projection_2D, registry.itemRenderRequests.components[i]);
 	}
 
 	for (int i = 0; i < registry.renderRequests.size(); i++)

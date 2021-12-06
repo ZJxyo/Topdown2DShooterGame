@@ -44,6 +44,9 @@ public:
 	ComponentContainer<CustomMesh> customMeshes;
 	ComponentContainer<RenderRequest> customMeshRenderRequests;
     ComponentContainer<BombInfo> bombInfo;
+    ComponentContainer<Item> items;
+    ComponentContainer<CircleCollider> itemColliders;
+    ComponentContainer<RenderRequest> itemRenderRequests;
 
 
 	// constructor that adds all containers for looping over them
@@ -83,6 +86,9 @@ public:
 		registry_list.push_back(&customMeshes);
 		registry_list.push_back(&customMeshRenderRequests);
         registry_list.push_back(&bombInfo);
+        registry_list.push_back(&items);
+        registry_list.push_back(&itemColliders);
+        registry_list.push_back(&itemRenderRequests);
 	}
 
 	void clear_all_components()

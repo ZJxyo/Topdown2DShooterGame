@@ -37,3 +37,4 @@ Entity createBullet(RenderSystem *renderer, vec2 position, float angle);
 Entity createLightSource(vec2 pos, std::vector<vec3>& vertices, std::vector<unsigned int>& indices);
 Entity createShockwave(vec2 pos);
 Entity createNonConvexWall(float thickness, std::vector<vec2>& hinges);
+Entity createItem(vec2 pos, ITEM_TYPE type);

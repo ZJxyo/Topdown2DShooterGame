@@ -390,6 +390,23 @@ void PhysicsSystem::step(float elapsed_ms)
 		}
 	}
 
+	Entity player = registry.players.entities[0];
+	vec2 player_pos = registry.motions.get(player).position;
+
+	float player_radius = registry.avatarColliders.get(player).radius;
+	for (int i = registry.itemColliders.size() - 1; i >= 0; i--) {
+		Entity item_entity = registry.itemColliders.entities[i];
+		Item& item_comp = registry.items.get(item_entity);
+		if (length(player_pos - item_comp.position) < player_radius + registry.itemColliders.components[i].radius) {
+			// TODO:call handle item function
+			registry.itemColliders.remove(item_entity);
+			if (registry.itemColliders.has(item_entity)) {
+				assert(false);
+			}
+			item_comp.active = false;
+		}
+	}
+
 	// player/enemies vs walls
 	for (int i = registry.avatarColliders.entities.size() - 1; i >= 0; i--) {
 		Entity p = registry.avatarColliders.entities[i];
@@ -481,7 +498,6 @@ void PhysicsSystem::step(float elapsed_ms)
 		registry.remove_all_components_of(registry.lightSources.entities[0]);
 	}
 
-	vec2 player_pos = registry.motions.get(registry.players.entities[0]).position;
 	std::vector<vec3> light_polygon = compute_light_polygon(player_pos, wall_vertices);
 	std::vector<unsigned int> light_polygon_indices = compute_light_polygon_indices(light_polygon.size());
 	createLightSource(player_pos, light_polygon, light_polygon_indices);

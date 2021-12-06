@@ -495,3 +495,15 @@ Entity createNonConvexWall(float thickness, std::vector<vec2>& hinges) {
 		 GEOMETRY_BUFFER_ID::CUSTOM });
 	return e;
 }
+
+Entity createItem(vec2 pos, ITEM_TYPE type) {
+	Entity entity = Entity();
+	registry.items.emplace(entity, pos, type);
+	registry.itemRenderRequests.insert(entity,
+		{
+		TEXTURE_ASSET_ID::TEXTURE_COUNT,
+		EFFECT_ASSET_ID::ITEM,
+		GEOMETRY_BUFFER_ID::CUSTOM
+		});
+	return entity;
+}

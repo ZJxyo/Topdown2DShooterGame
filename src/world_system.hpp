@@ -93,7 +93,6 @@ private:
 	// non convex walls
 	bool right_mouse_down = false;
 	std::vector<vec2> wall_hinges;
-	
 
 	// music references
 	Mix_Music *background_music;
