@@ -311,7 +311,7 @@ MyArray createMatrix(std::string path) {// matrix 2d array
 		
 	}
 
-	Print(T);
+//	Prinxt(T);
     return T;
 }
 
