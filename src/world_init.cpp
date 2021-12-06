@@ -443,7 +443,7 @@ int createGround(RenderSystem *renderer, int current_map)
 			motion.velocity = {0.f, 0.f};
 			motion.scale = {m["scale"]["x"], m["scale"]["y"]};
 
-			motion.position = {m["position"]["x"], m["position"]["y"]};
+			motion.position = {int(m["position"]["x"]) + 50, int(m["position"]["y"]) + 50};
 
 			// Create and (empty) Salmon component to be able to refer to all turtles
 
