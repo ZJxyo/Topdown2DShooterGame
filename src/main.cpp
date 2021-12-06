@@ -96,7 +96,7 @@ int main()
 
         } else {
             world.step(elapsed_ms);
-			ai.step(elapsed_ms);
+			ai.step(elapsed_ms, world.getCurrentMap());
 			physics.step(elapsed_ms);
             //world.handle_collisions();
         }

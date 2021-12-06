@@ -36,14 +36,14 @@ struct Node
 class AISystem
 {
 public:
-    void step(float elapsed_ms);
+    void step(float elapsed_ms, int currentMap);
     // Cite from: https://www.geeksforgeeks.org/breadth-first-traversal-bfs-on-a-2d-array/
     bool isValid(int row, int col);
     void BFS(int startRow, int startCol, int endRow, int endCol);
     stack<pair<int, int>> findPath(int startRow, int startCol, int endRow, int endCol);
     AISystem() {
         memset(vis, false, sizeof vis);
-        temp = createMatrix();
+        temp = createMatrix("src/map/map" + to_string(current_map) + ".json");
         for(int i = 0; i < temp.size(); i++) {
             for(int j = 0; j < temp[0].size(); j++) {
                 grid[i][j] = temp[i][j];
@@ -60,6 +60,7 @@ public:
     vector<Node> aStar(Node player, Node dest);
 private:
     MyArray temp;
+    int current_map = 1;
     bool vis[ROW][COL];
     //    int grid[ROW][COL] = { { 1, 2, 3, 4 },
     //                           { 5, 6, 7, 8 },
