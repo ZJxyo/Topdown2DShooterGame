@@ -6,6 +6,13 @@ void AISystem::step(float elapsed_ms, int currentMap)
 {
 //    (void)elapsed_ms; // placeholder to silence unused warning until implemented
     this->current_map = currentMap;
+    temp = createMatrix("src/map/map" + to_string(current_map) + ".json");
+//    cout<< "current map" << current_map;
+    for(int i = 0; i < temp.size(); i++) {
+        for(int j = 0; j < temp[0].size(); j++) {
+            grid[i][j] = temp[i][j];
+        }
+    }
 }
 
 
