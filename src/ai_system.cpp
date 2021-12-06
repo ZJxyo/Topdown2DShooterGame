@@ -144,7 +144,7 @@ vector<Node>AISystem::makePath(array<array<Node, (50)>, (50)> map, Node dest) {
         return usablePath;
     }
     catch (const exception& e) {
-        cout << e.what() << endl;
+        //cout << e.what() << endl;
         return usablePath;
     }
 }
