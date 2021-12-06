@@ -64,7 +64,7 @@ class RenderSystem
 		shader_path("turtle"),
 		shader_path("textured"),
 		shader_path("water"),
-        shader_path("light"),
+        shader_path("item"),
         shader_path("plantspot"),
 		shader_path("instances"),
         shader_path("animate"),
@@ -130,3 +130,6 @@ private:
 
 bool loadEffectFromFile(
 	const std::string &vs_path, const std::string &fs_path, GLuint &out_program);
+
+bool loadAllShadersFromFile(
+	const std::string& vs_path, const std::string& fs_path, const std::string& gs_path, GLuint& out_program);

@@ -102,7 +102,15 @@ void RenderSystem::initializeGlEffects()
 		const std::string vertex_shader_name = effect_paths[i] + ".vs.glsl";
 		const std::string fragment_shader_name = effect_paths[i] + ".fs.glsl";
 
-		bool is_valid = loadEffectFromFile(vertex_shader_name, fragment_shader_name, effects[i]);
+		bool is_valid;
+
+		if (i == (GLuint)EFFECT_ASSET_ID::ITEM) {
+			is_valid = loadAllShadersFromFile(vertex_shader_name, fragment_shader_name, shader_path("item") + ".gs.glsl", effects[i]);
+		}
+		else {
+			is_valid = loadEffectFromFile(vertex_shader_name, fragment_shader_name, effects[i]);
+		}
+
 		assert(is_valid && (GLuint)effects[i] != 0);
 	}
 }
@@ -382,3 +390,98 @@ bool loadEffectFromFile(
 	return true;
 }
 
+bool loadAllShadersFromFile(
+	const std::string& vs_path, const std::string& fs_path, const std::string& gs_path, GLuint& out_program)
+{
+	// Opening files
+	std::ifstream vs_is(vs_path);
+	std::ifstream fs_is(fs_path);
+	std::ifstream gs_is(gs_path);
+	if (!vs_is.good() || !fs_is.good() || !gs_is.good())
+	{
+		fprintf(stderr, "Failed to load shader files %s, %s, %s", vs_path.c_str(), fs_path.c_str(), gs_path.c_str());
+		assert(false);
+		return false;
+	}
+
+	// Reading sources
+	std::stringstream vs_ss, fs_ss, gs_ss;
+	vs_ss << vs_is.rdbuf();
+	fs_ss << fs_is.rdbuf();
+	gs_ss << gs_is.rdbuf();
+	std::string vs_str = vs_ss.str();
+	std::string fs_str = fs_ss.str();
+	std::string gs_str = gs_ss.str();
+	const char* vs_src = vs_str.c_str();
+	const char* fs_src = fs_str.c_str();
+	const char* gs_src = gs_str.c_str();
+	GLsizei vs_len = (GLsizei)vs_str.size();
+	GLsizei fs_len = (GLsizei)fs_str.size();
+	GLsizei gs_len = (GLsizei)gs_str.size();
+
+	GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertex, 1, &vs_src, &vs_len);
+	GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragment, 1, &fs_src, &fs_len);
+	GLuint geometry = glCreateShader(GL_GEOMETRY_SHADER);
+	glShaderSource(geometry, 1, &gs_src, &gs_len);
+	gl_has_errors();
+
+	// Compiling
+	if (!gl_compile_shader(vertex))
+	{
+		fprintf(stderr, "Vertex compilation failed");
+		assert(false);
+		return false;
+	}
+	if (!gl_compile_shader(fragment))
+	{
+		fprintf(stderr, "Vertex compilation failed");
+		assert(false);
+		return false;
+	}
+	if (!gl_compile_shader(geometry))
+	{
+		fprintf(stderr, "Vertex compilation failed");
+		assert(false);
+		return false;
+	}
+
+	// Linking
+	out_program = glCreateProgram();
+	glAttachShader(out_program, vertex);
+	glAttachShader(out_program, fragment);
+	glAttachShader(out_program, geometry);
+	glLinkProgram(out_program);
+	gl_has_errors();
+
+
+	{
+		GLint is_linked = GL_FALSE;
+		glGetProgramiv(out_program, GL_LINK_STATUS, &is_linked);
+		if (is_linked == GL_FALSE)
+		{
+			GLint log_len;
+			glGetProgramiv(out_program, GL_INFO_LOG_LENGTH, &log_len);
+			std::vector<char> log(log_len);
+			glGetProgramInfoLog(out_program, log_len, &log_len, log.data());
+			gl_has_errors();
+
+			fprintf(stderr, "Link error: %s", log.data());
+			assert(false);
+			return false;
+		}
+	}
+
+	// No need to carry this around. Keeping these objects is only useful if we recycle
+	// the same shaders over and over, which we don't, so no need and this is simpler.
+	glDetachShader(out_program, vertex);
+	glDetachShader(out_program, fragment);
+	glDetachShader(out_program, geometry);
+	glDeleteShader(vertex);
+	glDeleteShader(fragment);
+	glDeleteShader(geometry);
+	gl_has_errors();
+
+	return true;
+}
