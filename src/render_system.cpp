@@ -386,6 +386,8 @@ void RenderSystem::drawPoint(Entity entity, mat3& projection, RenderRequest& ren
 
 	GLint type_uloc = glGetUniformLocation(program, "type");
 	glUniform1i(type_uloc, (int)item.item_type);
+	GLint active_uloc = glGetUniformLocation(program, "is_active");
+	glUniform1i(active_uloc, (int)item.active);
 	gl_has_errors();
 
 

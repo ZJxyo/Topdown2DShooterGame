@@ -4,10 +4,10 @@
 
 void update_visibility_status(std::vector<vec2> contact_points, std::vector<float> new_angles) {
 	Entity player = registry.players.entities[0];
-	vec2 player_position = registry.motions.get(player).position;
+	vec2& player_position = registry.motions.get(player).position;
 	for (int i = 0; i < registry.enemies.size(); i++) {
 		Entity enemy = registry.enemies.entities[i];
-		vec2 enemy_position = registry.motions.get(enemy).position;
+		vec2& enemy_position = registry.motions.get(enemy).position;
 		// relative position from the player
 		vec2 relative_pos = enemy_position - player_position;
 		// angle in radians
@@ -391,7 +391,7 @@ void PhysicsSystem::step(float elapsed_ms)
 	}
 
 	Entity player = registry.players.entities[0];
-	vec2 player_pos = registry.motions.get(player).position;
+	vec2& player_pos = registry.motions.get(player).position;
 
 	float player_radius = registry.avatarColliders.get(player).radius;
 	for (int i = registry.itemColliders.size() - 1; i >= 0; i--) {
