@@ -533,6 +533,19 @@ Entity createNonConvexWall(float thickness, std::vector<vec2>& hinges) {
 	return e;
 }
 
+
+Entity createItem(vec2 pos, ITEM_TYPE type) {
+	Entity entity = Entity();
+	registry.items.emplace(entity, pos, type);
+	registry.itemRenderRequests.insert(entity,
+		{
+		TEXTURE_ASSET_ID::TEXTURE_COUNT,
+		EFFECT_ASSET_ID::ITEM,
+		GEOMETRY_BUFFER_ID::CUSTOM
+		});
+	return entity;
+}
+
 Entity createParticleSource(uint8 size, float radius, float life_span, vec3 color, vec2 pos, float angle, float speed) {
 	assert(size != 0);
 	std::vector<vec2> positions;

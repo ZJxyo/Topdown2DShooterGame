@@ -24,6 +24,8 @@ const size_t BULLET_TIMER_MS = 100;
 const size_t BOMB_TIMER_MS = 40000.f;
 const size_t FOOTSTEPS_SOUND_TIMER_MS = 400.f;
 const size_t PLANT_TIMER_MS = 2000.0f;
+const size_t ITEM_RESPAWN_DELAY = 30000.f;
+const size_t WALL_COOLDOWN = 2000.f;
 const size_t DEFUSE_TIMER_MS = 6000.0f;
 json j;
 
@@ -211,7 +213,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		return true;
 	}
 
-	
+	update_player_velocity();
 
 	//update animation
 	Player p = registry.players.get(player_salmon);
@@ -652,15 +654,33 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		}
 	}
 
-	// if wall is done drawing or exceeds limit
+	wall_timer = std::max(-1.f, wall_timer - elapsed_ms_since_last_update);
+
+	// generate wall when drawing is done or exceeds length limit
 	if (wall_hinges.size() > 5 || right_mouse_down == false) {
 		// at least 2 nodes
 		if (wall_hinges.size() < 2) {
 			wall_hinges.clear();
 		}
 		else {
+			for (int i = registry.customMeshes.size() - 1; i >= 0; i--) {
+				registry.remove_all_components_of(registry.customMeshes.entities[i]);
+			}
 			createNonConvexWall(20.f, wall_hinges);
 			wall_hinges.clear();
+			wall_timer = WALL_COOLDOWN;
+		}
+	}
+
+	for (int i = 0; i < registry.items.size(); i++) {
+		Item& item = registry.items.components[i];
+		if (!item.active) {
+			item.respawn_timer -= elapsed_ms_since_last_update;
+			if (item.respawn_timer <= 0) {
+				item.active = true;
+				item.respawn_timer = ITEM_RESPAWN_DELAY;
+				registry.itemColliders.emplace(registry.items.entities[i], 50.f);
+			}
 		}
 	}
 
@@ -799,6 +819,8 @@ void WorldSystem::restart_game()
         boxes[3] = createStoryBox(renderer, BOX4_LOCATION);
     }
 
+	createItem(vec2(1300, 4600), ITEM_TYPE::HEALTH_REGEN);
+	createItem(vec2(700, 4300), ITEM_TYPE::SPEED_BOOST);
 }
 
 // Compute collisions between entities
@@ -914,7 +936,6 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		input.down = 0;
 		input.left = 0;
 		input.right = 0;
-		update_player_velocity();
 		return;
 	}
 
@@ -990,22 +1011,18 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			if (key == GLFW_KEY_W)
 			{
 				input.up = 1.f;
-				update_player_velocity();
 			}
 			else if (key == GLFW_KEY_S)
 			{
 				input.down = 1.f;
-				update_player_velocity();
 			}
 			else if (key == GLFW_KEY_A)
 			{
 				input.left = 1.f;
-				update_player_velocity();
 			}
 			else if (key == GLFW_KEY_D)
 			{
 				input.right = 1.f;
-				update_player_velocity();
 			}
 		}
 		if (action == GLFW_RELEASE)
@@ -1013,22 +1030,18 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			if (key == GLFW_KEY_W)
 			{
 				input.up = 0;
-				update_player_velocity();
 			}
 			else if (key == GLFW_KEY_S)
 			{
 				input.down = 0;
-				update_player_velocity();
 			}
 			else if (key == GLFW_KEY_A)
 			{
 				input.left = 0;
-				update_player_velocity();
 			}
 			else if (key == GLFW_KEY_D)
 			{
 				input.right = 0;
-				update_player_velocity();
 			}
 		}
 
@@ -1037,7 +1050,6 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			input.down = 0;
 			input.left = 0;
 			input.right = 0;
-			update_player_velocity();
 		}
 	}
 
@@ -1077,7 +1089,7 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 	motion.angle = angle;
 	mousecoord = mouse_position;
 
-	if (right_mouse_down && registry.nonConvexWallColliders.size() == 0) {
+	if (right_mouse_down && wall_timer <= 0.f) {
 		vec2 mouse_world_coord = vec2(relative_position.x / (w / 2.f) * (window_width_px / 2.f)
 			, relative_position.y / (h / 2.f) * (window_height_px / 2.f)) + motion.position;
 		if (wall_hinges.size() == 0 || length(mouse_world_coord - wall_hinges.back()) > 100.f) {
@@ -1151,9 +1163,22 @@ void WorldSystem::handle_bullet_hit(Entity bullet, Entity entity) {
 }
 
 void WorldSystem::update_player_velocity() {
-	registry.motions.get(player_salmon).velocity = player_speed * vec2(input.right - input.left, input.down - input.up);
+	float multiplier = 1.f;
+	if (registry.boosts.has(player_salmon)) {
+		multiplier = registry.boosts.get(player_salmon).speed_multiplier;
+	}
+	registry.motions.get(player_salmon).velocity = player_speed * multiplier * vec2(input.right - input.left, input.down - input.up);
 }
 
+void WorldSystem::handle_items(Entity entity_1, ITEM_TYPE type) {
+	if (type == ITEM_TYPE::HEALTH_REGEN) {
+		registry.healths.get(entity_1).health += 100;
+	}
+	else if (type == ITEM_TYPE::SPEED_BOOST) {
+		registry.boosts.emplace(entity_1);
+	}
+}
+  
 int WorldSystem::getCurrentMap() {
     return current_map;
 }

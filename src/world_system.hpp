@@ -38,6 +38,7 @@ public:
 	// Check for collisions
 	void handle_collisions();
 	static void handle_bullet_hit(Entity entity_1, Entity entity_2);
+	static void handle_items(Entity entity_1, ITEM_TYPE type);
 
 	void update_player_velocity();
 
@@ -97,10 +98,11 @@ private:
 	vec2 mousecoord;
 	int current_map;
 
+	float wall_timer = -1.f;
+
 	// non convex walls
 	bool right_mouse_down = false;
 	std::vector<vec2> wall_hinges;
-	
 
 	// music references
 	Mix_Music *background_music;
@@ -132,4 +134,5 @@ private:
     const vec2 BOX2_LOCATION = {1000, 4600};
     const vec2 BOX3_LOCATION = {1000, 4400};
     const vec2 BOX4_LOCATION = {1000, 4200};
+
 };

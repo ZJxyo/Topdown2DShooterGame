@@ -16,6 +16,7 @@ public:
 	}
 
 	std::vector<std::function<void(Entity entity_1, Entity entity_2)>> bullet_hit_callbacks;
+	std::vector<std::function<void(Entity entity_1, ITEM_TYPE entity_2)>> item_callbacks;
 };
 
 std::vector<float> get_bounding_box(std::vector<vec2>& vertices);

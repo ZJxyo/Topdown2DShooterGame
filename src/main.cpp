@@ -43,6 +43,7 @@ int main()
 	world.init(&renderer);
 
 	physics.bullet_hit_callbacks.emplace_back(WorldSystem::handle_bullet_hit);
+	physics.item_callbacks.emplace_back(WorldSystem::handle_items);
 
 	// variable timestep loop
 	auto t = Clock::now();
