@@ -524,7 +524,7 @@ private:
         }
 
         // avoid other AI
-        int eplison = 75;
+        int eplison = 50;
         for (Entity enemy : registry.enemies.entities) {
 
             float y = registry.motions.get(enemy).position.y; //enemy y

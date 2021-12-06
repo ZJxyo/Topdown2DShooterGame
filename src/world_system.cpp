@@ -277,7 +277,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 							Mix_PlayChannel(-1, defuse_sound, 0);
 						}
 						is_defusing = true;
-					} 
+					} else {
+						is_defusing = false;
+						defuse_timer=DEFUSE_TIMER_MS;
+					}
 				}
 			}
 			if (!attack_mode){
