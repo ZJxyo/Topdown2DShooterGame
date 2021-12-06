@@ -37,3 +37,5 @@ Entity createBullet(RenderSystem *renderer, vec2 position, float angle);
 Entity createLightSource(vec2 pos, std::vector<vec3>& vertices, std::vector<unsigned int>& indices);
 Entity createShockwave(vec2 pos);
 Entity createNonConvexWall(float thickness, std::vector<vec2>& hinges);
+Entity createParticleSource(uint8 size, float radius, float life_span, vec3 color, vec2 pos, float angle, float speed);
+Entity createPushArea(vec2 pos, float dist, float angle, float span);

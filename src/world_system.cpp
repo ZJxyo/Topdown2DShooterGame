@@ -554,8 +554,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	for (int i = registry.particleSources.entities.size() - 1; i >= 0; i--) {
 		ParticleSource& ps = registry.particleSources.components[i];
-		ps.alpha -= ps.decay * time;
-		if (ps.alpha <= 0.5) {
+		ps.life_span -= time;
+		if (ps.life_span <= 0) {
 			registry.remove_all_components_of(registry.particleSources.entities[i]);
 			continue;
 		}
@@ -853,18 +853,26 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		}
 	}
 
+	if (key == GLFW_KEY_V && action == GLFW_PRESS) {
+		// create an area that apply impulse
+		Motion& player_motion = registry.motions.get(player_salmon);
+		createPushArea(player_motion.position, 300.f, player_motion.angle, M_PI / 3.f);
+		createParticleSource(100, 2.f, 0.2f, vec3(0.7f, 0.7f, 0.7f), player_motion.position, player_motion.angle, 1500.f);
+	}
+
+
 	// Control the current speed with `<` `>`
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA)
-	{
-		current_speed -= 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD)
-	{
-		current_speed += 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	current_speed = fmax(0.f, current_speed);
+	//if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA)
+	//{
+	//	current_speed -= 0.1f;
+	//	printf("Current speed = %f\n", current_speed);
+	//}
+	//if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD)
+	//{
+	//	current_speed += 0.1f;
+	//	printf("Current speed = %f\n", current_speed);
+	//}
+	//current_speed = fmax(0.f, current_speed);
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position)
@@ -941,10 +949,12 @@ void WorldSystem::handle_bullet_hit(Entity bullet, Entity entity) {
 	Motion& bullet_motion = registry.motions.get(bullet);
 
 	if (registry.nonConvexWallColliders.has(entity)) {
-		createParticleSource(50, 2.f, 1.5f, vec3(0.f, 0.f, 0.f), bullet_motion.position, -normalize(bullet_motion.velocity), 300.f);
+		vec2 dir = -normalize(bullet_motion.velocity);
+		createParticleSource(50, 2.f, 0.7f, vec3(0.f, 0.f, 0.f), bullet_motion.position, atan2(dir.y, dir.x), 200.f);
 	}
 	else if (registry.enemies.has(entity) || registry.players.has(entity)) {
-		createParticleSource(50, 2.f, 1.5f, vec3(1.f, 0.f, 0.f), bullet_motion.position, -normalize(bullet_motion.velocity), 300.f);
+		vec2 dir = -normalize(bullet_motion.velocity);
+		createParticleSource(50, 2.f, 0.7f, vec3(1.f, 0.f, 0.f), bullet_motion.position, atan2(dir.y, dir.x), 200.f);
 	}
 
 	if (registry.shockwaveSource.size() == 0) {
@@ -954,25 +964,4 @@ void WorldSystem::handle_bullet_hit(Entity bullet, Entity entity) {
 
 void WorldSystem::update_player_velocity() {
 	registry.motions.get(player_salmon).velocity = player_speed * vec2(input.right - input.left, input.down - input.up);
-}
-
-Entity WorldSystem::createParticleSource(uint8 size, float radius, float decay, vec3 color, vec2 pos, vec2 dir, float speed) {
-	assert(size != 0);
-	std::vector<vec2> positions;
-	std::vector<vec2> velocities;
-	for (uint i = 0; i < size; i++) {
-		positions.push_back(pos);
-		 //-0.5 to 0.5
-		float random_float = ((float)rand() / (float)RAND_MAX) - 0.5f;
-		float cs = cos(random_float * M_PI / 2.f);
-		float sn = sin(random_float * M_PI / 2.f);
-		vec2 random_dir = vec2(dir.x * cs - dir.y * sn, dir.x * sn + dir.y * cs);
-		float random_speed = speed * (1.f + (((float)rand() / (float)RAND_MAX) - 0.5f));
-		velocities.push_back(random_dir * random_speed);
-	}
-
-	Entity ps = Entity();
-	registry.particleSources.emplace(ps, size, radius, decay, color, positions, velocities);
-
-	return ps;
 }

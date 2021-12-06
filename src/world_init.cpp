@@ -495,3 +495,30 @@ Entity createNonConvexWall(float thickness, std::vector<vec2>& hinges) {
 		 GEOMETRY_BUFFER_ID::CUSTOM });
 	return e;
 }
+
+Entity createParticleSource(uint8 size, float radius, float life_span, vec3 color, vec2 pos, float angle, float speed) {
+	assert(size != 0);
+	std::vector<vec2> positions;
+	std::vector<vec2> velocities;
+	for (uint i = 0; i < size; i++) {
+		positions.push_back(pos);
+		//-0.5 to 0.5
+		float random_float = ((float)rand() / (float)RAND_MAX) - 0.5f;
+		float angle_span = M_PI / 3.f;
+		float random_angle = angle + random_float * angle_span;
+		vec2 random_dir = vec2(cos(random_angle), sin(random_angle));
+		float random_speed = speed * (1.f + (((float)rand() / (float)RAND_MAX) - 0.5f));
+		velocities.push_back(random_dir * random_speed);
+	}
+
+	Entity ps = Entity();
+	registry.particleSources.emplace(ps, size, radius, life_span, color, positions, velocities);
+
+	return ps;
+}
+
+Entity createPushArea(vec2 pos, float dist, float angle, float span) {
+	Entity entity = Entity();
+	registry.pushAreaColliders.emplace(entity, pos, dist, angle, span);
+	return entity;
+}
