@@ -33,7 +33,7 @@ WorldSystem::WorldSystem()
 	plant_timer(PLANT_TIMER_MS), explode_timer(BOMB_TIMER_MS), bomb_planted(false), is_planting(false),
 	 win_game(false),footsteps_timer(FOOTSTEPS_SOUND_TIMER_MS), buildmode(false), buildcoord({0,0}),
 	  mousecoord({0,0}), building(false), maxWall(10), attack_mode(true), defuse_timer(DEFUSE_TIMER_MS),
-	  attack_side(0),is_defusing(false),next_chase(0.f),current_map(1)
+	  attack_side(0),is_defusing(false),next_chase(0.f),current_map(1), end_screen(false)
 
 {
 	// Seeding rng with random device
@@ -512,6 +512,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	}
 
 	if (defuse_timer < 0 && bomb_planted && !attack_mode){
+		end_screen = true;
+		canMove = false;
 		createEndScreen(renderer,motion.position, true, 2);
 	}
 
@@ -541,6 +543,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	}
 
 	if (bomb_planted && attack_mode && defuse_timer < 0){
+		end_screen = true;
+		canMove = false;
 		createEndScreen(renderer,motion.position, false, 2);
 	}
 
@@ -549,7 +553,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		win_game = true;
 		
 		Mix_PlayChannel(-1, bomb_explosion_sound, 0);
-		
+		end_screen = true;
+		canMove = false;
 		createEndScreen(renderer,motion.position, true, 1);
 	}
 	
@@ -557,6 +562,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		cout << "explode";		
 		Mix_PlayChannel(-1, bomb_explosion_sound, 0);
 		
+		end_screen = true;
+		canMove = false;
 		createEndScreen(renderer,motion.position, false, 1);
 	}
 	if (registry.enemies.entities.size() > 0){
@@ -566,6 +573,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	
 	if (registry.enemies.entities.size() == 0){
 		win_game = true;
+		end_screen = true;
+		canMove = false;
 		createEndScreen(renderer,motion.position, true, 3);
 	}
 
@@ -588,6 +597,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		Entity e = registry.healths.entities[i];
 		if (registry.healths.components[i].health <= 0) {
 			if (registry.players.has(e)) {
+				end_screen = true;
+				canMove = false;
 				createEndScreen(renderer,motion.position, false, 3);
 			}
 			else {
@@ -671,6 +682,8 @@ void WorldSystem::restart_game()
 	is_defusing=false;
 	win_game=false;
     canMove = true;
+	end_screen = false;
+
 
 	Mix_HaltChannel(-1);
 	Mix_Volume(-1,MIX_MAX_VOLUME/20);
@@ -893,7 +906,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		restart_game();
 	}
 
-	if(win_game){
+	if(end_screen){
 		input.up = 0;
 		input.down = 0;
 		input.left = 0;

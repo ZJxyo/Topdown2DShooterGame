@@ -83,6 +83,7 @@ private:
 	float explode_timer;
 	bool is_planting;
 	bool win_game;
+	bool end_screen;
 	float footsteps_timer;
 	bool buildmode;
 	bool building;
