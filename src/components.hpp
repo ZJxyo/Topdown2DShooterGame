@@ -199,7 +199,7 @@ struct Item {
 
 struct Boost {
 	// in ms
-	float timer = 5000.f;
+	float timer = 3000.f;
 	float speed_multiplier = 1.5f;
 };
 
