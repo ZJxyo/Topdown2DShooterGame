@@ -19,6 +19,8 @@ struct Enemy
 {
 	bool is_visible = true;
 	bool is_activated = false;
+	bool guard_mode = false;
+	vec2 pos = {0,0};
 };
 
 // Fish and Salmon have a soft shell
@@ -187,6 +189,9 @@ struct StoryBox {
     bool isOpened = false;
 };
 
+
+struct Bomb {
+};
 // vertices 0123 forms a rectangle, 4567 is the next rectangle
 struct NonConvexCollider {
 	std::vector<vec2> vertices;
@@ -229,8 +234,13 @@ enum class TEXTURE_ASSET_ID
 	GROUND_WOOD = FEET + 1,
 	WALL = GROUND_WOOD + 1,
 	BULLET = WALL + 1,
-	WIN = BULLET + 1,
-	BOMB = WIN + 1,
+	BOMBWIN = BULLET + 1,
+	BOMBLOSE = BOMBWIN + 1,
+	DEFUSEWIN = BOMBLOSE + 1,
+	DEFUSELOSE = DEFUSEWIN + 1,
+	ELIMWIN = DEFUSELOSE + 1,
+	ELIMLOSE = ELIMWIN + 1,
+	BOMB = ELIMLOSE + 1,
 	HELP0 = BOMB + 1,
 	HELP1 = HELP0 + 1,
 	HELP2 = HELP1 + 1,

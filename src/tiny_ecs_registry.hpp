@@ -40,6 +40,7 @@ public:
 	ComponentContainer<ShockwaveSource> shockwaveSource;
 	ComponentContainer<StoryBox> storyBox;
 	ComponentContainer<Wall> destroyable;
+	ComponentContainer<Bomb> bomb;
 	ComponentContainer<NonConvexCollider> nonConvexWallColliders;
 	ComponentContainer<CustomMesh> customMeshes;
 	ComponentContainer<RenderRequest> customMeshRenderRequests;
@@ -81,6 +82,7 @@ public:
 		registry_list.push_back(&shockwaveSource);
 		registry_list.push_back(&storyBox);
 		registry_list.push_back(&destroyable);
+		registry_list.push_back(&bomb);
 		registry_list.push_back(&nonConvexWallColliders);
 		registry_list.push_back(&customMeshes);
 		registry_list.push_back(&customMeshRenderRequests);

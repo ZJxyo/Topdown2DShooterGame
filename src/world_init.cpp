@@ -121,7 +121,7 @@ Entity createTurtle(RenderSystem *renderer, vec2 position)
 	// Initialize the motion
 	auto &motion = registry.motions.emplace(entity);
 	motion.angle = 0.f;
-	motion.velocity = {100.f, 0.f};
+	motion.velocity = {0.f, 0.f};
 	motion.position = position;
 
 	// Setting initial values, scale is negative to make it face the opposite way
@@ -199,6 +199,7 @@ Entity createBomb(RenderSystem *renderer, vec2 pos){
 	Entity bomb = Entity();
 	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(bomb, &mesh);
+	Bomb &b = registry.bomb.emplace(bomb);
     BombInfo &bombInfo = registry.bombInfo.emplace(bomb);
     bombInfo.position = pos;
 	Motion &m = registry.motions.emplace(bomb);
@@ -216,7 +217,7 @@ Entity createBomb(RenderSystem *renderer, vec2 pos){
 
 
 
-Entity createEndScreen(RenderSystem *renderer, vec2 pos){
+Entity createEndScreen(RenderSystem *renderer, vec2 pos, bool win, int mode){
 
 	Entity endscreen = Entity();
 	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
@@ -226,11 +227,43 @@ Entity createEndScreen(RenderSystem *renderer, vec2 pos){
 	m.scale = {600.f,300.f};
 	m.velocity = {0.f,0.f};
 	m.angle = 0.f;
+	if (win && mode == 1)
 	registry.renderRequests.insert(
 			endscreen,
-			{TEXTURE_ASSET_ID::WIN,
+			{TEXTURE_ASSET_ID::BOMBWIN,
 				EFFECT_ASSET_ID::TEXTURED,
 				GEOMETRY_BUFFER_ID::SPRITE});
+	else if (win && mode == 2)
+	registry.renderRequests.insert(
+			endscreen,
+			{TEXTURE_ASSET_ID::DEFUSEWIN,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	else if (win && mode == 3)
+	registry.renderRequests.insert(
+			endscreen,
+			{TEXTURE_ASSET_ID::ELIMWIN,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	else if (!win && mode == 1)
+	registry.renderRequests.insert(
+			endscreen,
+			{TEXTURE_ASSET_ID::DEFUSEWIN,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	else if (!win && mode == 2)
+	registry.renderRequests.insert(
+			endscreen,
+			{TEXTURE_ASSET_ID::ELIMWIN,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	else if (!win && mode == 3)
+	registry.renderRequests.insert(
+			endscreen,
+			{TEXTURE_ASSET_ID::DEFUSEWIN,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+
 	return endscreen;
 }
 struct wall
@@ -240,7 +273,7 @@ struct wall
 	vec2 scale;
 };
 
-MyArray createMatrix() {// matrix 2d array
+MyArray createMatrix(std::string path) {// matrix 2d array
 	
 	MyArray T;
 	Fill(T);
@@ -248,12 +281,13 @@ MyArray createMatrix() {// matrix 2d array
 
 	//load from map.json
 	string src = PROJECT_SOURCE_DIR;
-	src += "src/map/map.json";
+	src += path;
 	ifstream ifs(src);
 	json j;
 	ifs >> j;
 
-	for (json w : j["walls"]) {
+	for (json q : j["walls"]) {
+		for (json w: q["motion"]) {
 		int value_x = int(w["position"]["x"]) / 100;
 		int value_y = int(w["position"]["y"]) / 100;
 		T[value_y][value_x] = 1;
@@ -273,16 +307,18 @@ MyArray createMatrix() {// matrix 2d array
 		// 	T[value_y + i][value_x] = 1;
 		// 	T[value_y - i][value_x] = 1;
 		// }
+		}
+		
 	}
 
-//	Print(T);
+	Print(T);
     return T;
 }
 
-int SetupMap(RenderSystem *renderer)
+int SetupMap(RenderSystem *renderer, int current_map)
 {
 	string src = PROJECT_SOURCE_DIR;
-	src += "src/map/map.json";
+	src += "src/map/map" + to_string(current_map) + ".json";
 	ifstream ifs(src);
 	json j;
 	ifs >> j;
@@ -306,44 +342,40 @@ int SetupMap(RenderSystem *renderer)
 			 EFFECT_ASSET_ID::PLANTSPOT,
 			 GEOMETRY_BUFFER_ID::RECTANGLE});
 	}
-	
-	for (json w : j["walls"])
-	{
-		auto entity = Entity();
+	for (json wall_obj: j["walls"]){
+		for (json w : wall_obj["motion"])
+		{
+			auto entity = Entity();
 
-		// Store a reference to the potentially re-used mesh object
-		Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::RECTANGLE);
-		registry.meshPtrs.emplace(entity, &mesh);
+			// Store a reference to the potentially re-used mesh object
+			Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::RECTANGLE);
+			registry.meshPtrs.emplace(entity, &mesh);
+			registry.wallColliders.emplace(entity);
 
-		// Setting initial motion values
-		Motion &motion = registry.motions.emplace(entity);
-		int pre_value1 = int(w["position"]["x"]);
-		int pre_value2 = int(w["position"]["y"]);
-		int value1 = pre_value1 + 50;
-		int value2 = pre_value2 + 50;
-		motion.position = vec2(value1, value2);
-		motion.angle = w["angle"];
-		motion.scale = vec2(w["scale"]["x"], w["scale"]["y"]);
+			// Setting initial motion values
+			Motion &motion = registry.motions.emplace(entity);
+			int pre_value1 = int(w["position"]["x"]);
+			int pre_value2 = int(w["position"]["y"]);
+			int value1 = pre_value1 + 50;
+			int value2 = pre_value2 + 50;
+			motion.position = vec2(value1, value2);
+			motion.angle = w["angle"];
+			motion.scale = vec2(w["scale"]["x"], w["scale"]["y"]);
 
-		registry.wallColliders.emplace(entity);
-		registry.walls.emplace(entity);
+			//registry.polygonColliders.emplace(entity);
+			registry.walls.emplace(entity);
 
-		
-		
-		
-
-		
-
-		
-		// Create and (empty) Salmon component to be able to refer to all turtles
-		registry.renderRequests.insert(
-			entity,
-			{TEXTURE_ASSET_ID::WALL,
-			 EFFECT_ASSET_ID::TEXTURED,
-			 GEOMETRY_BUFFER_ID::SPRITE});
+			// Create and (empty) Salmon component to be able to refer to all turtles
+			registry.renderRequests.insert(
+				entity,
+				{TEXTURE_ASSET_ID::WALL,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+		}
 	}
 	return 0;
 }
+
 
 
 
@@ -366,14 +398,18 @@ void Print(const MyArray &T){
 
 
 
-int createGround(RenderSystem *renderer)
+int createGround(RenderSystem *renderer, int current_map)
 {
+	
+	string src = PROJECT_SOURCE_DIR;
+	src += "src/map/map" + to_string(current_map) + ".json";
+	ifstream ifs(src);
+	json j;
+	ifs >> j;
 
-	for (int i = 0; i <= 4; i++)
-	{
-		for (int j = 0; j <= 4; j++)
+	for (json ground_obj: j["ground"]){
+		for (json m: ground_obj["motion"])
 		{
-
 			auto entity = Entity();
 
 			Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::RECTANGLE);
@@ -383,17 +419,18 @@ int createGround(RenderSystem *renderer)
 			Motion &motion = registry.motions.emplace(entity);
 			motion.angle = 0.f;
 			motion.velocity = {0.f, 0.f};
-			motion.scale = {1000, 1000};
+			motion.scale = {m["scale"]["x"], m["scale"]["y"]};
 
-			motion.position = {(1000 * i) + 500, (1000 * j) + 500};
+			motion.position = {m["position"]["x"], m["position"]["y"]};
 
 			// Create and (empty) Salmon component to be able to refer to all turtles
 
 			registry.floorRenderRequests.insert(
 				entity,
 				{TEXTURE_ASSET_ID::GROUND_WOOD,
-				 EFFECT_ASSET_ID::TEXTURED,
-				 GEOMETRY_BUFFER_ID::SPRITE});
+					EFFECT_ASSET_ID::TEXTURED,
+					GEOMETRY_BUFFER_ID::SPRITE});
+			
 		}
 	}
 

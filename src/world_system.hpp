@@ -80,13 +80,19 @@ private:
 	float plant_timer;
 	float explode_timer;
 	bool is_planting;
-	bool bomb_exploded;
+	bool win_game;
+	bool end_screen;
 	float footsteps_timer;
 	bool buildmode;
 	bool building;
 	int maxWall;
+	bool attack_mode;
+	float defuse_timer;
+	int attack_side;
+	bool is_defusing;
 	vec2 buildcoord;
 	vec2 mousecoord;
+	int current_map;
 
 	// non convex walls
 	bool right_mouse_down = false;
@@ -103,6 +109,8 @@ private:
 	Mix_Chunk *bomb_explosion_sound;
 	Mix_Chunk *footsteps_sound;
 	Mix_Chunk *ak47_sound;
+	Mix_Chunk *defuse_sound;
+	
 
 	// C++ random number generator
 	std::default_random_engine rng;

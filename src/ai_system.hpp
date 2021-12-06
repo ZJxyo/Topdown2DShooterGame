@@ -128,83 +128,47 @@ public:
 
 class BTIfCondition : public BTNode {
 public:
-    BTIfCondition(BTNode* chase, BTNode* shoot, BTNode* build) : chase(chase), shoot(shoot), build(build) {
+    BTIfCondition(BTNode* chase, BTNode* shoot, BTNode* build, BTNode* guard, BTNode* move) :
+     chase(chase), shoot(shoot), build(build), guard(guard), move(move) {
+
     }
 
     virtual void init(Entity e) override {
         chase->init(e);
     }
 
-    virtual BTState process(Entity e1) override {
-        BTState state = BTState::Success;
-        int count = 1;
-            for (Entity e : registry.enemies.entities) {
-                // std::cout << "count: " << count << std::endl;
-                if (registry.motions.has(e)) {
-
-
-                    if (chase->process(e) == BTState::Success) {
-                        //return BTState::Success;
-                        state = BTState::Success;
-                    }
-
-                    if (chase->process(e) != BTState::Success) {
-                        int bombX = 0;
-                        int bombY = 0;
-                        bool is_planted = false;
-                        for (Entity b : registry.bombInfo.entities) {
-                            bombX = registry.bombInfo.get(b).position.x;
-                            bombY = registry.bombInfo.get(b).position.y;
-                            // is_planted = registry.bombInfo.get(b).isPlanted;
-                            is_planted = true;
-
-                        }
-
-                        int bombDistance = 10000;
-                        Entity closet = e1; //dummy entity
-                        if (is_planted) {
-                            for (Entity enemy : registry.enemies.entities) {
-                                int enemyX = registry.motions.get(enemy).position.x;
-                                int enemyY = registry.motions.get(enemy).position.y;
-                                int dis = sqrt(pow(enemyX - bombX, 2) + pow(enemyY - bombY, 2));
-                                if (dis < bombDistance) {
-                                    bombDistance = dis;
-                                    closet = enemy;
-                                }
-                            }
-
-                        }
-
-                        if (e == closet) {
-                            // defuse
-                        }
-                        else {
-                            shoot->process(e);
-                        }
-
-                        // shoot->process(e) == BTState::Success;
-                        //return BTState::Success;
-                        state = BTState::Success;
-                    }
-                    state = BTState::Success;
-                    //return BTState::Success;
+    virtual BTState process(Entity e) override {
+        if (registry.motions.has(e)) {
+            if (chase) {
+                if (chase->process(e) == BTState::Success) {
+                    return BTState::Success;
                 }
-                else {
-                    state = BTState::Success;
-                    //return BTState::Success;
-                    //std::cout << "don't have" << registry.enemies.entities.size();
+                else if (shoot->process(e) == BTState::Success) {
+                    return BTState::Success;
                 }
-
-                // count++;
+            } else {
+                if (shoot->process(e) == BTState::Success) {
+                    return BTState::Success;
+                } 
+                else if (move->process(e) == BTState::Success) {
+                    return BTState::Success;
+                } 
+                else if (guard->process(e) == BTState::Success){
+                    return BTState::Success;
+                }
             }
-        
-
+            // if (build->process(e) == BTState::Success) {
+            //     return BTState::Success;
+            // }
+        }
         return BTState::Success;
     }
 private:
     BTNode* chase;
     BTNode* shoot;
     BTNode* build;
+    BTNode* guard;
+    BTNode* move;
 };
 
 class Chase : public BTNode {
@@ -265,36 +229,26 @@ private:
         AI.y = AIX / 100;
         AI.x = AIY / 100;
 
-        Node bomb;
-        bomb.y = bombX / 100;
-        bomb.x = bombY / 100;
-
-        std::cout << "bombX: " << bomb.x << std::endl;
-        std::cout << "bombY: " << bomb.y << std::endl;
-
         vector<Node> pathA = ai.aStar(AI, player);
-        if (e == closet) {
-            pathA = ai.aStar(AI, bomb);
-        }
 
         if (pathA.size() >= 2) {
             Node node = pathA.at(1); // find next place we want to go to 
             if (AIX > node.y * 100 + 50) {
 
-                vel.x = -150;
+                vel.x = -300;
             }
             if (AIX < node.y * 100 + 50) {
 
-                vel.x = 150;
+                vel.x = 300;
             }
 
             if (AIY > node.x * 100 + 50) {
 
-                vel.y = -150;
+                vel.y = -300;
             }
             if (AIY < node.x * 100 + 50) {
 
-                vel.y = 150;
+                vel.y = +300;
             }
         }
 
@@ -436,6 +390,13 @@ private:
         int playerY = registry.motions.get(player).position.y;
         Motion& AImotion = registry.motions.get(e);
 
+        int AIX = registry.motions.get(e).position.x;
+        int AIY = registry.motions.get(e).position.y;
+        int distance = sqrt(pow(playerX - AIX, 2) + pow(playerY - AIY, 2));
+
+        if (distance > 300 ){
+            return BTState::Failure;
+        }
         AImotion.angle = atan2(playerY - AImotion.position.y, playerX - AImotion.position.x);
 
         //here to change AI bullet
@@ -465,6 +426,107 @@ private:
     BTState process(Entity e) override {
 
         printf("After shooting, start to build a wall\n");
+
+        return BTState::Success;
+    }
+};
+
+class Guard : public BTNode {
+public:
+    Guard(Entity other, RenderSystem* renderer, float elapsed_ms) {
+        player = other;
+        this->renderer = renderer;
+        this->elapsed_ms = elapsed_ms;
+    }
+private:
+    Entity player;
+    RenderSystem* renderer;
+    float elapsed_ms;
+    void init(Entity e) override {}
+
+    BTState process(Entity e) override {
+        auto& vel = registry.motions.get(e).velocity;
+        vel.x = 0;
+        vel.y = 0;
+        //WorldSystem::getEntity()
+        int playerX = registry.motions.get(player).position.x;
+        int playerY = registry.motions.get(player).position.y;
+        Motion& AImotion = registry.motions.get(e);
+
+        if (AImotion.position.x <= playerX) {
+            AImotion.angle = atan2(playerY, playerX);
+        }
+        else {
+            AImotion.angle = 3.14 - atan2(playerY, playerX);
+        }
+
+        int AIX = registry.motions.get(e).position.x;
+        int AIY = registry.motions.get(e).position.y;
+        int distance = sqrt(pow(playerX - AIX, 2) + pow(playerY - AIY, 2));
+
+        if (distance >700 ){
+            return BTState::Success;
+        }
+
+        //here to change AI bullet
+        float LO = 0;
+        float HI = 0;
+        float r3 = LO + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (HI - LO)));
+        FireRate &fr = registry.fireRates.get(e);
+        fr.fire_rate -= elapsed_ms;
+        if (fr.fire_rate < 0){
+            fr.fire_rate = BULLET_TIMER_AI_MS;
+            createBullet(renderer, AImotion.position, AImotion.angle + 1.5708 + r3);
+        }
+
+        return BTState::Success;
+    }
+};
+
+class Move : public BTNode {
+public:
+    Move(vec2 position) {
+        this->position = position;
+    }
+private:
+    vec2 position;
+    void init(Entity e) override {}
+
+    BTState process(Entity e) override {
+        AISystem ai;
+        auto& vel = registry.motions.get(e).velocity;
+        int AIX = registry.motions.get(e).position.x;
+        int AIY = registry.motions.get(e).position.y;
+
+        ai.BFS(AIY / 100,AIX/100, position.y /100, position.x / 100);
+        int distance = sqrt(pow(position.x - AIX, 2) + pow(position.y - AIY, 2));
+
+        if (!ai.path.empty()) {
+            pair<int, int> curr = ai.path.top();
+            if (AIX > curr.second * 100 + 50) {
+
+                vel.x = -300;
+            }
+            if (AIX < curr.second * 100 + 50 ) {
+
+                vel.x = 300;
+            }
+
+            if (AIY > curr.first* 100 + 50) {
+
+                vel.y = -300;
+            }
+            if (AIY < curr.first * 100+ 50) {
+
+                vel.y = 300;
+            }
+
+        }
+
+
+        if (distance < 100) {
+            return BTState::Failure;
+        }
 
         return BTState::Success;
     }
