@@ -2,17 +2,59 @@
 #include <queue>
 
 
+AISystem::AISystem() {
+    memset(vis, false, sizeof vis);
+}
+
+
+//AISystem::AISystem(int currentMap) {
+//    memset(vis, false, sizeof vis);
+//    cout<< "current map private" << currentMap << endl;
+//        temp = createMatrix("src/map/map" + to_string(currentMap) + ".json");
+////    cout<< "current map" << current_map;
+//    for(int i = 0; i < temp.size(); i++) {
+//        for(int j = 0; j < temp[0].size(); j++) {
+//            grid[i][j] = temp[i][j];
+//        }
+//    }
+//}
+
 void AISystem::step(float elapsed_ms, int currentMap)
 {
-//    (void)elapsed_ms; // placeholder to silence unused warning until implemented
-    this->current_map = currentMap;
-    temp = createMatrix("src/map/map" + to_string(current_map) + ".json");
-//    cout<< "current map" << current_map;
-    for(int i = 0; i < temp.size(); i++) {
-        for(int j = 0; j < temp[0].size(); j++) {
-            grid[i][j] = temp[i][j];
-        }
-    }
+    (void)elapsed_ms; // placeholder to silence unused warning until implemented
+//    current_map = currentMap;
+//    cout<< "current map " << currentMap << endl;
+//    switch (currentMap) {
+//        case 1:
+//            for(int i = 0; i < ROW; i++) {
+//                for(int j = 0; j < COL; j++) {
+//                    grid[i][j] = map1[i][j];
+//                }
+//            }
+//            break;
+//        case 2:
+//            for(int i = 0; i < ROW; i++) {
+//                for(int j = 0; j < COL; j++) {
+//                    grid[i][j] = map2[i][j];
+//                }
+//            }
+//            break;
+//        case 3:
+//            for(int i = 0; i < ROW; i++) {
+//                for(int j = 0; j < COL; j++) {
+//                    grid[i][j] = map3[i][j];
+//                }
+//            }
+//            break;
+//
+//    }
+//    temp = createMatrix("src/map/map" + to_string(current_map) + ".json");
+////    cout<< "current map" << current_map;
+//    for(int i = 0; i < temp.size(); i++) {
+//        for(int j = 0; j < temp[0].size(); j++) {
+//            grid[i][j] = temp[i][j];
+//        }
+//    }
 }
 
 
@@ -266,4 +308,40 @@ vector<Node> AISystem::aStar(Node player, Node dest) {
         return empty;
     }
     return empty;
+}
+
+void AISystem::setCurrentMap(int currentMap) {
+    current_map = currentMap;
+    cout<< "current map private" << current_map << endl;
+//    temp = createMatrix("src/map/map" + to_string(current_map) + ".json");
+//    cout<< "current map" << current_map;
+//    for(int i = 0; i < temp.size(); i++) {
+//        for(int j = 0; j < temp[0].size(); j++) {
+//            grid[i][j] = temp[i][j];
+//        }
+//    }
+//
+    switch (current_map) {
+        case 1:
+            for(int i = 0; i < ROW; i++) {
+                for(int j = 0; j < COL; j++) {
+                    grid[i][j] = map1[i][j];
+                }
+            }
+            break;
+        case 2:
+            for(int i = 0; i < ROW; i++) {
+                for(int j = 0; j < COL; j++) {
+                    grid[i][j] = map2[i][j];
+                }
+            }
+            break;
+        case 3:
+            for(int i = 0; i < ROW; i++) {
+                for(int j = 0; j < COL; j++) {
+                    grid[i][j] = map3[i][j];
+                }
+            }
+            break;
+    }
 }

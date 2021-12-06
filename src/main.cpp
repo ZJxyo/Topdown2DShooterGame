@@ -41,6 +41,7 @@ int main()
 	// initialize the main systems
 	renderer.init(window_width_px, window_height_px, window);
 	world.init(&renderer);
+    ai.setCurrentMap(world.getCurrentMap());
 
 	physics.bullet_hit_callbacks.emplace_back(WorldSystem::handle_bullet_hit);
 
@@ -98,6 +99,7 @@ int main()
             world.step(elapsed_ms);
 			ai.step(elapsed_ms, world.getCurrentMap());
 			physics.step(elapsed_ms);
+
             //world.handle_collisions();
         }
 
