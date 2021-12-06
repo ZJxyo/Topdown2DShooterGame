@@ -91,6 +91,8 @@ private:
 	vec2 buildcoord;
 	vec2 mousecoord;
 
+	float wall_timer = -1.f;
+
 	// non convex walls
 	bool right_mouse_down = false;
 	std::vector<vec2> wall_hinges;

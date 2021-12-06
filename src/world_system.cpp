@@ -22,6 +22,7 @@ const size_t BOMB_TIMER_MS = 40000.f;
 const size_t FOOTSTEPS_SOUND_TIMER_MS = 400.f;
 const size_t PLANT_TIMER_MS = 2000.0f;
 const size_t ITEM_RESPAWN_DELAY = 30000.f;
+const size_t WALL_COOLDOWN = 2000.f;
 
 // Create the fish world
 WorldSystem::WorldSystem()
@@ -201,7 +202,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		return true;
 	}
 
-	
+	update_player_velocity();
 
 	//update animation
 	Player p = registry.players.get(player_salmon);
@@ -565,6 +566,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		}
 	}
 
+	wall_timer = std::max(-1.f, wall_timer - elapsed_ms_since_last_update);
+
 	// generate wall when drawing is done or exceeds length limit
 	if (wall_hinges.size() > 5 || right_mouse_down == false) {
 		// at least 2 nodes
@@ -572,8 +575,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			wall_hinges.clear();
 		}
 		else {
+			for (int i = registry.customMeshes.size() - 1; i >= 0; i--) {
+				registry.remove_all_components_of(registry.customMeshes.entities[i]);
+			}
 			createNonConvexWall(20.f, wall_hinges);
 			wall_hinges.clear();
+			wall_timer = WALL_COOLDOWN;
 		}
 	}
 
@@ -760,7 +767,6 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		input.down = 0;
 		input.left = 0;
 		input.right = 0;
-		update_player_velocity();
 		return;
 	}
 
@@ -817,22 +823,18 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			if (key == GLFW_KEY_W)
 			{
 				input.up = 1.f;
-				update_player_velocity();
 			}
 			else if (key == GLFW_KEY_S)
 			{
 				input.down = 1.f;
-				update_player_velocity();
 			}
 			else if (key == GLFW_KEY_A)
 			{
 				input.left = 1.f;
-				update_player_velocity();
 			}
 			else if (key == GLFW_KEY_D)
 			{
 				input.right = 1.f;
-				update_player_velocity();
 			}
 		}
 		if (action == GLFW_RELEASE)
@@ -840,22 +842,18 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			if (key == GLFW_KEY_W)
 			{
 				input.up = 0;
-				update_player_velocity();
 			}
 			else if (key == GLFW_KEY_S)
 			{
 				input.down = 0;
-				update_player_velocity();
 			}
 			else if (key == GLFW_KEY_A)
 			{
 				input.left = 0;
-				update_player_velocity();
 			}
 			else if (key == GLFW_KEY_D)
 			{
 				input.right = 0;
-				update_player_velocity();
 			}
 		}
 
@@ -864,7 +862,6 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			input.down = 0;
 			input.left = 0;
 			input.right = 0;
-			update_player_velocity();
 		}
 	}
 
@@ -896,7 +893,7 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 	motion.angle = angle;
 	mousecoord = mouse_position;
 
-	if (right_mouse_down && registry.nonConvexWallColliders.size() == 0) {
+	if (right_mouse_down && wall_timer <= 0.f) {
 		vec2 mouse_world_coord = vec2(relative_position.x / (w / 2.f) * (window_width_px / 2.f)
 			, relative_position.y / (h / 2.f) * (window_height_px / 2.f)) + motion.position;
 		if (wall_hinges.size() == 0 || length(mouse_world_coord - wall_hinges.back()) > 100.f) {
