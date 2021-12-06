@@ -268,14 +268,7 @@ private:
         AI.y = AIX / 100;
         AI.x = AIY / 100;
 
-        Node bomb;
-        bomb.y = bombX / 100;
-        bomb.x = bombY / 100;
-
         vector<Node> pathA = ai.aStar(AI, player);
-        if (e == closet) {
-            pathA = ai.aStar(AI, bomb);
-        }
 
         if (pathA.size() >= 2) {
             Node node = pathA.at(1); // find next place we want to go to 

@@ -217,7 +217,7 @@ Entity createBomb(RenderSystem *renderer, vec2 pos){
 
 
 
-Entity createEndScreen(RenderSystem *renderer, vec2 pos){
+Entity createEndScreen(RenderSystem *renderer, vec2 pos, bool win, int mode){
 
 	Entity endscreen = Entity();
 	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
@@ -227,11 +227,43 @@ Entity createEndScreen(RenderSystem *renderer, vec2 pos){
 	m.scale = {600.f,300.f};
 	m.velocity = {0.f,0.f};
 	m.angle = 0.f;
+	if (win && mode == 1)
 	registry.renderRequests.insert(
 			endscreen,
-			{TEXTURE_ASSET_ID::WIN,
+			{TEXTURE_ASSET_ID::BOMBWIN,
 				EFFECT_ASSET_ID::TEXTURED,
 				GEOMETRY_BUFFER_ID::SPRITE});
+	else if (win && mode == 2)
+	registry.renderRequests.insert(
+			endscreen,
+			{TEXTURE_ASSET_ID::DEFUSEWIN,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	else if (win && mode == 3)
+	registry.renderRequests.insert(
+			endscreen,
+			{TEXTURE_ASSET_ID::ELIMWIN,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	else if (!win && mode == 1)
+	registry.renderRequests.insert(
+			endscreen,
+			{TEXTURE_ASSET_ID::DEFUSEWIN,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	else if (!win && mode == 2)
+	registry.renderRequests.insert(
+			endscreen,
+			{TEXTURE_ASSET_ID::ELIMWIN,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	else if (!win && mode == 3)
+	registry.renderRequests.insert(
+			endscreen,
+			{TEXTURE_ASSET_ID::DEFUSEWIN,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+
 	return endscreen;
 }
 struct wall

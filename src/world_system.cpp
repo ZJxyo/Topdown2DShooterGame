@@ -61,6 +61,8 @@ WorldSystem::~WorldSystem()
 		Mix_FreeChunk(footsteps_sound);
 	if (ak47_sound != nullptr) 
 		Mix_FreeChunk(ak47_sound);
+	if (defuse_sound != nullptr) 
+		Mix_FreeChunk(defuse_sound);
 	Mix_CloseAudio();
 
 	// Destroy all created components
@@ -155,9 +157,10 @@ GLFWwindow *WorldSystem::create_window()
 	bomb_explosion_sound = Mix_LoadWAV(audio_path("bomb_explosion.wav").c_str());
 	footsteps_sound = Mix_LoadWAV(audio_path("footsteps.wav").c_str());
 	ak47_sound = Mix_LoadWAV(audio_path("ak47.wav").c_str());
+	defuse_sound = Mix_LoadWAV(audio_path("defuse.wav").c_str());
 
 	if (background_music == nullptr || salmon_dead_sound == nullptr || salmon_eat_sound == nullptr || bomb_planted_sound == nullptr||bomb_planting_sound == nullptr
-	|| bomb_countdown_sound == nullptr || bomb_explosion_sound == nullptr || footsteps_sound == nullptr || ak47_sound == nullptr)
+	|| bomb_countdown_sound == nullptr || bomb_explosion_sound == nullptr || footsteps_sound == nullptr || ak47_sound == nullptr || defuse_sound == nullptr)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
 				audio_path("music.wav").c_str(),
@@ -168,7 +171,8 @@ GLFWwindow *WorldSystem::create_window()
 				audio_path("bomb_countdown.wav").c_str(),
 				audio_path("bomb_explosion.wav").c_str(),
 				audio_path("footsteps.wav").c_str(),
-				audio_path("ak47.wav").c_str()
+				audio_path("ak47.wav").c_str(),
+				audio_path("defuse_sound.wav").c_str()
 				;
 		return nullptr;
 	}
@@ -267,10 +271,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				if (i == 0){
 					e.guard_mode = true;
 					e.pos = bomb_pos;
-				}
-        		int distance = sqrt(pow(m.position.x - bomb_pos.x, 2) + pow(m.position.y - bomb_pos.y, 2));
-				if (distance < 100){
-					defuse_timer -= elapsed_ms_since_last_update * current_speed;
+					int distance = sqrt(pow(m.position.x - bomb_pos.x, 2) + pow(m.position.y - bomb_pos.y, 2));
+					if (distance < 100){
+						if (!is_defusing){
+							Mix_PlayChannel(-1, defuse_sound, 0);
+						}
+						is_defusing = true;
+					} 
 				}
 			}
 			if (!attack_mode){
@@ -500,12 +507,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		plant_timer -= elapsed_ms_since_last_update * current_speed;
 	}
 	
-	if (is_defusing && bomb_planted && !attack_mode){
+	if (is_defusing && bomb_planted){
 		defuse_timer -= elapsed_ms_since_last_update * current_speed;
 	}
 
 	if (defuse_timer < 0 && bomb_planted && !attack_mode){
-		createEndScreen(renderer,motion.position);
+		createEndScreen(renderer,motion.position, true, 2);
 	}
 
 	if (plant_timer < 0 && !bomb_planted &&  attack_mode) {
@@ -534,7 +541,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	}
 
 	if (bomb_planted && attack_mode && defuse_timer < 0){
-		restart_game();
+		createEndScreen(renderer,motion.position, false, 2);
 	}
 
 	if (explode_timer < 0 && !win_game && attack_mode) {
@@ -543,14 +550,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		
 		Mix_PlayChannel(-1, bomb_explosion_sound, 0);
 		
-		createEndScreen(renderer,motion.position);
+		createEndScreen(renderer,motion.position, true, 1);
 	}
 	
 	if (explode_timer < 0 && !win_game && !attack_mode) {
 		cout << "explode";		
 		Mix_PlayChannel(-1, bomb_explosion_sound, 0);
 		
-		restart_game();
+		createEndScreen(renderer,motion.position, false, 1);
 	}
 	if (registry.enemies.entities.size() > 0){
 		//cout << "x: "<< registry.motions.get(registry.enemies.entities[0]).position.x << "y: " << registry.motions.get(registry.enemies.entities[0]).position.y;
@@ -559,7 +566,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	
 	if (registry.enemies.entities.size() == 0){
 		win_game = true;
-		createEndScreen(renderer,motion.position);
+		createEndScreen(renderer,motion.position, true, 3);
 	}
 
 
@@ -581,7 +588,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		Entity e = registry.healths.entities[i];
 		if (registry.healths.components[i].health <= 0) {
 			if (registry.players.has(e)) {
-				restart_game();
+				createEndScreen(renderer,motion.position, false, 3);
 			}
 			else {
 				registry.remove_all_components_of(e);
@@ -933,9 +940,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 					if (distance < 50) {
 						is_defusing = true;
 						cout << "defusing";
-						//Mix_PlayChannel(-1, bomb_planting_sound, 0);
-						
-					
+						Mix_PlayChannel(-1, defuse_sound, 0);
 					} 
 
 				}

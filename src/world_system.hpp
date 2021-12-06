@@ -110,6 +110,8 @@ private:
 	Mix_Chunk *bomb_explosion_sound;
 	Mix_Chunk *footsteps_sound;
 	Mix_Chunk *ak47_sound;
+	Mix_Chunk *defuse_sound;
+	
 
 	// C++ random number generator
 	std::default_random_engine rng;
