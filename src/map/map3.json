@@ -128,7 +128,7 @@
     }],
     "ground":[
         {
-            "texture":"cobble",
+            "texture":"COBBLE",
             "motion":[
                 {
                     "position":{
@@ -144,16 +144,16 @@
             ]
         },
         {
-            "texture":"bridge",
+            "texture":"BRIDGE",
             "motion":[
                 {
                     "position":{
-                        "x":2400,
-                        "y":2700
+                        "x":2500,
+                        "y":2800
                     },
                     "scale":{
-                        "x":700,
-                        "y":700
+                        "x":800,
+                        "y":800
                     }
                 }
             ]
@@ -163,7 +163,7 @@
     ],
     "walls":[
         {
-            "texture":"lava",
+            "texture":"LAVA",
             "motion":[
                 {
                     "position":{

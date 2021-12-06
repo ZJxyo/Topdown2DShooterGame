@@ -45,10 +45,10 @@ class RenderSystem
 		textures_path("elimwin.png"),
 		textures_path("elimlose.png"),
 		textures_path("bomb.png"),
-    textures_path("help0.png"),
-    textures_path("help1.png"),
-    textures_path("help2.png"),
-    textures_path("help3.png"),
+   		textures_path("help0.png"),
+    	textures_path("help1.png"),
+    	textures_path("help2.png"),
+    	textures_path("help3.png"),
         textures_path("storyBox.png"),
         textures_path("story1.png"),
         textures_path("story2.png"),
@@ -58,7 +58,12 @@ class RenderSystem
         textures_path("story6.png"),
         textures_path("story7.png"),
         textures_path("story8.png"),
-        textures_path("story9.png")};
+        textures_path("story9.png"),
+		textures_path("cobble.png"),
+		textures_path("grass.png"),
+		textures_path("lava.png"),
+		textures_path("water.png"),
+		textures_path("bridge.png")};
 
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.

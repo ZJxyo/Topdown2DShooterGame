@@ -121,7 +121,7 @@
     }],
     "ground":[
         {
-            "texture":"wood",
+            "texture":"GROUND_WOOD",
             "motion":[
                 {
                     "position":{
@@ -138,7 +138,7 @@
     ],
     "walls":[
         {
-            "texture":"stone",
+            "texture":"WALL",
             "motion":[
                 {
                     "position":{
