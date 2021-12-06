@@ -262,41 +262,42 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	Guard guard(player_salmon, renderer, elapsed_ms_since_last_update);
 
 	for(int i = 0; i < registry.enemies.entities.size(); i++ ){
-		if (registry.enemies.components[i].guard_mode){
-			Enemy &e = registry.enemies.components[i];
-			Motion m = registry.motions.get(registry.enemies.entities[i]);
-			if (bomb_planted && attack_mode){
-				e.guard_mode = false;
-				vec2 bomb_pos = registry.motions.get(registry.bomb.entities[0]).position;
-				if (i == 0){
-					e.guard_mode = true;
-					e.pos = bomb_pos;
-					int distance = sqrt(pow(m.position.x - bomb_pos.x, 2) + pow(m.position.y - bomb_pos.y, 2));
-					if (distance < 100){
-						if (!is_defusing){
-							Mix_PlayChannel(-1, defuse_sound, 0);
-						}
-						is_defusing = true;
-					} else {
-						is_defusing = false;
-						defuse_timer=DEFUSE_TIMER_MS;
-					}
-				}
-			}
-			if (!attack_mode){
-				vec2 site_pos = {j["plant_spots"][attack_side]["position"]["x"], j["plant_spots"][attack_side]["position"]["y"]};
-				if (i == 0 && !bomb_planted){
-					e.pos = site_pos;
-				}
-				if (i == 0 && is_defusing){
-					e.guard_mode = false;
-				}
-        		int distance = sqrt(pow(m.position.x - site_pos.x, 2) + pow(m.position.y - site_pos.y, 2));
+		Enemy &e = registry.enemies.components[i];
+		Motion m = registry.motions.get(registry.enemies.entities[i]);
+		if (bomb_planted && attack_mode){
+			e.guard_mode = false;
+			vec2 bomb_pos = registry.motions.get(registry.bomb.entities[0]).position;
+			if (i == 0){
+				e.guard_mode = true;
+				e.pos = bomb_pos;
+				int distance = sqrt(pow(m.position.x - bomb_pos.x, 2) + pow(m.position.y - bomb_pos.y, 2));
 				if (distance < 100){
-					is_planting = true;
-					plant_timer -= elapsed_ms_since_last_update * current_speed;
+					if (!is_defusing){
+						Mix_PlayChannel(-1, defuse_sound, 0);
+					}
+					is_defusing = true;
+				} else {
+					is_defusing = false;
+					defuse_timer=DEFUSE_TIMER_MS;
 				}
 			}
+		}
+		if (!attack_mode){
+			vec2 site_pos = {j["plant_spots"][attack_side]["position"]["x"], j["plant_spots"][attack_side]["position"]["y"]};
+			if (i == 0 && !bomb_planted){
+				e.pos = site_pos;
+			}
+			if (i == 0 && is_defusing){
+				e.guard_mode = false;
+			}
+			int distance = sqrt(pow(m.position.x - site_pos.x, 2) + pow(m.position.y - site_pos.y, 2));
+			if (distance < 100){
+				is_planting = true;
+				plant_timer -= elapsed_ms_since_last_update * current_speed;
+			}
+		}
+		if (registry.enemies.components[i].guard_mode){
+			
 			Move move(registry.enemies.components[i].pos);
 			BTIfCondition btIfCondition(NULL, &shoot, &build, &guard, &move);
 			Entity entity = registry.enemies.entities[i];

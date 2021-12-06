@@ -655,12 +655,8 @@ private:
         int playerY = registry.motions.get(player).position.y;
         Motion& AImotion = registry.motions.get(e);
 
-        if (AImotion.position.x <= playerX) {
-            AImotion.angle = atan2(playerY, playerX);
-        }
-        else {
-            AImotion.angle = 3.14 - atan2(playerY, playerX);
-        }
+        
+        AImotion.angle = atan2(playerY - AImotion.position.y, playerX - AImotion.position.x);
 
         int AIX = registry.motions.get(e).position.x;
         int AIY = registry.motions.get(e).position.y;
