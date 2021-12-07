@@ -558,6 +558,38 @@ Entity createNonConvexWall(float thickness, std::vector<vec2>& hinges) {
 }
 
 
+Entity createUI(RenderSystem *renderer, bool attack_mode) {
+	Entity entity = Entity();
+	auto texture_asset_id = TEXTURE_ASSET_ID::TEXTURE_COUNT;
+	if (attack_mode){
+		texture_asset_id = TEXTURE_ASSET_ID::T;
+	} else {
+		texture_asset_id = TEXTURE_ASSET_ID::CT;
+	}
+	Motion &m = registry.motions.emplace(entity);
+	m.scale = {50,50};
+	m.position = {1175,25};
+	registry.renderRequests.insert(entity,
+		{
+		texture_asset_id,
+		EFFECT_ASSET_ID::TEXTURED,
+		GEOMETRY_BUFFER_ID::SPRITE
+		});
+		
+	Entity healthbar = Entity();
+
+	Motion &hm = registry.motions.emplace(healthbar);
+	hm.scale = {100,3};
+	hm.position = {600,325};
+	registry.renderRequests.insert(healthbar,
+		{
+		TEXTURE_ASSET_ID::BOMB,
+		EFFECT_ASSET_ID::HEALTH,
+		GEOMETRY_BUFFER_ID::SPRITE
+		});
+	return entity;
+}
+
 Entity createItem(vec2 pos, ITEM_TYPE type) {
 	Entity entity = Entity();
 	registry.items.emplace(entity, pos, type);

@@ -63,7 +63,10 @@ class RenderSystem
 		textures_path("grass.png"),
 		textures_path("lava.png"),
 		textures_path("water.png"),
-		textures_path("bridge.png")};
+		textures_path("bridge.png"),
+		textures_path("CT.png"),
+		textures_path("T.png")
+		};
 
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -78,7 +81,8 @@ class RenderSystem
         shader_path("plantspot"),
 		shader_path("instances"),
         shader_path("animate"),
-		shader_path("particle")
+		shader_path("particle"),
+		shader_path("health")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;

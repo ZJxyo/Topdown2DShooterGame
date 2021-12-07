@@ -19,7 +19,9 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	vec2 pos = registry.motions.get(player).position;
 
 	Transform transform;
-	transform.translate(vec2(window_width_px / 2 - pos.x, window_height_px / 2 - pos.y)); // translate camera to player
+	if (render_request.used_texture != TEXTURE_ASSET_ID::T && render_request.used_texture != TEXTURE_ASSET_ID::CT && render_request.used_effect != EFFECT_ASSET_ID::HEALTH){
+		transform.translate(vec2(window_width_px / 2 - pos.x, window_height_px / 2 - pos.y)); // translate camera to player
+	}
 	transform.translate(motion.position);
 	transform.rotate(motion.angle);
 	transform.scale(motion.scale);
@@ -130,6 +132,13 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		
 		gl_has_errors();
 		glBindTexture(GL_TEXTURE_2D, texture_id);
+		gl_has_errors();
+	} else if( render_request.used_effect == EFFECT_ASSET_ID::HEALTH){
+		Entity player_salmon = registry.players.entities[0];
+		Health h = registry.healths.get(player_salmon);
+		
+		GLint health_uloc = glGetUniformLocation(program, "health");
+		glUniform1i(health_uloc, h.health);
 		gl_has_errors();
 	}
 
@@ -269,6 +278,7 @@ void RenderSystem::drawTexturedInstances(std::vector<Entity>& entities,
 	glDrawElementsInstanced(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr, entities.size());
 	gl_has_errors();
 }
+
 
 void RenderSystem::drawParticles(ParticleSource ps, mat3 projection) {
 	const GLuint program = effects[(GLuint)EFFECT_ASSET_ID::PARTICLE];
@@ -525,7 +535,9 @@ void RenderSystem::draw()
 			continue;
 
 		RenderRequest &render_request = registry.floorRenderRequests.get(entity);
+		
 		drawTexturedMesh(entity, projection_2D, render_request);
+		
 	}
 
 	for (Entity entity : registry.renderRequests2.entities)
