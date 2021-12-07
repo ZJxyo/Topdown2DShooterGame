@@ -179,8 +179,8 @@ public:
 
 class BTIfCondition : public BTNode {
 public:
-    BTIfCondition(BTNode* chase, BTNode* shoot, BTNode* build, BTNode* guard, BTNode* move) :
-     chase(chase), shoot(shoot), build(build), guard(guard), move(move) {
+    BTIfCondition(BTNode* chase, BTNode* shoot, BTNode* build, BTNode* guard, BTNode* move, bool defuser) :
+     chase(chase), shoot(shoot), build(build), guard(guard), move(move), defuser(defuser) {
 
     }
 
@@ -195,6 +195,13 @@ public:
                     return BTState::Success;
                 }
                 else if (shoot->process(e) == BTState::Success) {
+                    return BTState::Success;
+                }
+            } else if (defuser){
+                if (move->process(e) == BTState::Success) {
+                    return BTState::Success;
+                } 
+                else if (guard->process(e) == BTState::Success){
                     return BTState::Success;
                 }
             } else {
@@ -220,6 +227,7 @@ private:
     BTNode* build;
     BTNode* guard;
     BTNode* move;
+    bool defuser;
 };
 
 //class Chase : public BTNode {
@@ -596,7 +604,7 @@ private:
         int AIY = registry.motions.get(e).position.y;
         int distance = sqrt(pow(playerX - AIX, 2) + pow(playerY - AIY, 2));
 
-        if (distance > 300 ){
+        if (distance > 500 ){
             return BTState::Failure;
         }
         AImotion.angle = atan2(playerY - AImotion.position.y, playerX - AImotion.position.x);
@@ -699,24 +707,27 @@ private:
         ai.BFS(AIY / 100,AIX/100, position.y /100, position.x / 100);
         int distance = sqrt(pow(position.x - AIX, 2) + pow(position.y - AIY, 2));
 
+        int speed = 200;
+        if (distance < 200) {
+            speed = 100;
+        }
         if (!ai.path.empty()) {
             pair<int, int> curr = ai.path.top();
             if (AIX > curr.second * 100 + 50) {
-
-                vel.x = -300;
+                vel.x = -speed;
             }
             if (AIX < curr.second * 100 + 50 ) {
 
-                vel.x = 300;
+                vel.x = speed;
             }
 
             if (AIY > curr.first* 100 + 50) {
 
-                vel.y = -300;
+                vel.y = -speed;
             }
             if (AIY < curr.first * 100+ 50) {
 
-                vel.y = 300;
+                vel.y = speed;
             }
 
         }
