@@ -500,20 +500,20 @@ private:
             pair<int, int> curr = ai.path.top();
             //std::cout << "curr row : " << curr.second * 100 << " curr col : " << curr.first * 100 << " \n";
             //std::cout << "AIX : " << AIX << " AIY : " << AIY << " \n";
-            if (AIX > curr.second * 100 + 50) {
+            if (AIX > curr.second * 100) {
 
                 vel.x = -200;
             }
-            if (AIX < curr.second * 100 + 50 ) {
+            if (AIX < curr.second * 100) {
 
                 vel.x = 200;
             }
 
-            if (AIY > curr.first* 100 + 50) {
+            if (AIY > curr.first* 100) {
 
                 vel.y = -200;
             }
-            if (AIY < curr.first * 100+ 50) {
+            if (AIY < curr.first * 100) {
 
                 vel.y = +200;
             }
@@ -701,20 +701,20 @@ private:
 
         if (!ai.path.empty()) {
             pair<int, int> curr = ai.path.top();
-            if (AIX > curr.second * 100 + 50) {
+            if (AIX > curr.second * 100) {
 
                 vel.x = -300;
             }
-            if (AIX < curr.second * 100 + 50 ) {
+            if (AIX < curr.second * 100) {
 
                 vel.x = 300;
             }
 
-            if (AIY > curr.first* 100 + 50) {
+            if (AIY > curr.first* 100) {
 
                 vel.y = -300;
             }
-            if (AIY < curr.first * 100+ 50) {
+            if (AIY < curr.first * 100) {
 
                 vel.y = 300;
             }
