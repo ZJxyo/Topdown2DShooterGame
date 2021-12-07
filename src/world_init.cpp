@@ -116,7 +116,7 @@ Entity createTurtle(RenderSystem *renderer, vec2 position)
 	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
 	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
-	registry.avatarColliders.emplace(entity, 50);
+	registry.avatarColliders.emplace(entity, 45);
 
 	// Initialize the motion
 	auto &motion = registry.motions.emplace(entity);
@@ -248,19 +248,19 @@ Entity createEndScreen(RenderSystem *renderer, vec2 pos, bool win, int mode){
 	else if (!win && mode == 1)
 	registry.renderRequests.insert(
 			endscreen,
-			{TEXTURE_ASSET_ID::DEFUSEWIN,
+			{TEXTURE_ASSET_ID::BOMBLOSE,
 				EFFECT_ASSET_ID::TEXTURED,
 				GEOMETRY_BUFFER_ID::SPRITE});
 	else if (!win && mode == 2)
 	registry.renderRequests.insert(
 			endscreen,
-			{TEXTURE_ASSET_ID::ELIMWIN,
+			{TEXTURE_ASSET_ID::DEFUSELOSE,
 				EFFECT_ASSET_ID::TEXTURED,
 				GEOMETRY_BUFFER_ID::SPRITE});
 	else if (!win && mode == 3)
 	registry.renderRequests.insert(
 			endscreen,
-			{TEXTURE_ASSET_ID::DEFUSEWIN,
+			{TEXTURE_ASSET_ID::ELIMLOSE,
 				EFFECT_ASSET_ID::TEXTURED,
 				GEOMETRY_BUFFER_ID::SPRITE});
 

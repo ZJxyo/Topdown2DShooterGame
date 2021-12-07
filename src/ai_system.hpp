@@ -269,8 +269,8 @@ public:
 
 class BTIfCondition : public BTNode {
 public:
-    BTIfCondition(BTNode* chase, BTNode* shoot, BTNode* build, BTNode* guard, BTNode* move) :
-     chase(chase), shoot(shoot), build(build), guard(guard), move(move) {
+    BTIfCondition(BTNode* chase, BTNode* shoot, BTNode* build, BTNode* guard, BTNode* move, bool defuser) :
+     chase(chase), shoot(shoot), build(build), guard(guard), move(move), defuser(defuser) {
 
     }
 
@@ -285,6 +285,13 @@ public:
                     return BTState::Success;
                 }
                 else if (shoot->process(e) == BTState::Success) {
+                    return BTState::Success;
+                }
+            } else if (defuser){
+                if (move->process(e) == BTState::Success) {
+                    return BTState::Success;
+                } 
+                else if (guard->process(e) == BTState::Success){
                     return BTState::Success;
                 }
             } else {
@@ -310,6 +317,7 @@ private:
     BTNode* build;
     BTNode* guard;
     BTNode* move;
+    bool defuser;
 };
 
 //class Chase : public BTNode {
@@ -525,12 +533,12 @@ private:
 
     BTState process(Entity e) override {
         AISystem ai;
-        auto& vel = registry.motions.get(e).velocity;
-        //WorldSystem::getEntity()
         int playerX = registry.motions.get(player).position.x;
         int playerY = registry.motions.get(player).position.y;
-        int AIX = registry.motions.get(e).position.x;
-        int AIY = registry.motions.get(e).position.y;
+        Motion& ai_motion = registry.motions.get(e);
+        auto& vel = ai_motion.velocity;
+        int AIX = ai_motion.position.x;
+        int AIY = ai_motion.position.y;
 
         int bombX = 0;
         int bombY = 0;
@@ -541,21 +549,6 @@ private:
             bombY = registry.bombInfo.get(b).position.y;
             // is_planted = registry.bombInfo.get(b).isPlanted;
             is_planted = true;
-
-        }
-
-        int bombDistance = 10000;
-        Entity closet = player; //dummy entity
-        if (is_planted) {
-            for (Entity enemy : registry.enemies.entities) {
-                int enemyX = registry.motions.get(enemy).position.x;
-                int enemyY = registry.motions.get(enemy).position.y;
-                int dis = sqrt(pow(enemyX - bombX, 2) + pow(enemyY - bombY, 2));
-                if (dis < bombDistance) {
-                    bombDistance = dis;
-                    closet = enemy;
-                }
-            }
 
         }
 
@@ -590,32 +583,17 @@ private:
 
         if (!ai.path.empty()) {
             pair<int, int> curr = ai.path.top();
-            //std::cout << "curr row : " << curr.second * 100 << " curr col : " << curr.first * 100 << " \n";
-            //std::cout << "AIX : " << AIX << " AIY : " << AIY << " \n";
-            if (AIX > curr.second * 100 + 50) {
-
-                vel.x = -200;
+            vec2 dir = vec2((float)(curr.second) * 100.f + 50.f, (float)(curr.first) * 100.f + 50.f) - ai_motion.position;
+            if (length(dir) > 30.f) {
+                vec2 norm_dir = normalize(dir);
+                vel = norm_dir * 300.f;
             }
-            if (AIX < curr.second * 100 + 50 ) {
-
-                vel.x = 200;
+            else {
+                vel = vec2(0.f);
             }
-
-            if (AIY > curr.first* 100 + 50) {
-
-                vel.y = -200;
-            }
-            if (AIY < curr.first * 100+ 50) {
-
-                vel.y = +200;
-            }
-
-            //if (abs(AIX - curr.first * 100) < 200 && abs(AIY - curr.second * 100) < 200) {
-            //    ai.path.pop();
-            //}
         }
 
-        // avoid other AI
+         //avoid other AI
         int eplison = 50;
         for (Entity enemy : registry.enemies.entities) {
 
@@ -678,7 +656,6 @@ private:
     float elapsed_ms;
     void init(Entity e) override {}
     BTState process(Entity e) override {
-        auto& vel = registry.motions.get(e).velocity;
         //WorldSystem::getEntity()
         int playerX = registry.motions.get(player).position.x;
         int playerY = registry.motions.get(player).position.y;
@@ -688,7 +665,7 @@ private:
         int AIY = registry.motions.get(e).position.y;
         int distance = sqrt(pow(playerX - AIX, 2) + pow(playerY - AIY, 2));
 
-        if (distance > 300 ){
+        if (distance > 500 ){
             return BTState::Failure;
         }
         AImotion.angle = atan2(playerY - AImotion.position.y, playerX - AImotion.position.x);
@@ -739,20 +716,14 @@ private:
     void init(Entity e) override {}
 
     BTState process(Entity e) override {
-        auto& vel = registry.motions.get(e).velocity;
-        vel.x = 0;
-        vel.y = 0;
+        registry.motions.get(e).velocity = vec2(0.f);
         //WorldSystem::getEntity()
         int playerX = registry.motions.get(player).position.x;
         int playerY = registry.motions.get(player).position.y;
         Motion& AImotion = registry.motions.get(e);
 
-        if (AImotion.position.x <= playerX) {
-            AImotion.angle = atan2(playerY, playerX);
-        }
-        else {
-            AImotion.angle = 3.14 - atan2(playerY, playerX);
-        }
+        
+        AImotion.angle = atan2(playerY - AImotion.position.y, playerX - AImotion.position.x);
 
         int AIX = registry.motions.get(e).position.x;
         int AIY = registry.motions.get(e).position.y;
@@ -790,33 +761,28 @@ private:
 
     BTState process(Entity e) override {
         AISystem ai;
-        auto& vel = registry.motions.get(e).velocity;
-        int AIX = registry.motions.get(e).position.x;
-        int AIY = registry.motions.get(e).position.y;
+        Motion& ai_motion = registry.motions.get(e);
+        auto& vel = ai_motion.velocity;
+        int AIX = ai_motion.position.x;
+        int AIY = ai_motion.position.y;
 
         ai.BFS(AIY / 100,AIX/100, position.y /100, position.x / 100, current_map);
         int distance = sqrt(pow(position.x - AIX, 2) + pow(position.y - AIY, 2));
 
+        float speed = 200.f;
+        if (distance < 200) {
+            speed = 100.f;
+        }
         if (!ai.path.empty()) {
             pair<int, int> curr = ai.path.top();
-            if (AIX > curr.second * 100 + 50) {
-
-                vel.x = -300;
+            vec2 dir = vec2((float)(curr.second) * 100.f + 50.f, (float)(curr.first) * 100.f + 50.f) - ai_motion.position;
+            if (length(dir) > 30.f) {
+                vec2 norm_dir = normalize(dir);
+                vel = norm_dir * speed;
             }
-            if (AIX < curr.second * 100 + 50 ) {
-
-                vel.x = 300;
+            else {
+                vel = vec2(0.f);
             }
-
-            if (AIY > curr.first* 100 + 50) {
-
-                vel.y = -300;
-            }
-            if (AIY < curr.first * 100+ 50) {
-
-                vel.y = 300;
-            }
-
         }
 
 
