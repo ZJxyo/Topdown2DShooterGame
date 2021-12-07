@@ -279,6 +279,10 @@ public:
     }
 
     virtual BTState process(Entity e) override {
+        if (registry.physics.has(e)) {
+            return BTState::Success;
+        }
+
         if (registry.motions.has(e)) {
             if (chase) {
                 if (chase->process(e) == BTState::Success) {

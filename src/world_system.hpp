@@ -99,6 +99,7 @@ private:
 	int current_map;
 
 	float wall_timer = -1.f;
+	float push_timer = -1.f;
 
 	// non convex walls
 	bool right_mouse_down = false;
