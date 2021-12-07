@@ -264,14 +264,16 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	for(int i = 0; i < registry.enemies.entities.size(); i++ ){
 		Enemy &e = registry.enemies.components[i];
 		Motion m = registry.motions.get(registry.enemies.entities[i]);
+		bool defuser = false;
 		if (bomb_planted && attack_mode){
 			e.guard_mode = false;
 			vec2 bomb_pos = registry.motions.get(registry.bomb.entities[0]).position;
 			if (i == 0){
 				e.guard_mode = true;
 				e.pos = bomb_pos;
+				defuser = true;
 				int distance = sqrt(pow(m.position.x - bomb_pos.x, 2) + pow(m.position.y - bomb_pos.y, 2));
-				if (distance < 100){
+				if (distance < 125){
 					if (!is_defusing){
 						Mix_PlayChannel(-1, defuse_sound, 0);
 					}
@@ -297,16 +299,15 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 			}
 		}
 		if (registry.enemies.components[i].guard_mode){
-			
 			Move move(registry.enemies.components[i].pos);
-			BTIfCondition btIfCondition(NULL, &shoot, &build, &guard, &move);
+			BTIfCondition btIfCondition(NULL, &shoot, &build, &guard, &move, defuser);
 			Entity entity = registry.enemies.entities[i];
 			btIfCondition.process(entity);
 
 			
 		} else {
 			Chase chase(player_salmon);
-			BTIfCondition btIfCondition(&chase, &shoot, &build, &guard,NULL);
+			BTIfCondition btIfCondition(&chase, &shoot, &build, &guard,NULL, defuser);
 			Entity entity = registry.enemies.entities[i];
 			btIfCondition.init(entity);
 			btIfCondition.process(entity);
@@ -523,7 +524,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	if (plant_timer < 0 && !bomb_planted &&  attack_mode) {
 		cout << "planted";
-		createBomb(renderer,motion.position);
+		vec2 pos = motion.position;
+		pos.x = (int) (pos.x +50) / 100 * 100;
+		pos.y = (int) (pos.y +50) / 100 * 100;
+		createBomb(renderer,pos);
 		Mix_PlayChannel(-1, bomb_planted_sound, 0);
 		is_planting = false;
 		bomb_planted = true;
@@ -724,7 +728,7 @@ void WorldSystem::restart_game()
 		// AI defending site
 		std::set<int> guard_pos;
 		for (int i = 0; i < MAX_TURTLES; i++){
-			entity = createTurtle(renderer, {100.f * i + 2000.f, 100.f});
+			entity = createTurtle(renderer, {100.f * i + int(j["defense_spawn"]["x"]), j["defense_spawn"]["y"]});
 			Motion &motion = registry.motions.get(entity);
 			Enemy &enemy = registry.enemies.get(entity);
 			if (i >=0 && i < 4){
@@ -898,7 +902,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		restart_game();
 	}
 
-	if (win_game && GLFW_KEY_ENTER){
+	if (win_game && key == GLFW_KEY_ENTER){
 		if (!attack_mode){
 			current_map+=1;
 			if (current_map > 3){
