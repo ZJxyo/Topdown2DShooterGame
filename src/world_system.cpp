@@ -728,7 +728,7 @@ void WorldSystem::restart_game()
 		// AI defending site
 		std::set<int> guard_pos;
 		for (int i = 0; i < MAX_TURTLES; i++){
-			entity = createTurtle(renderer, {100.f * i + j["defense_spawn"]["x"], j["defense_spawn"]["y"]});
+			entity = createTurtle(renderer, {100.f * i + int(j["defense_spawn"]["x"]), j["defense_spawn"]["y"]});
 			Motion &motion = registry.motions.get(entity);
 			Enemy &enemy = registry.enemies.get(entity);
 			if (i >=0 && i < 4){
