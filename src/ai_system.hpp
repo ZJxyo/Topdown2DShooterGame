@@ -714,8 +714,8 @@ private:
         if (!ai.path.empty()) {
             pair<int, int> curr = ai.path.top();
             if (AIX > curr.second * 100) {
-
-                vel.x = -300;
+                AIY = 0;
+                vel.x = -speed;
             }
             if (AIX < curr.second * 100) {
 
