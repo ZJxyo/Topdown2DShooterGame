@@ -37,12 +37,12 @@ class AISystem
 {
 public:
     AISystem();
-//    AISystem(int currentMap);
+    AISystem(int currentMap);
 
     void step(float elapsed_ms, int currentMap);
     // Cite from: https://www.geeksforgeeks.org/breadth-first-traversal-bfs-on-a-2d-array/
-    bool isValid(int row, int col);
-    void BFS(int startRow, int startCol, int endRow, int endCol);
+    bool isValid(int row, int col, int current_map);
+    void BFS(int startRow, int startCol, int endRow, int endCol, int current_map);
     stack<pair<int, int>> findPath(int startRow, int startCol, int endRow, int endCol);
     stack<pair<int, int>> path;
     pair<int, int> route[ROW][COL];
@@ -51,13 +51,9 @@ public:
     bool isDestination(int x, int y, Node dest);
     double calculateH(int x, int y, Node dest);
     vector<Node> makePath(array<array<Node, (50)>, (50)> map, Node dest);
-    vector<Node> aStar(Node player, Node dest);
-    void setCurrentMap(int currentMap);
+    vector<Node> aStar(Node player, Node dest, int current_map);
 private:
-    int current_map;
-    MyArray temp;
     bool vis[ROW][COL];
-    int grid[ROW][COL];
     // hardcode Map1
     int map1[ROW][COL] = { {0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                            {0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -518,11 +514,13 @@ private:
 
 class Chase : public BTNode {
 public:
-    Chase(Entity other) {
+    Chase(Entity other, int current_map) {
         player = other;
+        this->current_map = current_map;
     }
 private:
     Entity player;
+    int current_map;
     void init(Entity e) override {}
 
     BTState process(Entity e) override {
@@ -570,7 +568,7 @@ private:
         //     ai.BFS(AIY / 100, AIX / 100, bombY / 100, bombX / 100);
         // }
         // else {
-            ai.BFS(AIY / 100, AIX / 100, playerY / 100, playerX / 100);
+            ai.BFS(AIY / 100, AIX / 100, playerY / 100, playerX / 100, current_map);
         //}
 
 
@@ -781,11 +779,13 @@ private:
 
 class Move : public BTNode {
 public:
-    Move(vec2 position) {
+    Move(vec2 position, int current_map) {
         this->position = position;
+        this->current_map = current_map;
     }
 private:
     vec2 position;
+    int current_map;
     void init(Entity e) override {}
 
     BTState process(Entity e) override {
@@ -794,7 +794,7 @@ private:
         int AIX = registry.motions.get(e).position.x;
         int AIY = registry.motions.get(e).position.y;
 
-        ai.BFS(AIY / 100,AIX/100, position.y /100, position.x / 100);
+        ai.BFS(AIY / 100,AIX/100, position.y /100, position.x / 100, current_map);
         int distance = sqrt(pow(position.x - AIX, 2) + pow(position.y - AIY, 2));
 
         if (!ai.path.empty()) {

@@ -33,7 +33,7 @@ WorldSystem::WorldSystem()
 	plant_timer(PLANT_TIMER_MS), explode_timer(BOMB_TIMER_MS), bomb_planted(false), is_planting(false),
 	 win_game(false),footsteps_timer(FOOTSTEPS_SOUND_TIMER_MS), buildmode(false), buildcoord({0,0}),
 	  mousecoord({0,0}), building(false), maxWall(10), attack_mode(true), defuse_timer(DEFUSE_TIMER_MS),
-	  attack_side(0),is_defusing(false),next_chase(0.f),current_map(3), end_screen(false)
+	  attack_side(0),is_defusing(false),next_chase(0.f),current_map(1), end_screen(false)
 
 {
 	// Seeding rng with random device
@@ -256,7 +256,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	// Spawning new turtles
 
-	// AIvy
+	// AI
 	ShootNBullets shoot(player_salmon, renderer, elapsed_ms_since_last_update);
 	Build build(player_salmon);
 	Guard guard(player_salmon, renderer, elapsed_ms_since_last_update);
@@ -297,14 +297,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 					plant_timer -= elapsed_ms_since_last_update * current_speed;
 				}
 			}
-			Move move(registry.enemies.components[i].pos);
+			Move move(registry.enemies.components[i].pos, current_map);
 			BTIfCondition btIfCondition(NULL, &shoot, &build, &guard, &move);
 			Entity entity = registry.enemies.entities[i];
 			btIfCondition.process(entity);
 
 			
 		} else {
-			Chase chase(player_salmon);
+			Chase chase(player_salmon, current_map);
 			BTIfCondition btIfCondition(&chase, &shoot, &build, &guard,NULL);
 			Entity entity = registry.enemies.entities[i];
 			btIfCondition.init(entity);
