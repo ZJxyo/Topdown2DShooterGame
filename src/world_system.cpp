@@ -728,7 +728,7 @@ void WorldSystem::restart_game()
 		// AI defending site
 		std::set<int> guard_pos;
 		for (int i = 0; i < MAX_TURTLES; i++){
-			entity = createTurtle(renderer, {100.f * i + int(j["defense_spawn"]["x"]), j["defense_spawn"]["y"]});
+			entity = createTurtle(renderer, vec2{100.f * (float)i + (float)j["defense_spawn"]["x"], (float)j["defense_spawn"]["y"]});
 			Motion &motion = registry.motions.get(entity);
 			Enemy &enemy = registry.enemies.get(entity);
 			if (i >=0 && i < 4){
@@ -740,23 +740,23 @@ void WorldSystem::restart_game()
 					}
 				} 
 				guard_pos.insert(r);
-				vec2 pos = {j["AI_guard_pos"]["defense"][r]["x"], j["AI_guard_pos"]["defense"][r]["y"]};
+				vec2 pos = {(float)j["AI_guard_pos"]["defense"][r]["x"], (float)j["AI_guard_pos"]["defense"][r]["y"]};
 				enemy.pos = pos;
 				enemy.guard_mode = true;
 			}
 		}
 		// Create a new salmon
-		player_salmon = createSalmon(renderer, {j["attack_spawn"]["x"], j["attack_spawn"]["y"]});
+		player_salmon = createSalmon(renderer, { (float)j["attack_spawn"]["x"], (float)j["attack_spawn"]["y"]});
 		registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
 	
 	} else { 
-		// AI attcking random site
+		 //AI attcking random site
 		std::set<int> guard_pos;
 		srand((unsigned int) time(NULL));
 		int side = rand() % 2;
 		attack_side = side;
 		for (int i = 0; i < MAX_TURTLES; i++){
-			entity = createTurtle(renderer, {100.f * i + 2000.f, 4800.f});
+			Entity entity = createTurtle(renderer, {100.f * i + 2000.f, 4800.f});
 			Motion &motion = registry.motions.get(entity);
 			Enemy &enemy = registry.enemies.get(entity);
 			int r = rand() % j["AI_guard_pos"]["attack"][side].size();
@@ -773,10 +773,9 @@ void WorldSystem::restart_game()
 
 		}
 
-		// Create a new salmon
+		//// Create a new salmon
 		player_salmon = createSalmon(renderer, {j["defense_spawn"]["x"], j["defense_spawn"]["y"]});
 		registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
-	
 	}
 
 	// CLEAN

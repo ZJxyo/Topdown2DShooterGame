@@ -557,5 +557,19 @@ void PhysicsSystem::step(float elapsed_ms)
 				}
 			}
 		}
+
+		for (float x = 1; x < 50; x++) {
+			createLine(vec2((float)(x*100), 2500.f), 0, vec2{ 3.f, 5000.f });
+		}
+
+		for (float y = 1; y < 50; y++) {
+			createLine(vec2(2500.f, (float)(y * 100)), 0, vec2{ 5000.f, 3.f });
+		}
+
+		for (Motion& motion : registry.motions.components) {
+			if (length(motion.velocity) > 1.f) {
+				createLine(motion.position + 50.f * normalize(motion.velocity), atan2(motion.velocity.y, motion.velocity.x), vec2{ 100.f, 3.f });
+			}
+		}
 	}
 }

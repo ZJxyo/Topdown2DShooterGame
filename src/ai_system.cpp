@@ -29,7 +29,10 @@ bool AISystem::isValid(int row, int col) {
 
 stack<pair<int, int>>
 AISystem::findPath(int startRow, int startCol, int endRow, int endCol) {
-    if (startRow == endRow && startCol == endCol) return path;
+    if (startRow == endRow && startCol == endCol) {
+        path.push(route[startRow][startCol]);
+        return path;
+    }
     int x = endRow, y = endCol;
     //    std::cout <<" hello" << endl;
     int counter = 5;
@@ -53,10 +56,14 @@ void AISystem::BFS(int startRow, int startCol, int endRow, int endCol) {
     // Stores indices of the matrix cells
     queue<pair<int, int> > q;
 
+    assert(isValid(startRow, startCol));
+    assert(isValid(endRow, endCol));
+
     // Mark the starting cell as visited
     // and push it into the queue
     q.push({ startRow, startCol });
     vis[startRow][startCol] = true;
+    route[startRow][startCol] = { startRow,startCol };
 
     // Iterate while the queue
     // is not empty
@@ -94,6 +101,7 @@ void AISystem::BFS(int startRow, int startCol, int endRow, int endCol) {
             }
         }
     }
+    printf("target: %d, %d, start: %d, %d\n", endRow, endCol, startRow, startCol);
 }
 
 

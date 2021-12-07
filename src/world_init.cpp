@@ -116,7 +116,7 @@ Entity createTurtle(RenderSystem *renderer, vec2 position)
 	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
 	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
-	registry.avatarColliders.emplace(entity, 50);
+	registry.avatarColliders.emplace(entity, 45);
 
 	// Initialize the motion
 	auto &motion = registry.motions.emplace(entity);
