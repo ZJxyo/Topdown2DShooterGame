@@ -121,12 +121,12 @@
     }],
     "ground":[
         {
-            "texture":"wood",
+            "texture":"GROUND_WOOD",
             "motion":[
                 {
                     "position":{
-                        "x":2500,
-                        "y":2500
+                        "x":2450,
+                        "y":2450
                     },
                     "scale":{
                         "x":5000,
@@ -138,7 +138,7 @@
     ],
     "walls":[
         {
-            "texture":"stone",
+            "texture":"WALL",
             "motion":[
                 {
                     "position":{

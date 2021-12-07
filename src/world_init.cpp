@@ -343,6 +343,17 @@ int SetupMap(RenderSystem *renderer, int current_map)
 			 GEOMETRY_BUFFER_ID::RECTANGLE});
 	}
 	for (json wall_obj: j["walls"]){
+		std::string texture = wall_obj["texture"];
+		auto texture_asset_id = TEXTURE_ASSET_ID::WALL;
+		if (texture == "WALL") {
+			texture_asset_id = TEXTURE_ASSET_ID::WALL;
+		} else if (texture == "WATER") {
+			texture_asset_id = TEXTURE_ASSET_ID::WATER;
+		} else if (texture == "GROUND_WOOD") {
+			texture_asset_id = TEXTURE_ASSET_ID::GROUND_WOOD;
+		} else if (texture == "LAVA") {
+			texture_asset_id = TEXTURE_ASSET_ID::LAVA;
+		}
 		for (json w : wall_obj["motion"])
 		{
 			auto entity = Entity();
@@ -368,7 +379,7 @@ int SetupMap(RenderSystem *renderer, int current_map)
 			// Create and (empty) Salmon component to be able to refer to all turtles
 			registry.renderRequests.insert(
 				entity,
-				{TEXTURE_ASSET_ID::WALL,
+				{texture_asset_id,
 				EFFECT_ASSET_ID::TEXTURED,
 				GEOMETRY_BUFFER_ID::SPRITE});
 		}
@@ -408,6 +419,17 @@ int createGround(RenderSystem *renderer, int current_map)
 	ifs >> j;
 
 	for (json ground_obj: j["ground"]){
+		std::string texture = ground_obj["texture"];
+		auto texture_asset_id = TEXTURE_ASSET_ID::GROUND_WOOD;
+		if (texture == "GROUND_WOOD") {
+			texture_asset_id = TEXTURE_ASSET_ID::GROUND_WOOD;
+		} else if (texture == "GRASS") {
+			texture_asset_id = TEXTURE_ASSET_ID::GRASS;
+		} else if (texture == "BRIDGE") {
+			texture_asset_id = TEXTURE_ASSET_ID::BRIDGE;
+		} else if (texture == "COBBLE") {
+			texture_asset_id = TEXTURE_ASSET_ID::COBBLE;
+		}
 		for (json m: ground_obj["motion"])
 		{
 			auto entity = Entity();
@@ -421,13 +443,15 @@ int createGround(RenderSystem *renderer, int current_map)
 			motion.velocity = {0.f, 0.f};
 			motion.scale = {m["scale"]["x"], m["scale"]["y"]};
 
-			motion.position = {m["position"]["x"], m["position"]["y"]};
+			motion.position = {int(m["position"]["x"]) + 50, int(m["position"]["y"]) + 50};
 
 			// Create and (empty) Salmon component to be able to refer to all turtles
 
+			
+
 			registry.floorRenderRequests.insert(
 				entity,
-				{TEXTURE_ASSET_ID::GROUND_WOOD,
+				{texture_asset_id,
 					EFFECT_ASSET_ID::TEXTURED,
 					GEOMETRY_BUFFER_ID::SPRITE});
 			
