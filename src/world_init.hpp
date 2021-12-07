@@ -29,7 +29,7 @@ Entity createEndScreen(RenderSystem *renderer, vec2 pos, bool win, int mode);
 MyArray createMatrix(std::string path);
 int createGround(RenderSystem *renderer, int current_map);
 int SetupMap(RenderSystem *renderer, int current_map);
-
+Entity createUI(RenderSystem *renderer, bool attack_mode);
 void Fill(MyArray &T);
 void Print(const MyArray &T);
 

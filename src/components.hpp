@@ -280,7 +280,9 @@ enum class TEXTURE_ASSET_ID
 	LAVA = GRASS + 1,
 	WATER = LAVA + 1,
 	BRIDGE = WATER + 1,
-    TEXTURE_COUNT = BRIDGE + 1
+	CT = BRIDGE +1,
+	T = CT + 1,
+    TEXTURE_COUNT = T + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -297,7 +299,8 @@ enum class EFFECT_ASSET_ID
 	INSTANCES = PLANTSPOT + 1,
 	ANIMATE = INSTANCES + 1,
 	PARTICLE = ANIMATE + 1,
-	EFFECT_COUNT = PARTICLE + 1
+	HEALTH = PARTICLE + 1,
+	EFFECT_COUNT = HEALTH + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
