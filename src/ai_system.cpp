@@ -2,10 +2,14 @@
 #include <queue>
 
 
+AISystem::AISystem() {
+    memset(vis, false, sizeof vis);
+}
+
+
 void AISystem::step(float elapsed_ms, int currentMap)
 {
-//    (void)elapsed_ms; // placeholder to silence unused warning until implemented
-    this->current_map = currentMap;
+    (void)elapsed_ms; // placeholder to silence unused warning until implemented
 }
 
 
@@ -14,10 +18,27 @@ int dRow[] = { -1, 0, 1, 0, 1, 1, -1, -1 };
 int dCol[] = { 0, -1, 0, 1 ,1, -1, 1, -1 };
 
 
-bool AISystem::isValid(int row, int col) {
+bool AISystem::isValid(int row, int col, int current_map) {
     // If cell lies out of bounds
-    if (row < 0 || col < 0 || row >= ROW || col >= COL || grid[row][col] == 1)
+
+//    cout << "current_map: " << current_map << endl;
+    bool isWall = false;
+    switch (current_map) {
+        case 1:
+            isWall = (map1[row][col] == 1);
+            break;
+        case 2:
+            isWall = (map2[row][col] == 1);
+            break;
+        case 3:
+            isWall = (map3[row][col] == 1);
+            break;
+    }
+    if (row < 0 || col < 0 || row >= ROW || col >= COL || isWall)
         return false;
+
+//    if (row < 0 || col < 0 || row >= ROW || col >= COL || map1[row][col] == 1)
+//        return false;
 
     // If cell is already visited
     if (vis[row][col])
@@ -45,7 +66,7 @@ AISystem::findPath(int startRow, int startCol, int endRow, int endCol) {
     return path;
 }
 
-void AISystem::BFS(int startRow, int startCol, int endRow, int endCol) {
+void AISystem::BFS(int startRow, int startCol, int endRow, int endCol, int current_map) {
     path = stack<pair<int, int>>();
     vis[ROW - 1][COL - 1] = { false };
 
@@ -88,7 +109,7 @@ void AISystem::BFS(int startRow, int startCol, int endRow, int endCol) {
             int adjx = x + dRow[i];
             int adjy = y + dCol[i];
             //            std::cout <<"inside BFS route x " << route[x][y].first << " rount y :"<< route[x][y].second<< " \n";
-            if (isValid(adjx, adjy)) {
+            if (isValid(adjx, adjy, current_map)) {
                 q.push({ adjx, adjy });
                 vis[adjx][adjy] = true;
                 route[adjx][adjy] = { x,y };
@@ -149,9 +170,9 @@ vector<Node>AISystem::makePath(array<array<Node, (50)>, (50)> map, Node dest) {
     }
 }
 
-vector<Node> AISystem::aStar(Node player, Node dest) {
+vector<Node> AISystem::aStar(Node player, Node dest, int current_map) {
     vector<Node> empty;
-    if (isValid(dest.x, dest.y) == false) {
+    if (isValid(dest.x, dest.y, current_map) == false) {
         //cout << "Destination is an obstacle" << endl;
         return empty;
         //Destination is invalid
@@ -213,7 +234,7 @@ vector<Node> AISystem::aStar(Node player, Node dest) {
             }
             node = *itNode;
             openList.erase(itNode);
-        } while (isValid(node.x, node.y) == false);
+        } while (isValid(node.x, node.y, current_map) == false);
 
         x = node.x;
         y = node.y;
@@ -223,7 +244,7 @@ vector<Node> AISystem::aStar(Node player, Node dest) {
         for (int newX = -1; newX <= 1; newX++) {
             for (int newY = -1; newY <= 1; newY++) {
                 double gNew, hNew, fNew;
-                if (isValid(x + newX, y + newY)) {
+                if (isValid(x + newX, y + newY, current_map)) {
                     if (isDestination(x + newX, y + newY, dest))
                     {
                         //Destination found - make path

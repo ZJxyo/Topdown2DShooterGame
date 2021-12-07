@@ -258,7 +258,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	// Spawning new turtles
 
-	// AIvy
+	// AI
 	ShootNBullets shoot(player_salmon, renderer, elapsed_ms_since_last_update);
 	Build build(player_salmon);
 	Guard guard(player_salmon, renderer, elapsed_ms_since_last_update);
@@ -299,14 +299,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 					plant_timer -= elapsed_ms_since_last_update * current_speed;
 				}
 			}
-			Move move(registry.enemies.components[i].pos);
+			Move move(registry.enemies.components[i].pos, current_map);
 			BTIfCondition btIfCondition(NULL, &shoot, &build, &guard, &move);
 			Entity entity = registry.enemies.entities[i];
 			btIfCondition.process(entity);
 
 			
 		} else {
-			Chase chase(player_salmon);
+			Chase chase(player_salmon, current_map);
 			BTIfCondition btIfCondition(&chase, &shoot, &build, &guard,NULL);
 			Entity entity = registry.enemies.entities[i];
 			btIfCondition.init(entity);

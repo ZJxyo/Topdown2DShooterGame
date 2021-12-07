@@ -311,7 +311,7 @@ MyArray createMatrix(std::string path) {// matrix 2d array
 		
 	}
 
-//	Prinxt(T);
+//	Print(T);
     return T;
 }
 
@@ -401,9 +401,9 @@ void Fill(MyArray &T){
 void Print(const MyArray &T){
     for(auto &row : T){
         for(auto &el : row){
-            //cout<<el<<" ";
+            cout<<el<<" ";
         }
-        //cout << endl;
+        cout << endl;
     }
 }
 

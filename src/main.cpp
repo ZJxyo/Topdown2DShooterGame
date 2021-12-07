@@ -41,7 +41,6 @@ int main()
 	// initialize the main systems
 	renderer.init(window_width_px, window_height_px, window);
 	world.init(&renderer);
-
 	physics.bullet_hit_callbacks.emplace_back(WorldSystem::handle_bullet_hit);
 	physics.item_callbacks.emplace_back(WorldSystem::handle_items);
 
