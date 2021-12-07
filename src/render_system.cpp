@@ -19,7 +19,9 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	vec2 pos = registry.motions.get(player).position;
 
 	Transform transform;
-	transform.translate(vec2(window_width_px / 2 - pos.x, window_height_px / 2 - pos.y)); // translate camera to player
+	if (render_request.used_texture != TEXTURE_ASSET_ID::T && render_request.used_texture != TEXTURE_ASSET_ID::CT && render_request.used_effect != EFFECT_ASSET_ID::HEALTH){
+		transform.translate(vec2(window_width_px / 2 - pos.x, window_height_px / 2 - pos.y)); // translate camera to player
+	}
 	transform.translate(motion.position);
 	transform.rotate(motion.angle);
 	transform.scale(motion.scale);
@@ -131,6 +133,13 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		gl_has_errors();
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
+	} else if( render_request.used_effect == EFFECT_ASSET_ID::HEALTH){
+		Entity player_salmon = registry.players.entities[0];
+		Health h = registry.healths.get(player_salmon);
+		
+		GLint health_uloc = glGetUniformLocation(program, "health");
+		glUniform1i(health_uloc, h.health);
+		gl_has_errors();
 	}
 
 	// Getting uniform locations for glUniform* calls
@@ -155,7 +164,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	GLint projection_loc = glGetUniformLocation(currProgram, "projection");
 	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float *)&projection);
 
-	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED && render_request.used_texture == TEXTURE_ASSET_ID::GROUND_WOOD)
+	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED && registry.floorRenderRequests.has(entity))
 	{
 		GLint tex_uloc = glGetUniformLocation(currProgram, "repeatx");
 		glUniform1i(tex_uloc, motion.scale.x/100);
@@ -165,7 +174,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glUniform1i(tex_uloc2, motion.scale.y/100);
 		gl_has_errors();
 	}
-	else if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED && render_request.used_texture == TEXTURE_ASSET_ID::WALL)
+	else if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED && registry.walls.has(entity))
 	{
 		GLint tex_uloc = glGetUniformLocation(currProgram, "repeatx");
 		glUniform1i(tex_uloc, motion.scale.x / 60);
@@ -270,6 +279,7 @@ void RenderSystem::drawTexturedInstances(std::vector<Entity>& entities,
 	gl_has_errors();
 }
 
+
 void RenderSystem::drawParticles(ParticleSource ps, mat3 projection) {
 	const GLuint program = effects[(GLuint)EFFECT_ASSET_ID::PARTICLE];
 	glUseProgram(program);
@@ -361,6 +371,38 @@ void RenderSystem::drawCustomMesh(Entity entity, mat3& projection, RenderRequest
 	glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
 
 	glDrawElements(GL_TRIANGLES, cm.indices.size(), GL_UNSIGNED_INT, nullptr);
+	gl_has_errors();
+
+}
+
+void RenderSystem::drawPoint(Entity entity, mat3& projection, RenderRequest& render_request) {
+	const GLuint program = effects[(GLuint)render_request.used_effect];
+	glUseProgram(program);
+	gl_has_errors();
+
+	glBindBuffer(GL_ARRAY_BUFFER, vertices_buffer);
+	Item& item = registry.items.get(entity);
+	vec2 player_postion = registry.motions.get(registry.players.entities[0]).position;
+	vec2 offset = vec2(window_width_px / 2.f - player_postion.x, window_height_px / 2.f - player_postion.y);
+	vec3 pos = vec3(item.position + offset, 1.f);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vec3), &pos, GL_STREAM_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), 0);
+	glEnableVertexAttribArray(0);
+	gl_has_errors();
+
+
+	GLint projection_uloc = glGetUniformLocation(program, "projection");
+	glUniformMatrix3fv(projection_uloc, 1, GL_FALSE, (float*)&projection);
+
+	GLint type_uloc = glGetUniformLocation(program, "type");
+	glUniform1i(type_uloc, (int)item.item_type);
+	GLint active_uloc = glGetUniformLocation(program, "is_active");
+	glUniform1i(active_uloc, (int)item.active);
+	gl_has_errors();
+
+
+	glDrawArrays(GL_POINTS, 0, 1);
+	gl_has_errors();
 }
 
 // draw the intermediate texture to the screen, with some distortion to simulate
@@ -493,7 +535,9 @@ void RenderSystem::draw()
 			continue;
 
 		RenderRequest &render_request = registry.floorRenderRequests.get(entity);
+		
 		drawTexturedMesh(entity, projection_2D, render_request);
+		
 	}
 
 	for (Entity entity : registry.renderRequests2.entities)
@@ -503,6 +547,10 @@ void RenderSystem::draw()
 		RenderRequest &render_request2 = registry.renderRequests2.get(entity);
 
 		drawTexturedMesh(entity, projection_2D, render_request2, {0.7, 0.7});
+	}
+
+	for (int i = 0; i < registry.itemRenderRequests.size(); i++) {
+		drawPoint(registry.itemRenderRequests.entities[i], projection_2D, registry.itemRenderRequests.components[i]);
 	}
 
 	for (int i = 0; i < registry.renderRequests.size(); i++)

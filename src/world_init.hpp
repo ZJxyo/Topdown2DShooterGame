@@ -29,7 +29,7 @@ Entity createEndScreen(RenderSystem *renderer, vec2 pos, bool win, int mode);
 MyArray createMatrix(std::string path);
 int createGround(RenderSystem *renderer, int current_map);
 int SetupMap(RenderSystem *renderer, int current_map);
-
+Entity createUI(RenderSystem *renderer, bool attack_mode);
 void Fill(MyArray &T);
 void Print(const MyArray &T);
 
@@ -43,5 +43,6 @@ const vec2 BOX2_LOCATION = {1000, 4600};
 const vec2 BOX3_LOCATION = {1000, 4400};
 const vec2 BOX4_LOCATION = {1000, 4200};
 Entity createNonConvexWall(float thickness, std::vector<vec2>& hinges);
+Entity createItem(vec2 pos, ITEM_TYPE type);
 Entity createParticleSource(uint8 size, float radius, float life_span, vec3 color, vec2 pos, float angle, float speed);
 Entity createPushArea(vec2 pos, float dist, float angle, float span);

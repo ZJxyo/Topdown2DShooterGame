@@ -45,10 +45,10 @@ class RenderSystem
 		textures_path("elimwin.png"),
 		textures_path("elimlose.png"),
 		textures_path("bomb.png"),
-    textures_path("help0.png"),
-    textures_path("help1.png"),
-    textures_path("help2.png"),
-    textures_path("help3.png"),
+   		textures_path("help0.png"),
+    	textures_path("help1.png"),
+    	textures_path("help2.png"),
+    	textures_path("help3.png"),
         textures_path("storyBox.png"),
         textures_path("story1.png"),
         textures_path("story2.png"),
@@ -58,7 +58,15 @@ class RenderSystem
         textures_path("story6.png"),
         textures_path("story7.png"),
         textures_path("story8.png"),
-        textures_path("story9.png")};
+        textures_path("story9.png"),
+		textures_path("cobble.png"),
+		textures_path("grass.png"),
+		textures_path("lava.png"),
+		textures_path("water.png"),
+		textures_path("bridge.png"),
+		textures_path("CT.png"),
+		textures_path("T.png")
+		};
 
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -69,11 +77,12 @@ class RenderSystem
 		shader_path("turtle"),
 		shader_path("textured"),
 		shader_path("water"),
-        shader_path("light"),
+        shader_path("item"),
         shader_path("plantspot"),
 		shader_path("instances"),
         shader_path("animate"),
-		shader_path("particle")
+		shader_path("particle"),
+		shader_path("health")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
@@ -114,6 +123,7 @@ private:
 	void drawTexturedInstances(std::vector<Entity>& entities, const mat3& projection, RenderRequest& request);
 	void drawParticles(ParticleSource ps, mat3 projection_2d);
 	void drawCustomMesh(Entity entity, mat3& projection, RenderRequest& render_request);
+	void drawPoint(Entity entity, mat3& projection, RenderRequest& render_request);
 	void drawToScreen();
 
 	// Window handle
@@ -135,3 +145,6 @@ private:
 
 bool loadEffectFromFile(
 	const std::string &vs_path, const std::string &fs_path, GLuint &out_program);
+
+bool loadAllShadersFromFile(
+	const std::string& vs_path, const std::string& fs_path, const std::string& gs_path, GLuint& out_program);

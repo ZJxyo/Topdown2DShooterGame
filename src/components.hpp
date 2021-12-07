@@ -197,6 +197,26 @@ struct NonConvexCollider {
 	std::vector<vec2> vertices;
 };
 
+enum class ITEM_TYPE {
+	HEALTH_REGEN = 0,
+	SPEED_BOOST = HEALTH_REGEN + 1
+};
+
+struct Item {
+	vec2 position;
+	ITEM_TYPE item_type;
+	bool active = false;
+	float respawn_timer = 0.f;
+	Item(vec2 pos, ITEM_TYPE item_type) : position(pos), item_type(item_type) {
+	}
+};
+
+struct Boost {
+	// in ms
+	float timer = 3000.f;
+	float speed_multiplier = 1.5f;
+};
+
 struct Physics {
 	float mass = 1.f;
 };
@@ -255,7 +275,14 @@ enum class TEXTURE_ASSET_ID
     STORY7 = STORY6 + 1,
     STORY8 = STORY7 + 1,
     STORY9 = STORY8 + 1,
-    TEXTURE_COUNT = STORY9 + 1
+	COBBLE = STORY9 + 1,
+	GRASS = COBBLE + 1,
+	LAVA = GRASS + 1,
+	WATER = LAVA + 1,
+	BRIDGE = WATER + 1,
+	CT = BRIDGE +1,
+	T = CT + 1,
+    TEXTURE_COUNT = T + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -267,12 +294,13 @@ enum class EFFECT_ASSET_ID
 	TURTLE = SALMON + 1,
 	TEXTURED = TURTLE + 1,
 	WATER = TEXTURED + 1,
-	LIGHT = WATER + 1,
-	PLANTSPOT = LIGHT + 1,
+	ITEM = WATER + 1,
+	PLANTSPOT = ITEM + 1,
 	INSTANCES = PLANTSPOT + 1,
 	ANIMATE = INSTANCES + 1,
 	PARTICLE = ANIMATE + 1,
-	EFFECT_COUNT = PARTICLE + 1
+	HEALTH = PARTICLE + 1,
+	EFFECT_COUNT = HEALTH + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 

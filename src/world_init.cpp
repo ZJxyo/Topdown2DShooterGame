@@ -311,7 +311,7 @@ MyArray createMatrix(std::string path) {// matrix 2d array
 		
 	}
 
-//	Prinxt(T);
+//	Print(T);
     return T;
 }
 
@@ -343,6 +343,17 @@ int SetupMap(RenderSystem *renderer, int current_map)
 			 GEOMETRY_BUFFER_ID::RECTANGLE});
 	}
 	for (json wall_obj: j["walls"]){
+		std::string texture = wall_obj["texture"];
+		auto texture_asset_id = TEXTURE_ASSET_ID::WALL;
+		if (texture == "WALL") {
+			texture_asset_id = TEXTURE_ASSET_ID::WALL;
+		} else if (texture == "WATER") {
+			texture_asset_id = TEXTURE_ASSET_ID::WATER;
+		} else if (texture == "GROUND_WOOD") {
+			texture_asset_id = TEXTURE_ASSET_ID::GROUND_WOOD;
+		} else if (texture == "LAVA") {
+			texture_asset_id = TEXTURE_ASSET_ID::LAVA;
+		}
 		for (json w : wall_obj["motion"])
 		{
 			auto entity = Entity();
@@ -368,7 +379,7 @@ int SetupMap(RenderSystem *renderer, int current_map)
 			// Create and (empty) Salmon component to be able to refer to all turtles
 			registry.renderRequests.insert(
 				entity,
-				{TEXTURE_ASSET_ID::WALL,
+				{texture_asset_id,
 				EFFECT_ASSET_ID::TEXTURED,
 				GEOMETRY_BUFFER_ID::SPRITE});
 		}
@@ -390,9 +401,9 @@ void Fill(MyArray &T){
 void Print(const MyArray &T){
     for(auto &row : T){
         for(auto &el : row){
-            //cout<<el<<" ";
+            cout<<el<<" ";
         }
-        //cout << endl;
+        cout << endl;
     }
 }
 
@@ -408,6 +419,17 @@ int createGround(RenderSystem *renderer, int current_map)
 	ifs >> j;
 
 	for (json ground_obj: j["ground"]){
+		std::string texture = ground_obj["texture"];
+		auto texture_asset_id = TEXTURE_ASSET_ID::GROUND_WOOD;
+		if (texture == "GROUND_WOOD") {
+			texture_asset_id = TEXTURE_ASSET_ID::GROUND_WOOD;
+		} else if (texture == "GRASS") {
+			texture_asset_id = TEXTURE_ASSET_ID::GRASS;
+		} else if (texture == "BRIDGE") {
+			texture_asset_id = TEXTURE_ASSET_ID::BRIDGE;
+		} else if (texture == "COBBLE") {
+			texture_asset_id = TEXTURE_ASSET_ID::COBBLE;
+		}
 		for (json m: ground_obj["motion"])
 		{
 			auto entity = Entity();
@@ -421,13 +443,15 @@ int createGround(RenderSystem *renderer, int current_map)
 			motion.velocity = {0.f, 0.f};
 			motion.scale = {m["scale"]["x"], m["scale"]["y"]};
 
-			motion.position = {m["position"]["x"], m["position"]["y"]};
+			motion.position = {int(m["position"]["x"]) + 50, int(m["position"]["y"]) + 50};
 
 			// Create and (empty) Salmon component to be able to refer to all turtles
 
+			
+
 			registry.floorRenderRequests.insert(
 				entity,
-				{TEXTURE_ASSET_ID::GROUND_WOOD,
+				{texture_asset_id,
 					EFFECT_ASSET_ID::TEXTURED,
 					GEOMETRY_BUFFER_ID::SPRITE});
 			
@@ -531,6 +555,51 @@ Entity createNonConvexWall(float thickness, std::vector<vec2>& hinges) {
 		 EFFECT_ASSET_ID::COLOURED,
 		 GEOMETRY_BUFFER_ID::CUSTOM });
 	return e;
+}
+
+
+Entity createUI(RenderSystem *renderer, bool attack_mode) {
+	Entity entity = Entity();
+	auto texture_asset_id = TEXTURE_ASSET_ID::TEXTURE_COUNT;
+	if (attack_mode){
+		texture_asset_id = TEXTURE_ASSET_ID::T;
+	} else {
+		texture_asset_id = TEXTURE_ASSET_ID::CT;
+	}
+	Motion &m = registry.motions.emplace(entity);
+	m.scale = {50,50};
+	m.position = {1175,25};
+	registry.renderRequests.insert(entity,
+		{
+		texture_asset_id,
+		EFFECT_ASSET_ID::TEXTURED,
+		GEOMETRY_BUFFER_ID::SPRITE
+		});
+		
+	Entity healthbar = Entity();
+
+	Motion &hm = registry.motions.emplace(healthbar);
+	hm.scale = {100,3};
+	hm.position = {600,325};
+	registry.renderRequests.insert(healthbar,
+		{
+		TEXTURE_ASSET_ID::BOMB,
+		EFFECT_ASSET_ID::HEALTH,
+		GEOMETRY_BUFFER_ID::SPRITE
+		});
+	return entity;
+}
+
+Entity createItem(vec2 pos, ITEM_TYPE type) {
+	Entity entity = Entity();
+	registry.items.emplace(entity, pos, type);
+	registry.itemRenderRequests.insert(entity,
+		{
+		TEXTURE_ASSET_ID::TEXTURE_COUNT,
+		EFFECT_ASSET_ID::ITEM,
+		GEOMETRY_BUFFER_ID::CUSTOM
+		});
+	return entity;
 }
 
 Entity createParticleSource(uint8 size, float radius, float life_span, vec3 color, vec2 pos, float angle, float speed) {

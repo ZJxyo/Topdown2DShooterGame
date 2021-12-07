@@ -4,10 +4,10 @@
 
 void update_visibility_status(std::vector<vec2> contact_points, std::vector<float> new_angles) {
 	Entity player = registry.players.entities[0];
-	vec2 player_position = registry.motions.get(player).position;
+	vec2& player_position = registry.motions.get(player).position;
 	for (int i = 0; i < registry.enemies.size(); i++) {
 		Entity enemy = registry.enemies.entities[i];
-		vec2 enemy_position = registry.motions.get(enemy).position;
+		vec2& enemy_position = registry.motions.get(enemy).position;
 		// relative position from the player
 		vec2 relative_pos = enemy_position - player_position;
 		// angle in radians
@@ -283,6 +283,14 @@ void PhysicsSystem::step(float elapsed_ms)
 		}
 	}
 
+	for (int i = registry.boosts.size() - 1; i >= 0; i--) {
+		Boost& boost = registry.boosts.components[i];
+		boost.timer -= elapsed_ms;
+		if (boost.timer <= 0) {
+			registry.boosts.remove(registry.boosts.entities[i]);
+		}
+	}
+
 	for (int i = registry.shockwaveSource.size() - 1; i >= 0; i--) {
 		registry.shockwaveSource.components[i].time_elapsed += time;
 		if (registry.shockwaveSource.components[i].time_elapsed > 1.f) {
@@ -372,6 +380,25 @@ void PhysicsSystem::step(float elapsed_ms)
 				bullet_removed = true;
 				break;
 			}
+		}
+	}
+
+	Entity player = registry.players.entities[0];
+	vec2& player_pos = registry.motions.get(player).position;
+
+	float player_radius = registry.avatarColliders.get(player).radius;
+	for (int i = registry.itemColliders.size() - 1; i >= 0; i--) {
+		Entity item_entity = registry.itemColliders.entities[i];
+		Item& item_comp = registry.items.get(item_entity);
+		if (length(player_pos - item_comp.position) < player_radius + registry.itemColliders.components[i].radius) {
+			for (auto callbacks : item_callbacks) {
+				callbacks(player, item_comp.item_type);
+			}
+			registry.itemColliders.remove(item_entity);
+			if (registry.itemColliders.has(item_entity)) {
+				assert(false);
+			}
+			item_comp.active = false;
 		}
 	}
 
@@ -526,7 +553,6 @@ void PhysicsSystem::step(float elapsed_ms)
 		registry.remove_all_components_of(registry.lightSources.entities[0]);
 	}
 
-	vec2 player_pos = registry.motions.get(registry.players.entities[0]).position;
 	std::vector<vec3> light_polygon = compute_light_polygon(player_pos, wall_vertices);
 	std::vector<unsigned int> light_polygon_indices = compute_light_polygon_indices(light_polygon.size());
 	createLightSource(player_pos, light_polygon, light_polygon_indices);

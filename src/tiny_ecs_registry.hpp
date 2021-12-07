@@ -44,9 +44,13 @@ public:
 	ComponentContainer<NonConvexCollider> nonConvexWallColliders;
 	ComponentContainer<CustomMesh> customMeshes;
 	ComponentContainer<RenderRequest> customMeshRenderRequests;
+    ComponentContainer<BombInfo> bombInfo;
+    ComponentContainer<Item> items;
+    ComponentContainer<CircleCollider> itemColliders;
+    ComponentContainer<RenderRequest> itemRenderRequests;
+    ComponentContainer<Boost> boosts;
 	ComponentContainer<SectorCollider> pushAreaColliders;
 	ComponentContainer<Physics> physics;
-  ComponentContainer<BombInfo> bombInfo;
 
 
 	// constructor that adds all containers for looping over them
@@ -86,9 +90,13 @@ public:
 		registry_list.push_back(&nonConvexWallColliders);
 		registry_list.push_back(&customMeshes);
 		registry_list.push_back(&customMeshRenderRequests);
+        registry_list.push_back(&bombInfo);
+        registry_list.push_back(&items);
+        registry_list.push_back(&itemColliders);
+        registry_list.push_back(&itemRenderRequests);
+        registry_list.push_back(&boosts);
 		registry_list.push_back(&pushAreaColliders);
 		registry_list.push_back(&physics);
-    registry_list.push_back(&bombInfo);
 	}
 
 	void clear_all_components()
