@@ -387,7 +387,21 @@ int SetupMap(RenderSystem *renderer, int current_map)
 	return 0;
 }
 
+void setupItems(int current_map) {
+	string src = PROJECT_SOURCE_DIR;
+	src += "src/map/map" + to_string(current_map) + ".json";
+	ifstream ifs(src);
+	json j;
+	ifs >> j;
 
+	for (json health_regen : j["items"]["health_regen"]) {
+		createItem(vec2(health_regen["x"], health_regen["y"]), ITEM_TYPE::HEALTH_REGEN);
+	}
+
+	for (json speed_boost : j["items"]["speed_boost"]) {
+		createItem(vec2(speed_boost["x"], speed_boost["y"]), ITEM_TYPE::SPEED_BOOST);
+	}
+}
 
 
 void Fill(MyArray &T){

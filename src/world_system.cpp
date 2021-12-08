@@ -24,7 +24,7 @@ const size_t BULLET_TIMER_MS = 100;
 const size_t BOMB_TIMER_MS = 40000.f;
 const size_t FOOTSTEPS_SOUND_TIMER_MS = 400.f;
 const size_t PLANT_TIMER_MS = 2000.0f;
-const size_t ITEM_RESPAWN_DELAY = 30000.f;
+const size_t ITEM_RESPAWN_DELAY = 15000.f;
 const size_t WALL_COOLDOWN = 2000.f;
 const size_t DEFUSE_TIMER_MS = 6000.0f;
 const size_t PUSH_COOLDOWN = 1000.0f;
@@ -752,7 +752,8 @@ void WorldSystem::restart_game()
 	createGround(renderer, current_map);
 	
 	SetupMap(renderer, current_map);
-	createMatrix("src/map/map" + to_string(current_map) + ".json");
+	setupItems(current_map);
+	//createMatrix("src/map/map" + to_string(current_map) + ".json");
 	createUI(renderer, attack_mode);
   
 	std::vector<vec3> vertices = {

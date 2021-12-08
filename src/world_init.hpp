@@ -46,3 +46,4 @@ Entity createNonConvexWall(float thickness, std::vector<vec2>& hinges);
 Entity createItem(vec2 pos, ITEM_TYPE type);
 Entity createParticleSource(uint8 size, float radius, float life_span, vec3 color, vec2 pos, float angle, float speed);
 Entity createPushArea(vec2 pos, float dist, float angle, float span);
+void setupItems(int current_map);
