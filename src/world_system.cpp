@@ -209,13 +209,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	while (registry.debugComponents.entities.size() > 0)
 		registry.remove_all_components_of(registry.debugComponents.entities.back());
 
-	if(win_game){
-
-		return true;
-	}
 
 	update_player_velocity();
 
+	if(win_game || !canMove){
+		return true;
+	}
+	
 	//update animation
 	Player p = registry.players.get(player_salmon);
 	auto &a_entities = registry.animates.entities;
@@ -522,7 +522,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	if (defuse_timer < 0 && bomb_planted && !attack_mode){
 		end_screen = true;
 		canMove = false;
+		plant_timer=PLANT_TIMER_MS;
+		explode_timer=BOMB_TIMER_MS;
+		defuse_timer=DEFUSE_TIMER_MS;
+		bomb_planted=false;
+		is_planting=false;
+		is_defusing=false;
 		createEndScreen(renderer,motion.position, true, 2);
+		return true;
 	}
 
 	if (plant_timer < 0 && !bomb_planted &&  attack_mode) {
@@ -556,6 +563,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	if (bomb_planted && attack_mode && defuse_timer < 0){
 		end_screen = true;
 		canMove = false;
+		bomb_planted = false;
 		createEndScreen(renderer,motion.position, false, 2);
 	}
 
@@ -570,7 +578,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	}
 	
 	if (explode_timer < 0 && !win_game && !attack_mode) {
-		cout << "explode";		
 		Mix_PlayChannel(-1, bomb_explosion_sound, 0);
 		
 		end_screen = true;
