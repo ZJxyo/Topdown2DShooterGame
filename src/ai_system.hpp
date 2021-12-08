@@ -269,8 +269,8 @@ public:
 
 class BTIfCondition : public BTNode {
 public:
-    BTIfCondition(BTNode* chase, BTNode* shoot, BTNode* build, BTNode* guard, BTNode* move, bool defuser) :
-     chase(chase), shoot(shoot), build(build), guard(guard), move(move), defuser(defuser) {
+    BTIfCondition(BTNode* chase, BTNode* shoot, BTNode* build, BTNode* guard, BTNode* move, BTNode* defuse, bool defuser) :
+     chase(chase), shoot(shoot), build(build), guard(guard), move(move), defuser(defuser), defuse(defuse) {
 
     }
 
@@ -291,7 +291,7 @@ public:
                 if (move->process(e) == BTState::Success) {
                     return BTState::Success;
                 } 
-                else if (guard->process(e) == BTState::Success){
+                else if (defuse->process(e) == BTState::Success){
                     return BTState::Success;
                 }
             } else {
@@ -318,6 +318,7 @@ private:
     BTNode* guard;
     BTNode* move;
     bool defuser;
+    BTNode* defuse;
 };
 
 //class Chase : public BTNode {
@@ -743,6 +744,34 @@ private:
             fr.fire_rate = BULLET_TIMER_AI_MS;
             createBullet(renderer, AImotion.position, AImotion.angle + 1.5708 + r3);
         }
+
+        return BTState::Success;
+    }
+};
+
+
+class Defuse : public BTNode {
+public:
+    Defuse(Entity other, RenderSystem* renderer, float elapsed_ms) {
+        player = other;
+        this->renderer = renderer;
+        this->elapsed_ms = elapsed_ms;
+    }
+private:
+    Entity player;
+    RenderSystem* renderer;
+    float elapsed_ms;
+    void init(Entity e) override {}
+
+    BTState process(Entity e) override {
+        registry.motions.get(e).velocity = vec2(0.f);
+        //WorldSystem::getEntity()
+        int playerX = registry.motions.get(player).position.x;
+        int playerY = registry.motions.get(player).position.y;
+        Motion& AImotion = registry.motions.get(e);
+
+        
+        AImotion.angle = atan2(playerY - AImotion.position.y, playerX - AImotion.position.x);
 
         return BTState::Success;
     }
