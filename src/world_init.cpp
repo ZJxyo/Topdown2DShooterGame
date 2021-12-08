@@ -30,7 +30,7 @@ Entity createSalmon(RenderSystem *renderer, vec2 pos)
 	registry.players.emplace(entity);
 	Health &health = registry.healths.emplace(entity);
 	health.health = 1000;
-	registry.circleColliders.emplace(entity, 50);
+	registry.avatarColliders.emplace(entity, 50);
 	registry.animates.emplace(entity);
 	registry.fireRates.emplace(entity);
 	registry.renderRequests.insert(
@@ -62,8 +62,11 @@ Entity createWall(RenderSystem *renderer, vec2 pos, float angle, vec2 scale)
 	motion.angle = angle;
 	motion.scale = scale;
 
-	registry.polygonColliders.emplace(entity);
+	registry.wallColliders.emplace(entity);
 	registry.walls.emplace(entity);
+	registry.destroyable.emplace(entity);
+	Health &h = registry.healths.emplace(entity);
+	h.health = 50;
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.renderRequests.insert(
@@ -113,12 +116,12 @@ Entity createTurtle(RenderSystem *renderer, vec2 position)
 	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
 	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
-	registry.circleColliders.emplace(entity, 50);
+	registry.avatarColliders.emplace(entity, 45);
 
 	// Initialize the motion
 	auto &motion = registry.motions.emplace(entity);
 	motion.angle = 0.f;
-	motion.velocity = {100.f, 0.f};
+	motion.velocity = {0.f, 0.f};
 	motion.position = position;
 
 	// Setting initial values, scale is negative to make it face the opposite way
@@ -127,6 +130,7 @@ Entity createTurtle(RenderSystem *renderer, vec2 position)
 	// Create and (empty) Turtle component to be able to refer to all turtles
 	registry.enemies.emplace(entity);
 	registry.animates.emplace(entity);
+	registry.fireRates.emplace(entity);
 	Health &health = registry.healths.emplace(entity);
 	health.health = 100;
 	registry.renderRequests.insert(
@@ -195,6 +199,9 @@ Entity createBomb(RenderSystem *renderer, vec2 pos){
 	Entity bomb = Entity();
 	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(bomb, &mesh);
+	Bomb &b = registry.bomb.emplace(bomb);
+    BombInfo &bombInfo = registry.bombInfo.emplace(bomb);
+    bombInfo.position = pos;
 	Motion &m = registry.motions.emplace(bomb);
 	m.position = pos;
 	m.scale = {50.f,80.f};
@@ -210,7 +217,7 @@ Entity createBomb(RenderSystem *renderer, vec2 pos){
 
 
 
-Entity createEndScreen(RenderSystem *renderer, vec2 pos){
+Entity createEndScreen(RenderSystem *renderer, vec2 pos, bool win, int mode){
 
 	Entity endscreen = Entity();
 	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
@@ -220,11 +227,43 @@ Entity createEndScreen(RenderSystem *renderer, vec2 pos){
 	m.scale = {600.f,300.f};
 	m.velocity = {0.f,0.f};
 	m.angle = 0.f;
+	if (win && mode == 1)
 	registry.renderRequests.insert(
 			endscreen,
-			{TEXTURE_ASSET_ID::WIN,
+			{TEXTURE_ASSET_ID::BOMBWIN,
 				EFFECT_ASSET_ID::TEXTURED,
 				GEOMETRY_BUFFER_ID::SPRITE});
+	else if (win && mode == 2)
+	registry.renderRequests.insert(
+			endscreen,
+			{TEXTURE_ASSET_ID::DEFUSEWIN,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	else if (win && mode == 3)
+	registry.renderRequests.insert(
+			endscreen,
+			{TEXTURE_ASSET_ID::ELIMWIN,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	else if (!win && mode == 1)
+	registry.renderRequests.insert(
+			endscreen,
+			{TEXTURE_ASSET_ID::BOMBLOSE,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	else if (!win && mode == 2)
+	registry.renderRequests.insert(
+			endscreen,
+			{TEXTURE_ASSET_ID::DEFUSELOSE,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	else if (!win && mode == 3)
+	registry.renderRequests.insert(
+			endscreen,
+			{TEXTURE_ASSET_ID::ELIMLOSE,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+
 	return endscreen;
 }
 struct wall
@@ -234,7 +273,7 @@ struct wall
 	vec2 scale;
 };
 
-MyArray createMatrix() {// matrix 2d array
+MyArray createMatrix(std::string path) {// matrix 2d array
 	
 	MyArray T;
 	Fill(T);
@@ -242,12 +281,13 @@ MyArray createMatrix() {// matrix 2d array
 
 	//load from map.json
 	string src = PROJECT_SOURCE_DIR;
-	src += "src/map/map.json";
+	src += path;
 	ifstream ifs(src);
 	json j;
 	ifs >> j;
 
-	for (json w : j["walls"]) {
+	for (json q : j["walls"]) {
+		for (json w: q["motion"]) {
 		int value_x = int(w["position"]["x"]) / 100;
 		int value_y = int(w["position"]["y"]) / 100;
 		T[value_y][value_x] = 1;
@@ -267,16 +307,18 @@ MyArray createMatrix() {// matrix 2d array
 		// 	T[value_y + i][value_x] = 1;
 		// 	T[value_y - i][value_x] = 1;
 		// }
+		}
+		
 	}
 
 //	Print(T);
     return T;
 }
 
-int SetupMap(RenderSystem *renderer)
+int SetupMap(RenderSystem *renderer, int current_map)
 {
 	string src = PROJECT_SOURCE_DIR;
-	src += "src/map/map.json";
+	src += "src/map/map" + to_string(current_map) + ".json";
 	ifstream ifs(src);
 	json j;
 	ifs >> j;
@@ -300,45 +342,66 @@ int SetupMap(RenderSystem *renderer)
 			 EFFECT_ASSET_ID::PLANTSPOT,
 			 GEOMETRY_BUFFER_ID::RECTANGLE});
 	}
-	
-	for (json w : j["walls"])
-	{
-		auto entity = Entity();
+	for (json wall_obj: j["walls"]){
+		std::string texture = wall_obj["texture"];
+		auto texture_asset_id = TEXTURE_ASSET_ID::WALL;
+		if (texture == "WALL") {
+			texture_asset_id = TEXTURE_ASSET_ID::WALL;
+		} else if (texture == "WATER") {
+			texture_asset_id = TEXTURE_ASSET_ID::WATER;
+		} else if (texture == "GROUND_WOOD") {
+			texture_asset_id = TEXTURE_ASSET_ID::GROUND_WOOD;
+		} else if (texture == "LAVA") {
+			texture_asset_id = TEXTURE_ASSET_ID::LAVA;
+		}
+		for (json w : wall_obj["motion"])
+		{
+			auto entity = Entity();
 
-		// Store a reference to the potentially re-used mesh object
-		Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::RECTANGLE);
-		registry.meshPtrs.emplace(entity, &mesh);
+			// Store a reference to the potentially re-used mesh object
+			Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::RECTANGLE);
+			registry.meshPtrs.emplace(entity, &mesh);
+			registry.wallColliders.emplace(entity);
 
-		// Setting initial motion values
-		Motion &motion = registry.motions.emplace(entity);
-		int pre_value1 = int(w["position"]["x"]);
-		int pre_value2 = int(w["position"]["y"]);
-		int value1 = pre_value1 + 50;
-		int value2 = pre_value2 + 50;
-		motion.position = vec2(value1, value2);
-		motion.angle = w["angle"];
-		motion.scale = vec2(w["scale"]["x"], w["scale"]["y"]);
+			// Setting initial motion values
+			Motion &motion = registry.motions.emplace(entity);
+			int pre_value1 = int(w["position"]["x"]);
+			int pre_value2 = int(w["position"]["y"]);
+			int value1 = pre_value1 + 50;
+			int value2 = pre_value2 + 50;
+			motion.position = vec2(value1, value2);
+			motion.angle = w["angle"];
+			motion.scale = vec2(w["scale"]["x"], w["scale"]["y"]);
 
-		registry.polygonColliders.emplace(entity);
-		registry.walls.emplace(entity);
+			//registry.polygonColliders.emplace(entity);
+			registry.walls.emplace(entity);
 
-		
-		
-		
-
-		
-
-		
-		// Create and (empty) Salmon component to be able to refer to all turtles
-		registry.renderRequests.insert(
-			entity,
-			{TEXTURE_ASSET_ID::WALL,
-			 EFFECT_ASSET_ID::TEXTURED,
-			 GEOMETRY_BUFFER_ID::SPRITE});
+			// Create and (empty) Salmon component to be able to refer to all turtles
+			registry.renderRequests.insert(
+				entity,
+				{texture_asset_id,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+		}
 	}
 	return 0;
 }
 
+void setupItems(int current_map) {
+	string src = PROJECT_SOURCE_DIR;
+	src += "src/map/map" + to_string(current_map) + ".json";
+	ifstream ifs(src);
+	json j;
+	ifs >> j;
+
+	for (json health_regen : j["items"]["health_regen"]) {
+		createItem(vec2(health_regen["x"], health_regen["y"]), ITEM_TYPE::HEALTH_REGEN);
+	}
+
+	for (json speed_boost : j["items"]["speed_boost"]) {
+		createItem(vec2(speed_boost["x"], speed_boost["y"]), ITEM_TYPE::SPEED_BOOST);
+	}
+}
 
 
 void Fill(MyArray &T){
@@ -360,14 +423,29 @@ void Print(const MyArray &T){
 
 
 
-int createGround(RenderSystem *renderer)
+int createGround(RenderSystem *renderer, int current_map)
 {
+	
+	string src = PROJECT_SOURCE_DIR;
+	src += "src/map/map" + to_string(current_map) + ".json";
+	ifstream ifs(src);
+	json j;
+	ifs >> j;
 
-	for (int i = 0; i <= 4; i++)
-	{
-		for (int j = 0; j <= 4; j++)
+	for (json ground_obj: j["ground"]){
+		std::string texture = ground_obj["texture"];
+		auto texture_asset_id = TEXTURE_ASSET_ID::GROUND_WOOD;
+		if (texture == "GROUND_WOOD") {
+			texture_asset_id = TEXTURE_ASSET_ID::GROUND_WOOD;
+		} else if (texture == "GRASS") {
+			texture_asset_id = TEXTURE_ASSET_ID::GRASS;
+		} else if (texture == "BRIDGE") {
+			texture_asset_id = TEXTURE_ASSET_ID::BRIDGE;
+		} else if (texture == "COBBLE") {
+			texture_asset_id = TEXTURE_ASSET_ID::COBBLE;
+		}
+		for (json m: ground_obj["motion"])
 		{
-
 			auto entity = Entity();
 
 			Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::RECTANGLE);
@@ -377,17 +455,20 @@ int createGround(RenderSystem *renderer)
 			Motion &motion = registry.motions.emplace(entity);
 			motion.angle = 0.f;
 			motion.velocity = {0.f, 0.f};
-			motion.scale = {1000, 1000};
+			motion.scale = {m["scale"]["x"], m["scale"]["y"]};
 
-			motion.position = {(1000 * i) + 500, (1000 * j) + 500};
+			motion.position = {int(m["position"]["x"]) + 50, int(m["position"]["y"]) + 50};
 
 			// Create and (empty) Salmon component to be able to refer to all turtles
 
+			
+
 			registry.floorRenderRequests.insert(
 				entity,
-				{TEXTURE_ASSET_ID::GROUND_WOOD,
-				 EFFECT_ASSET_ID::TEXTURED,
-				 GEOMETRY_BUFFER_ID::SPRITE});
+				{texture_asset_id,
+					EFFECT_ASSET_ID::TEXTURED,
+					GEOMETRY_BUFFER_ID::SPRITE});
+			
 		}
 	}
 
@@ -415,7 +496,7 @@ Entity createBullet(RenderSystem *renderer, vec2 pos, float angle)
 
 	motion.velocity = {x_speed, y_speed};
 
-	registry.pointColliders.emplace(entity);
+	registry.bulletColliders.emplace(entity);
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
 	registry.bulletsRenderRequests.insert(
@@ -436,7 +517,128 @@ Entity createShockwave(vec2 pos) {
 Entity createLightSource(vec2 pos, std::vector<vec3>& vertices, std::vector<unsigned int>& indices) {
 	
 	Entity entity = Entity();
-	registry.lightSources.emplace(entity, pos, vertices, indices);
+	registry.lightSources.emplace(entity, vertices, indices);
 
+	return entity;
+}
+
+Entity createNonConvexWall(float thickness, std::vector<vec2>& hinges) {
+	float half_thickness = thickness / 2.f;
+	std::vector<vec2> vertices;
+	std::vector<vec3> verticesV3;
+	std::vector<unsigned int> indices;
+	for (int i = 0; i < hinges.size() - 1; i++) {
+		vec2 h1 = hinges[i];
+		vec2 h2 = hinges[i + 1];
+		// direction from hinge i to hinge i+1 
+		vec2 dir = normalize(h2 - h1);
+		vec2 normal = vec2(-dir.y, dir.x);
+		// hinge 1 vertex 1
+		vec2 v = h1 + (normal - dir) * half_thickness;
+		vertices.push_back(v);
+		verticesV3.push_back(vec3(v, 1.f));
+		// hinge 1 vertex 2
+		v = h1 + (-normal - dir) * half_thickness;
+		vertices.push_back(v);
+		verticesV3.push_back(vec3(v, 1.f));
+		// hinge 2 vertex 1
+		v = h2 + (normal + dir) * half_thickness;
+		vertices.push_back(v);
+		verticesV3.push_back(vec3(v, 1.f));
+		// hinge 2 vertex 2
+		v = h2 + (-normal + dir) * half_thickness;
+		vertices.push_back(v);
+		verticesV3.push_back(vec3(v, 1.f));
+		unsigned int index = (unsigned int)i;
+		//triangle 1
+		indices.push_back(index * 4);
+		indices.push_back(index * 4 + 1);
+		indices.push_back(index * 4 + 2);
+		//triangle 2
+		indices.push_back(index * 4 + 1);
+		indices.push_back(index * 4 + 2);
+		indices.push_back(index * 4 + 3);
+	}
+
+	Entity e = Entity();
+	registry.nonConvexWallColliders.emplace(e).vertices = vertices;
+	registry.customMeshes.emplace(e, verticesV3, indices).color = vec3(0.678f, 0.847f, 0.902f);
+	registry.healths.emplace(e).health = 300;
+	registry.customMeshRenderRequests.insert(e,
+		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
+		 EFFECT_ASSET_ID::COLOURED,
+		 GEOMETRY_BUFFER_ID::CUSTOM });
+	return e;
+}
+
+
+Entity createUI(RenderSystem *renderer, bool attack_mode) {
+	Entity entity = Entity();
+	auto texture_asset_id = TEXTURE_ASSET_ID::TEXTURE_COUNT;
+	if (attack_mode){
+		texture_asset_id = TEXTURE_ASSET_ID::T;
+	} else {
+		texture_asset_id = TEXTURE_ASSET_ID::CT;
+	}
+	Motion &m = registry.motions.emplace(entity);
+	m.scale = {50,50};
+	m.position = {1175,25};
+	registry.renderRequests.insert(entity,
+		{
+		texture_asset_id,
+		EFFECT_ASSET_ID::TEXTURED,
+		GEOMETRY_BUFFER_ID::SPRITE
+		});
+		
+	Entity healthbar = Entity();
+
+	Motion &hm = registry.motions.emplace(healthbar);
+	hm.scale = {100,3};
+	hm.position = {600,325};
+	registry.renderRequests.insert(healthbar,
+		{
+		TEXTURE_ASSET_ID::BOMB,
+		EFFECT_ASSET_ID::HEALTH,
+		GEOMETRY_BUFFER_ID::SPRITE
+		});
+	return entity;
+}
+
+Entity createItem(vec2 pos, ITEM_TYPE type) {
+	Entity entity = Entity();
+	registry.items.emplace(entity, pos, type);
+	registry.itemRenderRequests.insert(entity,
+		{
+		TEXTURE_ASSET_ID::TEXTURE_COUNT,
+		EFFECT_ASSET_ID::ITEM,
+		GEOMETRY_BUFFER_ID::CUSTOM
+		});
+	return entity;
+}
+
+Entity createParticleSource(uint8 size, float radius, float life_span, vec3 color, vec2 pos, float angle, float speed) {
+	assert(size != 0);
+	std::vector<vec2> positions;
+	std::vector<vec2> velocities;
+	for (uint i = 0; i < size; i++) {
+		positions.push_back(pos);
+		//-0.5 to 0.5
+		float random_float = ((float)rand() / (float)RAND_MAX) - 0.5f;
+		float angle_span = M_PI / 3.f;
+		float random_angle = angle + random_float * angle_span;
+		vec2 random_dir = vec2(cos(random_angle), sin(random_angle));
+		float random_speed = speed * (1.f + (((float)rand() / (float)RAND_MAX) - 0.5f));
+		velocities.push_back(random_dir * random_speed);
+	}
+
+	Entity ps = Entity();
+	registry.particleSources.emplace(ps, size, radius, life_span, color, positions, velocities);
+
+	return ps;
+}
+
+Entity createPushArea(vec2 pos, float dist, float angle, float span) {
+	Entity entity = Entity();
+	registry.pushAreaColliders.emplace(entity, pos, dist, angle, span);
 	return entity;
 }

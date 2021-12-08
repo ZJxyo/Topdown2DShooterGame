@@ -25,14 +25,25 @@ Entity createLine(vec2 position, float angle, vec2 size);
 // a pebble
 Entity createPebble(vec2 pos, vec2 size);
 Entity createBomb(RenderSystem *renderer, vec2 pos);
-Entity createEndScreen(RenderSystem *renderer, vec2 pos);
-MyArray createMatrix();
-int createGround(RenderSystem *renderer);
-int SetupMap(RenderSystem *renderer);
-
+Entity createEndScreen(RenderSystem *renderer, vec2 pos, bool win, int mode);
+MyArray createMatrix(std::string path);
+int createGround(RenderSystem *renderer, int current_map);
+int SetupMap(RenderSystem *renderer, int current_map);
+Entity createUI(RenderSystem *renderer, bool attack_mode);
 void Fill(MyArray &T);
 void Print(const MyArray &T);
 
 Entity createBullet(RenderSystem *renderer, vec2 position, float angle);
 Entity createLightSource(vec2 pos, std::vector<vec3>& vertices, std::vector<unsigned int>& indices);
 Entity createShockwave(vec2 pos);
+
+
+const vec2 BOX1_LOCATION = {1000, 4800};
+const vec2 BOX2_LOCATION = {1000, 4600};
+const vec2 BOX3_LOCATION = {1000, 4400};
+const vec2 BOX4_LOCATION = {1000, 4200};
+Entity createNonConvexWall(float thickness, std::vector<vec2>& hinges);
+Entity createItem(vec2 pos, ITEM_TYPE type);
+Entity createParticleSource(uint8 size, float radius, float life_span, vec3 color, vec2 pos, float angle, float speed);
+Entity createPushArea(vec2 pos, float dist, float angle, float span);
+void setupItems(int current_map);

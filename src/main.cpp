@@ -13,8 +13,9 @@
 #include "HelpMenu.h"
 
 using Clock = std::chrono::high_resolution_clock;
-const vec2 INTRO_LOCATION = {1000, 4800};
-
+const vec2 INTRO_LOCATION = {2400, 4900};
+Entity storiesTutorial[5];
+int toggleTutorial = 1;
 
 // Entry point
 int main()
@@ -40,8 +41,8 @@ int main()
 	// initialize the main systems
 	renderer.init(window_width_px, window_height_px, window);
 	world.init(&renderer);
-
 	physics.bullet_hit_callbacks.emplace_back(WorldSystem::handle_bullet_hit);
+	physics.item_callbacks.emplace_back(WorldSystem::handle_items);
 
 	// variable timestep loop
 	auto t = Clock::now();
@@ -59,23 +60,44 @@ int main()
         renderer.draw();
         // menu intro loop
         if(helpMenu.showInto) {
-            helpMenu.createInto(&renderer, window, INTRO_LOCATION);
-//            ai.BFS(0,0, 40,35);
-            helpMenu.showInto = false;
-        }
+            if(toggleTutorial == 1) {
+                storiesTutorial[0] = helpMenu.createStory1(&renderer, window, INTRO_LOCATION);
+                toggleTutorial = 2;
 
-        // show menu page loop
-        if(helpMenu.showMenu && !helpMenu.showInto) {
-            helpMenu.createMenu(&renderer, window, INTRO_LOCATION);
-            if(!helpMenu.showMenu) {
-                world.init(&renderer);
+            } else if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && toggleTutorial == 2) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                registry.remove_all_components_of(storiesTutorial[0]);
+                storiesTutorial[1] = helpMenu.createStory2(&renderer, window, INTRO_LOCATION);
+                toggleTutorial = 3;
+
+            } else if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && toggleTutorial == 3) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                registry.remove_all_components_of(storiesTutorial[1]);
+                storiesTutorial[2] = helpMenu.createStory3(&renderer, window, INTRO_LOCATION);
+                toggleTutorial = 4;
+
+            } else if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && toggleTutorial == 4) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                registry.remove_all_components_of(storiesTutorial[2]);
+                storiesTutorial[3] = helpMenu.createStory4(&renderer, window, INTRO_LOCATION);
+                toggleTutorial = 5;
+
+            } else if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && toggleTutorial == 5) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                registry.remove_all_components_of(storiesTutorial[3]);
+                storiesTutorial[4] = helpMenu.createStory5(&renderer, window, INTRO_LOCATION);
+                toggleTutorial = 6;
+
+            } else if(glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS && toggleTutorial == 6) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                registry.remove_all_components_of(storiesTutorial[4]);
+                helpMenu.showInto = false;
             }
-        }
-        // game loop
-        else {
+
+        } else {
             world.step(elapsed_ms);
-            ai.step(elapsed_ms);
-            physics.step(elapsed_ms);
+			ai.step(elapsed_ms, world.getCurrentMap());
+			physics.step(elapsed_ms);
             //world.handle_collisions();
         }
 

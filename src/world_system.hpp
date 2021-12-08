@@ -38,13 +38,15 @@ public:
 	// Check for collisions
 	void handle_collisions();
 	static void handle_bullet_hit(Entity entity_1, Entity entity_2);
+	static void handle_items(Entity entity_1, ITEM_TYPE type);
 
 	void update_player_velocity();
 
-	static Entity createParticleSource(uint8 size, float radius, float decay, vec3 color, vec2 pos, vec2 dir, float speed);
-
 	// Should the game be over ?
 	bool is_over() const;
+
+    //get current map
+    int getCurrentMap();
 
 private:
 	// Input callback functions
@@ -68,21 +70,40 @@ private:
 	float next_turtle_spawn;
 	float next_fish_spawn;
 	float next_animation;
+	float next_chase;
 	Entity player_salmon;
-	bool mouse_down;
+	bool left_mouse_down;
 	bool tap;
+    Entity bomb;
 	bool can_plant;
 	bool bomb_planted;
+    bool canMove;
+    int toggle[4] = {-1, -1, -1, -1};
+    Entity stories[4];
+    Entity boxes[4];
 	float plant_timer;
 	float explode_timer;
 	bool is_planting;
-	bool bomb_exploded;
+	bool win_game;
+	bool end_screen;
 	float footsteps_timer;
 	bool buildmode;
 	bool building;
+	int maxWall;
+	bool attack_mode;
+	float defuse_timer;
+	int attack_side;
+	bool is_defusing;
 	vec2 buildcoord;
 	vec2 mousecoord;
-	
+	int current_map;
+
+	float wall_timer = -1.f;
+	float push_timer = -1.f;
+
+	// non convex walls
+	bool right_mouse_down = false;
+	std::vector<vec2> wall_hinges;
 
 	// music references
 	Mix_Music *background_music;
@@ -94,6 +115,8 @@ private:
 	Mix_Chunk *bomb_explosion_sound;
 	Mix_Chunk *footsteps_sound;
 	Mix_Chunk *ak47_sound;
+	Mix_Chunk *defuse_sound;
+	
 
 	// C++ random number generator
 	std::default_random_engine rng;
@@ -108,8 +131,9 @@ private:
 
 	Input input;
     HelpMenu helpMenu;
-    const vec2 BOX1_LOCATION = {1000, 4800};
-    const vec2 BOX2_LOCATION = {1000, 4600};
-    const vec2 BOX3_LOCATION = {1000, 4400};
-    const vec2 BOX4_LOCATION = {1000, 4200};
+    const vec2 BOX1_LOCATION = {2450, 4900};
+    const vec2 BOX2_LOCATION = {2550, 4900};
+    const vec2 BOX3_LOCATION = {2650, 4900};
+    const vec2 BOX4_LOCATION = {2750, 4900};
+
 };
