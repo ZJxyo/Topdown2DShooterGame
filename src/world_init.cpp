@@ -549,7 +549,7 @@ Entity createNonConvexWall(float thickness, std::vector<vec2>& hinges) {
 	Entity e = Entity();
 	registry.nonConvexWallColliders.emplace(e).vertices = vertices;
 	registry.customMeshes.emplace(e, verticesV3, indices).color = vec3(0.678f, 0.847f, 0.902f);
-	registry.healths.emplace(e).health = 200;
+	registry.healths.emplace(e).health = 300;
 	registry.customMeshRenderRequests.insert(e,
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
 		 EFFECT_ASSET_ID::COLOURED,
