@@ -745,7 +745,8 @@ void WorldSystem::restart_game()
 	createGround(renderer, current_map);
 	
 	SetupMap(renderer, current_map);
-	createMatrix("src/map/map" + to_string(current_map) + ".json");
+	setupItems(current_map);
+	//createMatrix("src/map/map" + to_string(current_map) + ".json");
 	createUI(renderer, attack_mode);
   
 	std::vector<vec3> vertices = {
