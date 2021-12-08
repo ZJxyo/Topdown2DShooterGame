@@ -27,6 +27,7 @@ const size_t PLANT_TIMER_MS = 2000.0f;
 const size_t ITEM_RESPAWN_DELAY = 30000.f;
 const size_t WALL_COOLDOWN = 2000.f;
 const size_t DEFUSE_TIMER_MS = 6000.0f;
+const size_t PUSH_COOLDOWN = 1000.0f;
 json j;
 
 // Create the fish world
@@ -452,26 +453,26 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		}
 	}
 
-	if (buildmode) {
-		vec2 pos = registry.motions.get(player_salmon).position;
-		int w, h;
-		glfwGetWindowSize(window, &w, &h);
-		if (left_mouse_down && !building){
-			mousecoord.x -= w/2;
-			mousecoord.y -= h/2;
-			mousecoord.x = mousecoord.x * 0.9;
-			mousecoord.y = mousecoord.y * 0.9;
-			buildcoord = pos + mousecoord;
-			building = true;
-		}
-		if (building && !left_mouse_down) {
-			building = false;
-			buildmode = false;
-			float angle = atan2(pos.x + mousecoord.x - (w/2) - buildcoord.x, -(pos.y + mousecoord.y - (h/2)- buildcoord.y));
-			createWall(renderer, buildcoord, angle,{100,300});
-			maxWall -= 1;
-		}
-	} 
+	//if (buildmode) {
+	//	vec2 pos = registry.motions.get(player_salmon).position;
+	//	int w, h;
+	//	glfwGetWindowSize(window, &w, &h);
+	//	if (left_mouse_down && !building){
+	//		mousecoord.x -= w/2;
+	//		mousecoord.y -= h/2;
+	//		mousecoord.x = mousecoord.x * 0.9;
+	//		mousecoord.y = mousecoord.y * 0.9;
+	//		buildcoord = pos + mousecoord;
+	//		building = true;
+	//	}
+	//	if (building && !left_mouse_down) {
+	//		building = false;
+	//		buildmode = false;
+	//		float angle = atan2(pos.x + mousecoord.x - (w/2) - buildcoord.x, -(pos.y + mousecoord.y - (h/2)- buildcoord.y));
+	//		createWall(renderer, buildcoord, angle,{100,300});
+	//		maxWall -= 1;
+	//	}
+	//} 
 	
 
 	Motion &motion = registry.motions.get(player_salmon);
@@ -660,6 +661,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	}
 
 	wall_timer = std::max(-1.f, wall_timer - elapsed_ms_since_last_update);
+	push_timer = std::max(-1.f, push_timer - elapsed_ms_since_last_update);
 
 	// generate wall when drawing is done or exceeds length limit
 	if (wall_hinges.size() > 5 || right_mouse_down == false) {
@@ -994,16 +996,16 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	}
 	
 	
-	if (key == GLFW_KEY_Q)
-	{
-		if (action == GLFW_PRESS)
-		{
-			if (maxWall > 0){
-				cout << buildmode;
-				buildmode = !buildmode;
-			}
-		}
-	}
+	//if (key == GLFW_KEY_Q)
+	//{
+	//	if (action == GLFW_PRESS)
+	//	{
+	//		if (maxWall > 0){
+	//			cout << buildmode;
+	//			buildmode = !buildmode;
+	//		}
+	//	}
+	//}
 
 	// Player movment WASD
 	if (!registry.deathTimers.has(player_salmon) && canMove)
@@ -1055,10 +1057,11 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		}
 	}
 
-	if (key == GLFW_KEY_V && action == GLFW_PRESS) {
+	if (key == GLFW_KEY_Q && action == GLFW_PRESS && push_timer <= 0.f) {
 		// create an area that apply impulse
+		push_timer = PUSH_COOLDOWN;
 		Motion& player_motion = registry.motions.get(player_salmon);
-		createPushArea(player_motion.position, 300.f, player_motion.angle, M_PI / 3.f);
+		createPushArea(player_motion.position, 500.f, player_motion.angle, M_PI / 3.f);
 		createParticleSource(100, 2.f, 0.2f, vec3(0.7f, 0.7f, 0.7f), player_motion.position, player_motion.angle, 1500.f);
 	}
 
@@ -1152,15 +1155,11 @@ void WorldSystem::handle_bullet_hit(Entity bullet, Entity entity) {
 
 	if (registry.nonConvexWallColliders.has(entity)) {
 		vec2 dir = -normalize(bullet_motion.velocity);
-		createParticleSource(50, 2.f, 0.7f, vec3(0.f, 0.f, 0.f), bullet_motion.position, atan2(dir.y, dir.x), 200.f);
+		createParticleSource(50, 2.f, 1.f, vec3(0.f, 0.f, 0.f), bullet_motion.position, atan2(dir.y, dir.x), 150.f);
 	}
 	else if (registry.enemies.has(entity) || registry.players.has(entity)) {
 		vec2 dir = -normalize(bullet_motion.velocity);
-		createParticleSource(50, 2.f, 0.7f, vec3(1.f, 0.f, 0.f), bullet_motion.position, atan2(dir.y, dir.x), 200.f);
-	}
-
-	if (registry.shockwaveSource.size() == 0) {
-		createShockwave(bullet_motion.position);
+		createParticleSource(50, 2.f, 1.f, vec3(1.f, 0.f, 0.f), bullet_motion.position, atan2(dir.y, dir.x), 150.f);
 	}
 }
 
