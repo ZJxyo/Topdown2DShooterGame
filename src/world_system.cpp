@@ -823,9 +823,6 @@ void WorldSystem::restart_game()
     if(toggle[3] == -1) {
         boxes[3] = createStoryBox(renderer, BOX4_LOCATION);
     }
-
-	createItem(vec2(1300, 4600), ITEM_TYPE::HEALTH_REGEN);
-	createItem(vec2(700, 4300), ITEM_TYPE::SPEED_BOOST);
 }
 
 // Compute collisions between entities
