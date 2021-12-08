@@ -587,6 +587,7 @@ private:
             if (length(dir) > 30.f) {
                 vec2 norm_dir = normalize(dir);
                 vel = norm_dir * 300.f;
+                ai_motion.angle = atan2(vel.y, vel.x);
             }
             else {
                 vel = vec2(0.f);
@@ -779,6 +780,7 @@ private:
             if (length(dir) > 30.f) {
                 vec2 norm_dir = normalize(dir);
                 vel = norm_dir * speed;
+                ai_motion.angle = atan2(vel.y, vel.x);
             }
             else {
                 vel = vec2(0.f);
