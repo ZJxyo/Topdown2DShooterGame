@@ -1177,7 +1177,8 @@ void WorldSystem::update_player_velocity() {
 
 void WorldSystem::handle_items(Entity entity_1, ITEM_TYPE type) {
 	if (type == ITEM_TYPE::HEALTH_REGEN) {
-		registry.healths.get(entity_1).health += 100;
+		Health& health = registry.healths.get(entity_1);
+		health.health = std::min(health.health + 500.f, 1000.f);
 	}
 	else if (type == ITEM_TYPE::SPEED_BOOST) {
 		registry.boosts.emplace(entity_1);
