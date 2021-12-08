@@ -9,6 +9,7 @@
 ---
 
 ### Stroy
+![guide1](data/textures/story9.png)
 The president of the country has escaped, so the government is under no one's control. Two
 groups of people are fighting against each other to control the country: the Bomber and the
 Defuser, which players can choose to join one of the teams. The Bomber will carry a bomb in the
@@ -24,6 +25,13 @@ players is slain by another, or the time limit reaches zero. If the bomb explode
 win. If the Defuser successfully defuses the bomb or Bomber exceeds the time limit to plant a
 bomb, the Defuser wins.
 
+---
+### Player Guide
+
+![guide1](data/textures/story1.png)
+![guide1](data/textures/story2.png)
+![guide1](data/textures/story3.png)
+![guide1](data/textures/story4.png)
 ---
 
 ### Features
