@@ -14,8 +14,8 @@
 
 using Clock = std::chrono::high_resolution_clock;
 const vec2 INTRO_LOCATION = {2400, 4900};
-Entity stories[5];
-int toggle = 1;
+Entity storiesTutorial[5];
+int toggleTutorial = 1;
 
 // Entry point
 int main()
@@ -60,37 +60,37 @@ int main()
         renderer.draw();
         // menu intro loop
         if(helpMenu.showInto) {
-            if(toggle == 1) {
-                stories[0] = helpMenu.createStory1(&renderer, window, INTRO_LOCATION);
-                toggle = 2;
+            if(toggleTutorial == 1) {
+                storiesTutorial[0] = helpMenu.createStory1(&renderer, window, INTRO_LOCATION);
+                toggleTutorial = 2;
 
-            } else if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && toggle == 2) {
+            } else if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && toggleTutorial == 2) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                registry.remove_all_components_of(stories[0]);
-                stories[1] = helpMenu.createStory2(&renderer, window, INTRO_LOCATION);
-                toggle = 3;
+                registry.remove_all_components_of(storiesTutorial[0]);
+                storiesTutorial[1] = helpMenu.createStory2(&renderer, window, INTRO_LOCATION);
+                toggleTutorial = 3;
 
-            } else if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && toggle == 3) {
+            } else if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && toggleTutorial == 3) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                registry.remove_all_components_of(stories[1]);
-                stories[2] = helpMenu.createStory3(&renderer, window, INTRO_LOCATION);
-                toggle = 4;
+                registry.remove_all_components_of(storiesTutorial[1]);
+                storiesTutorial[2] = helpMenu.createStory3(&renderer, window, INTRO_LOCATION);
+                toggleTutorial = 4;
 
-            } else if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && toggle == 4) {
+            } else if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && toggleTutorial == 4) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                registry.remove_all_components_of(stories[2]);
-                stories[3] = helpMenu.createStory4(&renderer, window, INTRO_LOCATION);
-                toggle = 5;
+                registry.remove_all_components_of(storiesTutorial[2]);
+                storiesTutorial[3] = helpMenu.createStory4(&renderer, window, INTRO_LOCATION);
+                toggleTutorial = 5;
 
-            } else if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && toggle == 5) {
+            } else if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && toggleTutorial == 5) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                registry.remove_all_components_of(stories[3]);
-                stories[4] = helpMenu.createStory5(&renderer, window, INTRO_LOCATION);
-                toggle = 6;
+                registry.remove_all_components_of(storiesTutorial[3]);
+                storiesTutorial[4] = helpMenu.createStory5(&renderer, window, INTRO_LOCATION);
+                toggleTutorial = 6;
 
-            } else if(glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS && toggle == 6) {
+            } else if(glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS && toggleTutorial == 6) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                registry.remove_all_components_of(stories[4]);
+                registry.remove_all_components_of(storiesTutorial[4]);
                 helpMenu.showInto = false;
             }
 
