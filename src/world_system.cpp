@@ -263,6 +263,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	ShootNBullets shoot(player_salmon, renderer, elapsed_ms_since_last_update);
 	Build build(player_salmon);
 	Guard guard(player_salmon, renderer, elapsed_ms_since_last_update);
+	Defuse defuse(player_salmon, renderer, elapsed_ms_since_last_update);
 
 	for(int i = 0; i < registry.enemies.entities.size(); i++ ){
 		Enemy &e = registry.enemies.components[i];
@@ -303,14 +304,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		}
 		if (registry.enemies.components[i].guard_mode){
             Move move(registry.enemies.components[i].pos, current_map);
-			BTIfCondition btIfCondition(NULL, &shoot, &build, &guard, &move, defuser);
+			BTIfCondition btIfCondition(NULL, &shoot, &build, &guard, &move,&defuse, defuser);
 			Entity entity = registry.enemies.entities[i];
 			btIfCondition.process(entity);
 
 			
 		} else {
             Chase chase(player_salmon, current_map);
-			BTIfCondition btIfCondition(&chase, &shoot, &build, &guard,NULL, defuser);
+			BTIfCondition btIfCondition(&chase, &shoot, &build, &guard,NULL, &defuse, defuser);
 			Entity entity = registry.enemies.entities[i];
 			btIfCondition.init(entity);
 			btIfCondition.process(entity);
@@ -332,14 +333,18 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
     && abs(registry.motions.get(player_salmon).position.y - BOX1_LOCATION.y) < 50) {
 
         if(toggle[0] == -1) {
-            tutorials[0] = helpMenu.createTutorial1(renderer, window, {BOX1_LOCATION.x, BOX1_LOCATION.y});
+            stories[0] = helpMenu.createTutorial1(renderer, window, {BOX1_LOCATION.x, BOX1_LOCATION.y});
             toggle[0] = 0;
             canMove = false;
             registry.motions.get(player_salmon).velocity = {0,0};
+            input.right = 0;
+            input.left = 0;
+            input.down = 0;
+            input.up = 0;
         }
 
         if (!helpMenu.showTutorial1 && toggle[0] == 0) {
-            registry.remove_all_components_of(tutorials[0]);
+            registry.remove_all_components_of(stories[0]);
             toggle[0] = 1;
             registry.motions.get(player_salmon).velocity = {0,0};
             canMove = true;
@@ -355,14 +360,18 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
        && abs(registry.motions.get(player_salmon).position.y - BOX2_LOCATION.y) < 50) {
 
         if(toggle[1] == -1) {
-            tutorials[1] = helpMenu.createTutorial2(renderer, window, {BOX2_LOCATION.x, BOX2_LOCATION.y});
+            stories[1] = helpMenu.createTutorial2(renderer, window, {BOX2_LOCATION.x, BOX2_LOCATION.y});
             toggle[1] = 0;
             canMove = false;
             registry.motions.get(player_salmon).velocity = {0,0};
+            input.right = 0;
+            input.left = 0;
+            input.down = 0;
+            input.up = 0;
         }
 
         if (!helpMenu.showTutorial2 && toggle[1] == 0) {
-            registry.remove_all_components_of(tutorials[1]);
+            registry.remove_all_components_of(stories[1]);
             toggle[1] = 1;
             registry.motions.get(player_salmon).velocity = {0,0};
             canMove = true;
@@ -378,14 +387,18 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
        && abs(registry.motions.get(player_salmon).position.y - BOX3_LOCATION.y) < 50) {
 
         if(toggle[2] == -1) {
-            tutorials[2] = helpMenu.createTutorial3(renderer, window, {BOX3_LOCATION.x, BOX3_LOCATION.y});
+            stories[2] = helpMenu.createTutorial3(renderer, window, {BOX3_LOCATION.x, BOX3_LOCATION.y});
             toggle[2] = 0;
             canMove = false;
             registry.motions.get(player_salmon).velocity = {0,0};
+            input.right = 0;
+            input.left = 0;
+            input.down = 0;
+            input.up = 0;
         }
 
         if (!helpMenu.showTutorial3 && toggle[2] == 0) {
-            registry.remove_all_components_of(tutorials[2]);
+            registry.remove_all_components_of(stories[2]);
             toggle[2] = 1;
             registry.motions.get(player_salmon).velocity = {0,0};
             canMove = true;
@@ -401,14 +414,18 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
        && abs(registry.motions.get(player_salmon).position.y - BOX4_LOCATION.y) < 50) {
 
         if(toggle[3] == -1) {
-            tutorials[3] = helpMenu.createTutorial4(renderer, window, {BOX4_LOCATION.x, BOX4_LOCATION.y});
+            stories[3] = helpMenu.createTutorial4(renderer, window, {BOX4_LOCATION.x, BOX4_LOCATION.y});
             toggle[3] = 0;
             canMove = false;
             registry.motions.get(player_salmon).velocity = {0,0};
+            input.right = 0;
+            input.left = 0;
+            input.down = 0;
+            input.up = 0;
         }
 
         if (!helpMenu.showTutorial4 && toggle[3] == 0) {
-            registry.remove_all_components_of(tutorials[3]);
+            registry.remove_all_components_of(stories[3]);
             toggle[3] = 1;
             registry.motions.get(player_salmon).velocity = {0,0};
             canMove = true;

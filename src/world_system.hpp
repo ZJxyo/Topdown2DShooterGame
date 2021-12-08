@@ -79,7 +79,7 @@ private:
 	bool bomb_planted;
     bool canMove;
     int toggle[4] = {-1, -1, -1, -1};
-    Entity tutorials[4];
+    Entity stories[4];
     Entity boxes[4];
 	float plant_timer;
 	float explode_timer;
@@ -131,9 +131,9 @@ private:
 
 	Input input;
     HelpMenu helpMenu;
-    const vec2 BOX1_LOCATION = {1000, 4800};
-    const vec2 BOX2_LOCATION = {1000, 4600};
-    const vec2 BOX3_LOCATION = {1000, 4400};
-    const vec2 BOX4_LOCATION = {1000, 4200};
+    const vec2 BOX1_LOCATION = {2450, 4900};
+    const vec2 BOX2_LOCATION = {2550, 4900};
+    const vec2 BOX3_LOCATION = {2650, 4900};
+    const vec2 BOX4_LOCATION = {2750, 4900};
 
 };
