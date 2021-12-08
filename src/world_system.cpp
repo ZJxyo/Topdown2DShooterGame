@@ -35,7 +35,7 @@ WorldSystem::WorldSystem()
 	plant_timer(PLANT_TIMER_MS), explode_timer(BOMB_TIMER_MS), bomb_planted(false), is_planting(false),
 	 win_game(false),footsteps_timer(FOOTSTEPS_SOUND_TIMER_MS), buildmode(false), buildcoord({0,0}),
 	  mousecoord({0,0}), building(false), maxWall(10), attack_mode(true), defuse_timer(DEFUSE_TIMER_MS),
-	  attack_side(0),is_defusing(false),next_chase(0.f),current_map(1), end_screen(false)
+	  attack_side(0),is_defusing(false),next_chase(0.f),current_map(3), end_screen(false)
 
 {
 	// Seeding rng with random device
@@ -749,7 +749,7 @@ void WorldSystem::restart_game()
 		// AI defending site
 		std::set<int> guard_pos;
 		for (int i = 0; i < MAX_TURTLES; i++){
-			entity = createTurtle(renderer, vec2{100.f * (float)i + (float)j["defense_spawn"]["x"], (float)j["defense_spawn"]["y"]});
+			entity = createTurtle(renderer, vec2{200.f * (float)i + (float)j["defense_spawn"]["x"] - 500, (float)j["defense_spawn"]["y"]});
 			Motion &motion = registry.motions.get(entity);
 			Enemy &enemy = registry.enemies.get(entity);
 			if (i >=0 && i < 4){
