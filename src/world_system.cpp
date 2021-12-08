@@ -263,6 +263,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	ShootNBullets shoot(player_salmon, renderer, elapsed_ms_since_last_update);
 	Build build(player_salmon);
 	Guard guard(player_salmon, renderer, elapsed_ms_since_last_update);
+	Defuse defuse(player_salmon, renderer, elapsed_ms_since_last_update);
 
 	for(int i = 0; i < registry.enemies.entities.size(); i++ ){
 		Enemy &e = registry.enemies.components[i];
@@ -303,14 +304,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		}
 		if (registry.enemies.components[i].guard_mode){
             Move move(registry.enemies.components[i].pos, current_map);
-			BTIfCondition btIfCondition(NULL, &shoot, &build, &guard, &move, defuser);
+			BTIfCondition btIfCondition(NULL, &shoot, &build, &guard, &move,&defuse, defuser);
 			Entity entity = registry.enemies.entities[i];
 			btIfCondition.process(entity);
 
 			
 		} else {
             Chase chase(player_salmon, current_map);
-			BTIfCondition btIfCondition(&chase, &shoot, &build, &guard,NULL, defuser);
+			BTIfCondition btIfCondition(&chase, &shoot, &build, &guard,NULL, &defuse, defuser);
 			Entity entity = registry.enemies.entities[i];
 			btIfCondition.init(entity);
 			btIfCondition.process(entity);
