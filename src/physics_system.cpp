@@ -545,6 +545,10 @@ void PhysicsSystem::step(float elapsed_ms)
 
 			vec2 vel = normalize(dir) * acceleration / mass;
 			enemy_motion.velocity = vel;
+
+			if (registry.shockwaveSource.size() == 0) {
+				createShockwave(enemy_motion.position);
+			}
 		}
 		registry.remove_all_components_of(registry.pushAreaColliders.entities[i]);
 	}
