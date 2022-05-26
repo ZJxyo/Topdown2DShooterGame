@@ -1,10 +1,10 @@
 ### Team Members:
-- Andrew Chang (18954164)
-- Ivy He (72574213)
-- John Jiang (90965252)
-- Chris Li (53908398)
-- Kevin Liang (19025162)
-- William Wu (98621378)
+- Andrew Chang
+- Ivy He
+- John Jiang
+- Chris Li
+- Kevin Liang
+- William Wu
 
 ---
 
