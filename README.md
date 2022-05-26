@@ -1,12 +1,3 @@
-### Team Members:
-- Andrew Chang
-- Ivy He
-- John Jiang
-- Chris Li
-- Kevin Liang
-- William Wu
-
----
 demo link: https://youtu.be/ctRDmyDb_Uc
 
 ### Stroy
@@ -75,3 +66,7 @@ bomb, the Defuser wins.
   - Collision Resolution
   - Precious Collision
   - Non-convex Collision
+
+---
+### Contributors: 
+6 members from CPSC427 2021 T1 Team 3
